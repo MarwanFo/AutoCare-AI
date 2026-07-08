@@ -13,19 +13,25 @@ export const useAuthStore = create((set) => ({
 
   setUser: (user) => set({ user }),
 
-  login: (token, user) => set({
-    accessToken: token,
-    user,
-    isAuthenticated: true,
-    isLoading: false,
-  }),
+  login: (token, user) => {
+    localStorage.setItem('autocare_has_session', 'true');
+    set({
+      accessToken: token,
+      user,
+      isAuthenticated: true,
+      isLoading: false,
+    });
+  },
 
-  logout: () => set({
-    accessToken: null,
-    user: null,
-    isAuthenticated: false,
-    isLoading: false,
-  }),
+  logout: () => {
+    localStorage.removeItem('autocare_has_session');
+    set({
+      accessToken: null,
+      user: null,
+      isAuthenticated: false,
+      isLoading: false,
+    });
+  },
 
   setLoading: (isLoading) => set({ isLoading }),
 }));

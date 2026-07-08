@@ -46,18 +46,6 @@ export const useLogout = () => {
   });
 };
 
-export const useRegister = () => {
-  return useMutation({
-    mutationFn: authApi.register,
-    onSuccess: (data) => {
-      toast.success(data.message || 'Registration successful! Check your email to verify.');
-    },
-    onError: (error) => {
-      const message = error?.response?.data?.message || 'Registration failed.';
-      toast.error(message);
-    },
-  });
-};
 
 export const useForgotPassword = () => {
   return useMutation({

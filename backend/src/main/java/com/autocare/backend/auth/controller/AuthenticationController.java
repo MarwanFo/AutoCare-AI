@@ -4,6 +4,7 @@ import com.autocare.backend.auth.dto.*;
 import com.autocare.backend.auth.entity.AccountStatus;
 import com.autocare.backend.auth.entity.User;
 import com.autocare.backend.auth.service.*;
+import com.autocare.backend.auth.exception.InvalidTokenException;
 import com.autocare.backend.security.CustomUserDetails;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -149,9 +150,12 @@ public class AuthenticationController {
     @Operation(summary = "Rotate refresh token", description = "Exchanges a valid refresh token cookie for a new rotated refresh token and access token.")
     @ApiResponse(responseCode = "200", description = "Tokens rotated successfully", content = @Content(schema = @Schema(implementation = AuthResponse.class)))
     public ResponseEntity<AuthResponse> refresh(
-            @CookieValue(value = "refresh_token") String refreshToken,
+            @CookieValue(value = "refresh_token", required = false) String refreshToken,
             HttpServletRequest httpServletRequest
     ) {
+        if (refreshToken == null || refreshToken.isBlank()) {
+            throw new InvalidTokenException("Refresh token is missing.");
+        }
         String ipAddress = httpServletRequest.getRemoteAddr();
         String userAgent = httpServletRequest.getHeader(HttpHeaders.USER_AGENT);
 

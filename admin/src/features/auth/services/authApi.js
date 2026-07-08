@@ -1,13 +1,32 @@
 import client from '../../../api/client';
 
+const getOrCreateDeviceId = () => {
+  let deviceId = localStorage.getItem('autocare_device_id');
+  if (!deviceId) {
+    try {
+      deviceId = crypto.randomUUID();
+    } catch (e) {
+      // Fallback helper if crypto.randomUUID is unavailable
+      deviceId = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+        const r = (Math.random() * 16) | 0;
+        const v = c === 'x' ? r : (r & 0x3) | 0x8;
+        return v.toString(16);
+      });
+    }
+    localStorage.setItem('autocare_device_id', deviceId);
+  }
+  return deviceId;
+};
+
 export const authApi = {
   login: async ({ email, password, rememberMe }) => {
-    const response = await client.post('/auth/login', { email, password, rememberMe });
-    return response.data;
-  },
-
-  register: async ({ email, password, fullName, phoneNumber }) => {
-    const response = await client.post('/auth/register', { email, password, fullName, phoneNumber });
+    const deviceId = getOrCreateDeviceId();
+    const response = await client.post('/auth/login', {
+      email,
+      password,
+      rememberMe: !!rememberMe,
+      deviceId,
+    });
     return response.data;
   },
 

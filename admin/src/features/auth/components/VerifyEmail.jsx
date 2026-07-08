@@ -31,7 +31,7 @@ export const VerifyEmail = () => {
   const handleResend = () => {
     const emailToUse = emailParam || localStorage.getItem('pending_verify_email');
     if (!emailToUse) {
-      toast.error('Email address not found. Please log in or register again.');
+      toast.error('Email address not found. Please contact your system administrator.');
       return;
     }
 

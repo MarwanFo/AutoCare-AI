@@ -436,6 +436,89 @@ class AuthenticationIntegrationTest {
         assertThat(revokedSession.getRevokedAt()).isNotNull();
     }
 
+    @Test
+    @DisplayName("Mobile login returns both tokens in JSON response body")
+    void testMobileLoginSuccess() throws Exception {
+        User user = createTestUser("mobile.active@example.com", AccountStatus.ACTIVE);
+
+        LoginRequest request = new LoginRequest(
+                "mobile.active@example.com",
+                "Password123!",
+                true,
+                UUID.randomUUID()
+        );
+
+        mockMvc.perform(post("/api/v1/auth/mobile/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.accessToken").isNotEmpty())
+                .andExpect(jsonPath("$.refreshToken").isNotEmpty())
+                .andExpect(jsonPath("$.tokenType").value("Bearer"))
+                .andExpect(jsonPath("$.user.email").value("mobile.active@example.com"));
+    }
+
+    @Test
+    @DisplayName("Mobile token refresh rotates tokens using request body")
+    void testMobileRefreshTokenRotation() throws Exception {
+        User user = createTestUser("mobile.active@example.com", AccountStatus.ACTIVE);
+
+        LoginRequest request = new LoginRequest(
+                "mobile.active@example.com",
+                "Password123!",
+                true,
+                UUID.randomUUID()
+        );
+
+        MvcResult loginResult = mockMvc.perform(post("/api/v1/auth/mobile/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andReturn();
+
+        String responseStr = loginResult.getResponse().getContentAsString();
+        MobileAuthResponse loginResponse = objectMapper.readValue(responseStr, MobileAuthResponse.class);
+
+        MobileRefreshRequest refreshRequest = new MobileRefreshRequest(loginResponse.refreshToken());
+
+        mockMvc.perform(post("/api/v1/auth/mobile/refresh")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(refreshRequest)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.accessToken").isNotEmpty())
+                .andExpect(jsonPath("$.refreshToken").isNotEmpty())
+                .andExpect(jsonPath("$.tokenType").value("Bearer"));
+    }
+
+    @Test
+    @DisplayName("Mobile logout revokes session using header and no cookies")
+    void testMobileLogoutSuccess() throws Exception {
+        User user = createTestUser("mobile.active@example.com", AccountStatus.ACTIVE);
+
+        LoginRequest request = new LoginRequest(
+                "mobile.active@example.com",
+                "Password123!",
+                true,
+                UUID.randomUUID()
+        );
+
+        MvcResult loginResult = mockMvc.perform(post("/api/v1/auth/mobile/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andReturn();
+
+        String responseStr = loginResult.getResponse().getContentAsString();
+        MobileAuthResponse loginResponse = objectMapper.readValue(responseStr, MobileAuthResponse.class);
+
+        mockMvc.perform(post("/api/v1/auth/mobile/logout")
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + loginResponse.accessToken()))
+                .andExpect(status().isNoContent());
+
+        List<UserSession> sessions = userSessionRepository.findAll();
+        assertThat(sessions).hasSize(1);
+        assertThat(sessions.get(0).getRevokedAt()).isNotNull();
+    }
+
+
     // --- Helper Methods ---
 
     private User createTestUser(String email, AccountStatus status) {

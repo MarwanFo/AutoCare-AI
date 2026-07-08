@@ -6,7 +6,6 @@ import ProtectedRoute from './ProtectedRoute';
 import GuestRoute from './GuestRoute';
 
 import { Login } from '../features/auth/components/Login';
-import { Register } from '../features/auth/components/Register';
 import { ForgotPassword } from '../features/auth/components/ForgotPassword';
 import { ResetPassword } from '../features/auth/components/ResetPassword';
 import { VerifyEmail } from '../features/auth/components/VerifyEmail';
@@ -14,16 +13,6 @@ import { Sessions } from '../features/auth/components/Sessions';
 import { Unauthorized } from '../features/auth/components/Unauthorized';
 import { NotFound } from '../features/auth/components/NotFound';
 
-// Minimal elegant placeholders for Auth views
-const RegisterPlaceholder = () => (
-  <div className="text-center py-6">
-    <h2 className="text-xl font-bold text-white mb-2">Create Account</h2>
-    <p className="text-sm text-zinc-400 mb-6">Register a new management account</p>
-    <div className="p-4 rounded-xl bg-zinc-950 border border-zinc-800 text-left text-xs font-mono text-zinc-500 mb-6">
-      Registration screen will be generated in the next step.
-    </div>
-  </div>
-);
 
 const ForgotPasswordPlaceholder = () => (
   <div className="text-center py-6">
@@ -116,7 +105,8 @@ export const appRoutes = createBrowserRouter([
         element: <AuthLayout />,
         children: [
           { path: '/login', element: <Login /> },
-          { path: '/register', element: <Register /> },
+          // /register is intentionally removed — admin accounts are provisioned by Super Admins only
+          { path: '/register', element: <Navigate to="/login" replace /> },
           { path: '/forgot-password', element: <ForgotPassword /> },
           { path: '/reset-password', element: <ResetPassword /> },
           { path: '/verify-email', element: <VerifyEmail /> },

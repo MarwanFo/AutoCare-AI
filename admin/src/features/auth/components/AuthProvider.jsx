@@ -14,14 +14,22 @@ export const AuthProvider = ({ children }) => {
 
     const initializeAuth = async () => {
       try {
-        // Attempt silent refresh to restore session on boot
+        const hasSession = localStorage.getItem('autocare_has_session') === 'true';
+        if (!hasSession) {
+          // No prior session - initialize as anonymous user immediately
+          logout();
+          return;
+        }
+
+        // Prior session detected - attempt silent token rotation
         const response = await client.post('/auth/refresh');
         const { accessToken, user } = response.data;
         login(accessToken, user);
-      } catch (error) {
-        // Silent failure - user is guest
+      } catch {
+        // Silent failure - expired or invalid session, initialize as guest
         logout();
       } finally {
+        // Always resolve the loading state so the UI can render
         setLoading(false);
       }
     };
