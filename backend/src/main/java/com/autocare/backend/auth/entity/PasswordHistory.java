@@ -15,7 +15,7 @@ import java.util.UUID;
 @Table(name = "password_history")
 @Getter
 @Setter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
 public class PasswordHistory {
 

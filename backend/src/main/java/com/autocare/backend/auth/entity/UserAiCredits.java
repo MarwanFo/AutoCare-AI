@@ -16,7 +16,7 @@ import java.util.UUID;
 @Table(name = "user_ai_credits")
 @Getter
 @Setter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
 public class UserAiCredits {
 

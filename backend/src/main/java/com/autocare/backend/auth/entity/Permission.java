@@ -16,7 +16,7 @@ import java.util.*;
 @Table(name = "permissions")
 @Getter
 @Setter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
 public class Permission {
 

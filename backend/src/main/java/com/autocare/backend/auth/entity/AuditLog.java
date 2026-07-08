@@ -18,7 +18,7 @@ import java.util.UUID;
 @Table(name = "audit_logs")
 @Getter
 @Setter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
 public class AuditLog {
 

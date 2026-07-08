@@ -17,7 +17,7 @@ import java.util.UUID;
 @Table(name = "auth_tokens")
 @Getter
 @Setter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
 public class AuthToken {
 

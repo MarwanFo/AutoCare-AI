@@ -15,7 +15,7 @@ import java.util.UUID;
 @Table(name = "user_sessions")
 @Getter
 @Setter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
 public class UserSession {
 
