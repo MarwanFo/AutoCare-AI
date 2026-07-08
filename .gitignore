@@ -1,0 +1,35 @@
+# Environment and secrets
+.env
+.env.local
+.env.*.local
+*.env
+secrets/
+secrets
+credentials*
+*.key
+*.pem
+*.p12
+
+# IDEs and System files
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.DS_Store
+Thumbs.db
+
+# Build and dependencies
+node_modules/
+dist/
+target/
+build/
+bin/
+out/
+.mvn/wrapper/maven-wrapper.jar
+
+
+*.log
+backend/run.log
