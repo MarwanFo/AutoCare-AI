@@ -2,10 +2,21 @@ import React from 'react';
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../features/auth/stores/authStore';
 
-const ProtectedRoute = ({ allowedRoles = [] }) => {
+/**
+ * ProtectedRoute — enforces authentication AND ROLE_ADMIN access for the admin panel.
+ *
+ * All routes in the Admin application require ROLE_ADMIN. A user who is
+ * authenticated but holds only ROLE_USER (e.g. a mobile consumer) will be
+ * rejected and redirected to /unauthorized.
+ *
+ * Additional fine-grained roles can be passed via `requiredRoles` for
+ * specific sub-sections (e.g. ROLE_SUPER_ADMIN for user management).
+ */
+const ProtectedRoute = ({ requiredRoles = ['ROLE_ADMIN'] }) => {
   const { isAuthenticated, isLoading, user } = useAuthStore();
   const location = useLocation();
 
+  // Wait for auth bootstrap to complete before making routing decisions
   if (isLoading) {
     return (
       <div className="flex h-screen w-screen items-center justify-center bg-zinc-950 text-white">
@@ -17,17 +28,19 @@ const ProtectedRoute = ({ allowedRoles = [] }) => {
     );
   }
 
+  // Not authenticated — redirect to login, preserving intended destination
   if (!isAuthenticated) {
-    // Redirect to login page and keep track of where the user was trying to go
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  if (allowedRoles.length > 0) {
-    const hasRole = user?.roles?.some((role) => allowedRoles.includes(role));
-    if (!hasRole) {
-      // User is authenticated but doesn't have permissions - redirect to unauthorized/dashboard
-      return <Navigate to="/unauthorized" replace />;
-    }
+  // Authenticated but missing required role — redirect to unauthorized
+  const userRoles = user?.roles ?? new Set();
+  const hasRequiredRole = requiredRoles.some((role) =>
+    userRoles instanceof Set ? userRoles.has(role) : userRoles.includes(role)
+  );
+
+  if (!hasRequiredRole) {
+    return <Navigate to="/unauthorized" replace />;
   }
 
   return <Outlet />;

@@ -199,16 +199,6 @@ export const Login = () => {
         </form>
       </div>
 
-      {/* Footer Link */}
-      <div className="mt-8 text-center font-sans text-sm">
-        <span className="text-[#c4c7c8]">Don't have an account?</span>
-        <Link
-          to="/register"
-          className="ml-2 text-white font-medium hover:text-[#abc7ff] transition-colors underline underline-offset-4 decoration-[#444748] hover:decoration-[#abc7ff]"
-        >
-          Create Account
-        </Link>
-      </div>
     </>
   );
 };
