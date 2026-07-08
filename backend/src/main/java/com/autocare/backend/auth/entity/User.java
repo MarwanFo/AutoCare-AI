@@ -2,8 +2,9 @@ package com.autocare.backend.auth.entity;
 
 import com.autocare.backend.common.entity.BaseEntity;
 import jakarta.persistence.*;
+import lombok.AccessLevel;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
@@ -15,7 +16,7 @@ import java.util.*;
 @Table(name = "users")
 @Getter
 @Setter
-@RequiredArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class User extends BaseEntity {
 
     @Id
@@ -36,7 +37,7 @@ public class User extends BaseEntity {
     private String phoneNumber;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false)
+    @Column(name = "status", nullable = false, columnDefinition = "account_status")
     @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     private AccountStatus status = AccountStatus.UNVERIFIED;
 

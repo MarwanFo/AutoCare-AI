@@ -1,8 +1,9 @@
 package com.autocare.backend.auth.entity;
 
 import jakarta.persistence.*;
+import lombok.AccessLevel;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
@@ -16,7 +17,7 @@ import java.util.UUID;
 @Table(name = "auth_tokens")
 @Getter
 @Setter
-@RequiredArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @EntityListeners(AuditingEntityListener.class)
 public class AuthToken {
 
@@ -33,7 +34,7 @@ public class AuthToken {
     private String tokenHash;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "token_type", nullable = false)
+    @Column(name = "token_type", nullable = false, columnDefinition = "auth_token_type")
     @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     private AuthTokenType tokenType;
 

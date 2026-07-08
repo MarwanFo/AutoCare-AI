@@ -1,8 +1,9 @@
 package com.autocare.backend.auth.entity;
 
 import jakarta.persistence.*;
+import lombok.AccessLevel;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
@@ -17,7 +18,7 @@ import java.util.UUID;
 @Table(name = "audit_logs")
 @Getter
 @Setter
-@RequiredArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @EntityListeners(AuditingEntityListener.class)
 public class AuditLog {
 
@@ -27,7 +28,7 @@ public class AuditLog {
     private UUID id;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "event_type", nullable = false)
+    @Column(name = "event_type", nullable = false, columnDefinition = "audit_event_type")
     @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     private AuditEventType eventType;
 
