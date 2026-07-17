@@ -29,7 +29,7 @@ public class JwtServiceImpl implements JwtService {
     private final long expirationMs;
 
     public JwtServiceImpl(
-            @Value("${app.security.jwt.secret:dGhlLXNlY3JldC1rZXktZm9yLWF1dG9jYXJlLWFpLXByb2R1Y3Rpb24tc2VjdXJpdHktMTIzNDU2Nzg5MA==}") String base64Secret,
+            @Value("${app.security.jwt.secret}") String base64Secret,
             @Value("${app.security.jwt.expiration-ms:900000}") long expirationMs // Default 15 minutes
     ) {
         byte[] keyBytes = Decoders.BASE64.decode(base64Secret);
