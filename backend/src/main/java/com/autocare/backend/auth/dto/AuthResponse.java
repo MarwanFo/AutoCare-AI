@@ -13,6 +13,7 @@ public record AuthResponse(
         UUID id,
         String email,
         String fullName,
+        String phoneNumber,
         Set<String> roles,
         Set<String> permissions,
         boolean isEmailVerified,

@@ -13,7 +13,7 @@ import { useAuthStore } from '@/stores/authStore';
 
 SplashScreen.preventAutoHideAsync();
 
-import LoginScreen from '@/screens/auth/LoginScreen';
+import LoginScreen from '@/features/auth/screens/LoginScreen';
 
 function RootNavigator() {
   const { colorScheme } = useAppTheme();

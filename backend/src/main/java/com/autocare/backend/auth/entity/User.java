@@ -2,7 +2,6 @@ package com.autocare.backend.auth.entity;
 
 import com.autocare.backend.common.entity.BaseEntity;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;

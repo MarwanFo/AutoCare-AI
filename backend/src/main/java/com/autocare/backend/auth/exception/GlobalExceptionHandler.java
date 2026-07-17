@@ -115,6 +115,40 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
     }
 
+    @ExceptionHandler(PhoneNumberAlreadyExistsException.class)
+    public ResponseEntity<ApiErrorResponse> handlePhoneNumberAlreadyExistsException(
+            PhoneNumberAlreadyExistsException ex,
+            HttpServletRequest request
+    ) {
+        log.warn("Conflict: Phone number already exists: {} - Path: {}", ex.getMessage(), request.getRequestURI());
+
+        ApiErrorResponse response = new ApiErrorResponse(
+                HttpStatus.CONFLICT.value(),
+                "Conflict",
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+    }
+
+    @ExceptionHandler(DuplicateResourceException.class)
+    public ResponseEntity<ApiErrorResponse> handleDuplicateResourceException(
+            DuplicateResourceException ex,
+            HttpServletRequest request
+    ) {
+        log.warn("Conflict: Duplicate resource: {} - Path: {}", ex.getMessage(), request.getRequestURI());
+
+        ApiErrorResponse response = new ApiErrorResponse(
+                HttpStatus.CONFLICT.value(),
+                "Conflict",
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+    }
+
     @ExceptionHandler(AccountSuspendedException.class)
     public ResponseEntity<ApiErrorResponse> handleAccountSuspendedException(
             AccountSuspendedException ex,

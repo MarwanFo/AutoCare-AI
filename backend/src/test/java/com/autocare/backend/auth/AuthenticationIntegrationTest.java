@@ -99,12 +99,59 @@ class AuthenticationIntegrationTest {
         assertThat(userOpt).isPresent();
         User user = userOpt.get();
         assertThat(user.getFullName()).isEqualTo("John Doe");
+        assertThat(user.getPhoneNumber()).isEqualTo("+1234567890");
         assertThat(user.getStatus()).isEqualTo(AccountStatus.UNVERIFIED);
 
         List<AuthToken> tokens = authTokenRepository.findAll();
         assertThat(tokens).hasSize(1);
         assertThat(tokens.get(0).getUser().getId()).isEqualTo(user.getId());
         assertThat(tokens.get(0).getTokenType()).isEqualTo(AuthTokenType.EMAIL_VERIFICATION);
+    }
+
+    @Test
+    @DisplayName("Attempting to register with a duplicate phone number returns 409 Conflict")
+    void testRegisterUserDuplicatePhone() throws Exception {
+        RegisterRequest request1 = new RegisterRequest(
+                "user1@example.com",
+                "Password123!",
+                "User One",
+                "+12125550199"
+        );
+
+        mockMvc.perform(post("/api/v1/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request1)))
+                .andExpect(status().isCreated());
+
+        RegisterRequest request2 = new RegisterRequest(
+                "user2@example.com",
+                "Password123!",
+                "User Two",
+                "+12125550199" // Duplicate phone
+        );
+
+        mockMvc.perform(post("/api/v1/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request2)))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.message").value("Phone number is already registered."));
+    }
+
+    @Test
+    @DisplayName("Attempting to register with an invalid phone number format returns 400 Bad Request")
+    void testRegisterUserInvalidPhoneFormat() throws Exception {
+        RegisterRequest request = new RegisterRequest(
+                "invalid.phone@example.com",
+                "Password123!",
+                "Invalid Phone",
+                "123456" // No leading +, invalid E.164
+        );
+
+        mockMvc.perform(post("/api/v1/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors.phoneNumber").value("Phone number must be in standard international format (E.164)"));
     }
 
     @Test
@@ -182,7 +229,7 @@ class AuthenticationIntegrationTest {
     @Test
     @DisplayName("Successfully rotate refresh token")
     void testRefreshTokenRotation() throws Exception {
-        User user = createTestUser("active.user@example.com", AccountStatus.ACTIVE);
+        createTestUser("active.user@example.com", AccountStatus.ACTIVE);
         String deviceId = UUID.randomUUID().toString();
 
         LoginRequest request = new LoginRequest(
@@ -215,7 +262,7 @@ class AuthenticationIntegrationTest {
     @Test
     @DisplayName("Successfully logout and clear cookie")
     void testLogoutSuccess() throws Exception {
-        User user = createTestUser("active.user@example.com", AccountStatus.ACTIVE);
+        createTestUser("active.user@example.com", AccountStatus.ACTIVE);
 
         LoginRequest loginRequest = new LoginRequest(
                 "active.user@example.com",
@@ -251,7 +298,7 @@ class AuthenticationIntegrationTest {
     @Test
     @DisplayName("Logout all active devices/sessions")
     void testLogoutAllSuccess() throws Exception {
-        User user = createTestUser("active.user@example.com", AccountStatus.ACTIVE);
+        createTestUser("active.user@example.com", AccountStatus.ACTIVE);
 
         LoginRequest loginRequest = new LoginRequest(
                 "active.user@example.com",
@@ -280,7 +327,7 @@ class AuthenticationIntegrationTest {
     @Test
     @DisplayName("Request password recovery token")
     void testForgotPasswordSuccess() throws Exception {
-        User user = createTestUser("active.user@example.com", AccountStatus.ACTIVE);
+        createTestUser("active.user@example.com", AccountStatus.ACTIVE);
 
         ForgotPasswordRequest request = new ForgotPasswordRequest("active.user@example.com");
 
@@ -300,7 +347,7 @@ class AuthenticationIntegrationTest {
     void testResetPasswordSuccess() throws Exception {
         User user = createTestUser("active.user@example.com", AccountStatus.ACTIVE);
         String rawToken = "resettokenstring1234567890abcdef";
-        AuthToken token = createAuthToken(user, AuthTokenType.PASSWORD_RESET, rawToken);
+        createAuthToken(user, AuthTokenType.PASSWORD_RESET, rawToken);
 
         ResetPasswordRequest request = new ResetPasswordRequest(
                 rawToken,
@@ -320,7 +367,7 @@ class AuthenticationIntegrationTest {
     @Test
     @DisplayName("Change password for authenticated user")
     void testChangePasswordSuccess() throws Exception {
-        User user = createTestUser("active.user@example.com", AccountStatus.ACTIVE);
+        createTestUser("active.user@example.com", AccountStatus.ACTIVE);
 
         LoginRequest loginRequest = new LoginRequest(
                 "active.user@example.com",
@@ -353,7 +400,7 @@ class AuthenticationIntegrationTest {
     @Test
     @DisplayName("Get current authenticated user profile")
     void testGetCurrentUserMe() throws Exception {
-        User user = createTestUser("active.user@example.com", AccountStatus.ACTIVE);
+        createTestUser("active.user@example.com", AccountStatus.ACTIVE);
 
         LoginRequest loginRequest = new LoginRequest(
                 "active.user@example.com",
@@ -380,7 +427,7 @@ class AuthenticationIntegrationTest {
     @Test
     @DisplayName("List active user sessions")
     void testListActiveSessions() throws Exception {
-        User user = createTestUser("active.user@example.com", AccountStatus.ACTIVE);
+        createTestUser("active.user@example.com", AccountStatus.ACTIVE);
 
         LoginRequest loginRequest = new LoginRequest(
                 "active.user@example.com",
@@ -407,7 +454,7 @@ class AuthenticationIntegrationTest {
     @Test
     @DisplayName("Revoke a specific active device session")
     void testRevokeSessionSuccess() throws Exception {
-        User user = createTestUser("active.user@example.com", AccountStatus.ACTIVE);
+        createTestUser("active.user@example.com", AccountStatus.ACTIVE);
 
         LoginRequest loginRequest = new LoginRequest(
                 "active.user@example.com",
@@ -439,7 +486,7 @@ class AuthenticationIntegrationTest {
     @Test
     @DisplayName("Mobile login returns both tokens in JSON response body")
     void testMobileLoginSuccess() throws Exception {
-        User user = createTestUser("mobile.active@example.com", AccountStatus.ACTIVE);
+        createTestUser("mobile.active@example.com", AccountStatus.ACTIVE);
 
         LoginRequest request = new LoginRequest(
                 "mobile.active@example.com",
@@ -461,7 +508,7 @@ class AuthenticationIntegrationTest {
     @Test
     @DisplayName("Mobile token refresh rotates tokens using request body")
     void testMobileRefreshTokenRotation() throws Exception {
-        User user = createTestUser("mobile.active@example.com", AccountStatus.ACTIVE);
+        createTestUser("mobile.active@example.com", AccountStatus.ACTIVE);
 
         LoginRequest request = new LoginRequest(
                 "mobile.active@example.com",
@@ -492,7 +539,7 @@ class AuthenticationIntegrationTest {
     @Test
     @DisplayName("Mobile logout revokes session using header and no cookies")
     void testMobileLogoutSuccess() throws Exception {
-        User user = createTestUser("mobile.active@example.com", AccountStatus.ACTIVE);
+        createTestUser("mobile.active@example.com", AccountStatus.ACTIVE);
 
         LoginRequest request = new LoginRequest(
                 "mobile.active@example.com",

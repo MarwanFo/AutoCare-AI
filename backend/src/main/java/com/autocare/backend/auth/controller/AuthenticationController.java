@@ -63,7 +63,7 @@ public class AuthenticationController {
     @PostMapping("/resend-verification")
     @Operation(summary = "Resend email verification token", description = "Resends verification token. Returns success silently if user is not found to prevent enumeration.")
     @ApiResponse(responseCode = "200", description = "Verification email resent")
-    public ResponseEntity<Map<String, String>> resendVerification(@Valid @RequestBody ForgotPasswordRequest request) {
+    public ResponseEntity<Map<String, String>> resendVerification(@Valid @RequestBody ResendVerificationRequest request) {
         try {
             User user = userService.getByEmail(request.email());
             if (user.getStatus() == AccountStatus.UNVERIFIED) {
