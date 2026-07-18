@@ -58,8 +58,8 @@ public class GeminiClientImpl implements GeminiClient {
 
     @Override
     public GeminiVehicleProfileResponse fetchProfile(String prompt) {
-        if (apiKey == null || apiKey.trim().isEmpty() || "mock".equalsIgnoreCase(apiKey)) {
-            log.info("Gemini API key is missing or 'mock'. Simulating Gemini profile response for testing...");
+        if (apiKey == null || apiKey.trim().isEmpty() || "mock".equalsIgnoreCase(apiKey) || apiKey.toLowerCase().contains("dummy")) {
+            log.info("Gemini API key is missing, 'mock', or dummy. Simulating Gemini profile response for testing...");
             GeminiVehicleProfileResponse mockResponse = new GeminiVehicleProfileResponse();
             mockResponse.setSpecifications(java.util.Map.of(
                 "horsepower", 203,
