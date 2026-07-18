@@ -27,6 +27,14 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.UUID;
+import com.autocare.backend.vehicle.repository.UserComponentRepository;
+import com.autocare.backend.vehicle.repository.UserDocumentRepository;
+import com.autocare.backend.vehicle.entity.UserComponent;
+import com.autocare.backend.vehicle.entity.UserDocument;
+import com.autocare.backend.vehicle.dto.CreateComponentRequest;
+import com.autocare.backend.vehicle.dto.UpdateComponentRequest;
+import com.autocare.backend.vehicle.dto.CreateDocumentRequest;
+import com.autocare.backend.vehicle.dto.UpdateDocumentRequest;
 
 @Slf4j
 @Service
@@ -40,6 +48,8 @@ public class VehicleServiceImpl implements VehicleService {
     private final VehicleTemplateRepository vehicleTemplateRepository;
     private final VehicleTemplateCloneService vehicleTemplateCloneService;
     private final GeminiVehicleProfileService geminiVehicleProfileService;
+    private final UserComponentRepository userComponentRepository;
+    private final UserDocumentRepository userDocumentRepository;
 
     @Override
     @Transactional
@@ -268,6 +278,164 @@ public class VehicleServiceImpl implements VehicleService {
                 throw new DuplicateResourceException("A vehicle with the license plate '" + sanitizedPlate + "' is already registered and active.");
             }
         }
+    }
+
+    @Override
+    @Transactional
+    public com.autocare.backend.vehicle.entity.UserComponent addComponent(UUID userId, UUID vehicleId, com.autocare.backend.vehicle.dto.CreateComponentRequest request) {
+        UserVehicle vehicle = userVehicleRepository.findById(vehicleId)
+                .orElseThrow(() -> new ResourceNotFoundException("Vehicle not found with ID: " + vehicleId));
+
+        if (!vehicle.getUser().getId().equals(userId)) {
+            throw new AccessDeniedException("Access denied: You do not own this vehicle.");
+        }
+
+        com.autocare.backend.vehicle.entity.UserComponent component = new com.autocare.backend.vehicle.entity.UserComponent();
+        component.setUserVehicle(vehicle);
+        component.setCategory(request.getCategory());
+        component.setName(request.getName());
+        component.setPartNumber(request.getPartNumber());
+        component.setSpecifications(request.getSpecifications());
+        component.setLastReplacedMileage(request.getLastReplacedMileage());
+        component.setLastReplacedDate(request.getLastReplacedDate());
+        component.setNotes(request.getNotes());
+        component.setCustom(true);
+        component.setModifiedFromTemplate(false);
+        component.setStatus(request.getStatus() != null ? request.getStatus() : com.autocare.backend.vehicle.entity.enums.ComponentStatus.NEEDS_VERIFICATION);
+        component.setHealthScore(request.getHealthScore());
+        component.setConfidenceScore(request.getConfidenceScore() != null ? request.getConfidenceScore() : 100);
+        component.setEstimatedRemainingLife(request.getEstimatedRemainingLife());
+        component.setInstallationMileage(request.getInstallationMileage());
+        component.setInstallationDate(request.getInstallationDate());
+        component.setLastInspectionDate(request.getLastInspectionDate());
+        component.setOrigin(com.autocare.backend.vehicle.entity.enums.DataOrigin.USER_CONFIRMED);
+
+        return userComponentRepository.save(component);
+    }
+
+    @Override
+    @Transactional
+    public com.autocare.backend.vehicle.entity.UserComponent updateComponent(UUID userId, UUID vehicleId, UUID componentId, com.autocare.backend.vehicle.dto.UpdateComponentRequest request) {
+        UserVehicle vehicle = userVehicleRepository.findById(vehicleId)
+                .orElseThrow(() -> new ResourceNotFoundException("Vehicle not found with ID: " + vehicleId));
+
+        if (!vehicle.getUser().getId().equals(userId)) {
+            throw new AccessDeniedException("Access denied: You do not own this vehicle.");
+        }
+
+        com.autocare.backend.vehicle.entity.UserComponent component = userComponentRepository.findById(componentId)
+                .orElseThrow(() -> new ResourceNotFoundException("Component not found with ID: " + componentId));
+
+        if (!component.getUserVehicle().getId().equals(vehicleId)) {
+            throw new BusinessException("Component does not belong to the specified vehicle.");
+        }
+
+        component.setCategory(request.getCategory());
+        component.setName(request.getName());
+        component.setPartNumber(request.getPartNumber());
+        component.setSpecifications(request.getSpecifications());
+        component.setLastReplacedMileage(request.getLastReplacedMileage());
+        component.setLastReplacedDate(request.getLastReplacedDate());
+        component.setNotes(request.getNotes());
+        if (request.getStatus() != null) {
+            component.setStatus(request.getStatus());
+        }
+        component.setHealthScore(request.getHealthScore());
+        if (request.getConfidenceScore() != null) {
+            component.setConfidenceScore(request.getConfidenceScore());
+        }
+        component.setEstimatedRemainingLife(request.getEstimatedRemainingLife());
+        component.setInstallationMileage(request.getInstallationMileage());
+        component.setInstallationDate(request.getInstallationDate());
+        component.setLastInspectionDate(request.getLastInspectionDate());
+        component.setOrigin(com.autocare.backend.vehicle.entity.enums.DataOrigin.USER_CONFIRMED);
+
+        return userComponentRepository.save(component);
+    }
+
+    @Override
+    @Transactional
+    public void deleteComponent(UUID userId, UUID vehicleId, UUID componentId) {
+        UserVehicle vehicle = userVehicleRepository.findById(vehicleId)
+                .orElseThrow(() -> new ResourceNotFoundException("Vehicle not found with ID: " + vehicleId));
+
+        if (!vehicle.getUser().getId().equals(userId)) {
+            throw new AccessDeniedException("Access denied: You do not own this vehicle.");
+        }
+
+        com.autocare.backend.vehicle.entity.UserComponent component = userComponentRepository.findById(componentId)
+                .orElseThrow(() -> new ResourceNotFoundException("Component not found with ID: " + componentId));
+
+        if (!component.getUserVehicle().getId().equals(vehicleId)) {
+            throw new BusinessException("Component does not belong to the specified vehicle.");
+        }
+
+        userComponentRepository.delete(component);
+    }
+
+    @Override
+    @Transactional
+    public com.autocare.backend.vehicle.entity.UserDocument addDocument(UUID userId, UUID vehicleId, com.autocare.backend.vehicle.dto.CreateDocumentRequest request) {
+        UserVehicle vehicle = userVehicleRepository.findById(vehicleId)
+                .orElseThrow(() -> new ResourceNotFoundException("Vehicle not found with ID: " + vehicleId));
+
+        if (!vehicle.getUser().getId().equals(userId)) {
+            throw new AccessDeniedException("Access denied: You do not own this vehicle.");
+        }
+
+        com.autocare.backend.vehicle.entity.UserDocument document = new com.autocare.backend.vehicle.entity.UserDocument();
+        document.setUserVehicle(vehicle);
+        document.setTitle(request.getTitle());
+        document.setUrl(request.getUrl());
+        document.setExpiryDate(request.getExpiryDate());
+        document.setNotes(request.getNotes());
+
+        return userDocumentRepository.save(document);
+    }
+
+    @Override
+    @Transactional
+    public com.autocare.backend.vehicle.entity.UserDocument updateDocument(UUID userId, UUID vehicleId, UUID documentId, com.autocare.backend.vehicle.dto.UpdateDocumentRequest request) {
+        UserVehicle vehicle = userVehicleRepository.findById(vehicleId)
+                .orElseThrow(() -> new ResourceNotFoundException("Vehicle not found with ID: " + vehicleId));
+
+        if (!vehicle.getUser().getId().equals(userId)) {
+            throw new AccessDeniedException("Access denied: You do not own this vehicle.");
+        }
+
+        com.autocare.backend.vehicle.entity.UserDocument document = userDocumentRepository.findById(documentId)
+                .orElseThrow(() -> new ResourceNotFoundException("Document not found with ID: " + documentId));
+
+        if (!document.getUserVehicle().getId().equals(vehicleId)) {
+            throw new BusinessException("Document does not belong to the specified vehicle.");
+        }
+
+        document.setTitle(request.getTitle());
+        document.setUrl(request.getUrl());
+        document.setExpiryDate(request.getExpiryDate());
+        document.setNotes(request.getNotes());
+
+        return userDocumentRepository.save(document);
+    }
+
+    @Override
+    @Transactional
+    public void deleteDocument(UUID userId, UUID vehicleId, UUID documentId) {
+        UserVehicle vehicle = userVehicleRepository.findById(vehicleId)
+                .orElseThrow(() -> new ResourceNotFoundException("Vehicle not found with ID: " + vehicleId));
+
+        if (!vehicle.getUser().getId().equals(userId)) {
+            throw new AccessDeniedException("Access denied: You do not own this vehicle.");
+        }
+
+        com.autocare.backend.vehicle.entity.UserDocument document = userDocumentRepository.findById(documentId)
+                .orElseThrow(() -> new ResourceNotFoundException("Document not found with ID: " + documentId));
+
+        if (!document.getUserVehicle().getId().equals(vehicleId)) {
+            throw new BusinessException("Document does not belong to the specified vehicle.");
+        }
+
+        userDocumentRepository.delete(document);
     }
 }
 

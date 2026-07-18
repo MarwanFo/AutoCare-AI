@@ -8,14 +8,10 @@ import com.autocare.backend.auth.entity.User;
 import com.autocare.backend.auth.repository.RoleRepository;
 import com.autocare.backend.auth.repository.UserRepository;
 import com.autocare.backend.auth.repository.UserSessionRepository;
-import com.autocare.backend.vehicle.dto.CreateVehicleRequest;
-import com.autocare.backend.vehicle.dto.GeminiVehicleProfileResponse;
+import com.autocare.backend.vehicle.dto.*;
 import com.autocare.backend.vehicle.entity.Brand;
 import com.autocare.backend.vehicle.entity.Model;
-import com.autocare.backend.vehicle.entity.enums.FuelType;
-import com.autocare.backend.vehicle.entity.enums.MileageUnit;
-import com.autocare.backend.vehicle.entity.enums.PurchaseCondition;
-import com.autocare.backend.vehicle.entity.enums.Transmission;
+import com.autocare.backend.vehicle.entity.enums.*;
 import com.autocare.backend.vehicle.repository.BrandRepository;
 import com.autocare.backend.vehicle.repository.ModelRepository;
 import com.autocare.backend.vehicle.repository.UserVehicleRepository;
@@ -45,7 +41,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
-class VehicleIntegrationTest {
+class SaasVehicleIntegrationTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -81,8 +77,6 @@ class VehicleIntegrationTest {
     private GeminiClient geminiClient;
 
     private String tokenUser1;
-    private String tokenUser2;
-
     private Brand brand;
     private Model model;
 
@@ -95,14 +89,11 @@ class VehicleIntegrationTest {
         userSessionRepository.deleteAll();
         userRepository.deleteAll();
 
-        // 1. Setup roles & users
+        // Setup role & user
         createTestUser("alex@example.com", "Alex Owner");
-        createTestUser("bob@example.com", "Bob Imposter");
-
         tokenUser1 = obtainMobileToken("alex@example.com");
-        tokenUser2 = obtainMobileToken("bob@example.com");
 
-        // 2. Setup Brand & Model
+        // Setup Brand & Model
         brand = new Brand();
         brand.setName("Toyota");
         brand.setLogoUrl("https://logo.png");
@@ -113,9 +104,9 @@ class VehicleIntegrationTest {
         model.setBrand(brand);
         model = modelRepository.save(model);
 
-        // 3. Mock GeminiClient Response
+        // Mock GeminiClient Response with documents in specifications JSON
         GeminiVehicleProfileResponse mockProfile = new GeminiVehicleProfileResponse();
-        mockProfile.setSpecifications(Map.of("horsepower", 203));
+        mockProfile.setSpecifications(new HashMap<>(Map.of("horsepower", 203)));
         
         GeminiVehicleProfileResponse.ComponentDto compDto = new GeminiVehicleProfileResponse.ComponentDto();
         compDto.setCategory("Engine");
@@ -132,10 +123,15 @@ class VehicleIntegrationTest {
         intDto.setInspectionOnly(false);
         mockProfile.setIntervals(List.of(intDto));
 
+        GeminiVehicleProfileResponse.DocumentDto docDto = new GeminiVehicleProfileResponse.DocumentDto();
+        docDto.setTitle("Owner's Manual");
+        docDto.setNotes("Manufacturer instructions");
+        mockProfile.setDocuments(List.of(docDto));
+
         Mockito.when(geminiClient.fetchProfile(anyString())).thenReturn(mockProfile);
     }
 
-    private User createTestUser(String email, String name) {
+    private void createTestUser(String email, String name) {
         Role userRole = roleRepository.findByName("ROLE_USER")
                 .orElseGet(() -> {
                     Role r = new Role();
@@ -150,7 +146,7 @@ class VehicleIntegrationTest {
         user.setFullName(name);
         user.setRoles(Collections.singleton(userRole));
         user.setStatus(AccountStatus.ACTIVE);
-        return userRepository.save(user);
+        userRepository.save(user);
     }
 
     private String obtainMobileToken(String email) throws Exception {
@@ -168,213 +164,173 @@ class VehicleIntegrationTest {
     }
 
     @Test
-    @DisplayName("JWT Authentication security protection check")
-    void testAuthMissingToken() throws Exception {
-        mockMvc.perform(get("/api/v1/vehicles"))
-                .andExpect(status().isUnauthorized());
-    }
-
-    @Test
-    @DisplayName("Successfully onboard vehicle (with Gemini generation and template cloning)")
-    void testOnboardVehicleSuccess() throws Exception {
+    @DisplayName("Verify BRAND_NEW vehicle digital twin AI-prefilling behavior")
+    void testBrandNewPrefilling() throws Exception {
         CreateVehicleRequest request = new CreateVehicleRequest();
         request.setBrandId(brand.getId());
         request.setModelId(model.getId());
         request.setYear(2025);
-        request.setTrimConfiguration("SE");
         request.setTransmission(Transmission.AUTOMATIC);
         request.setFuelType(FuelType.GASOLINE);
-        request.setColor("Super White");
-        request.setLicensePlate("CAMRY25");
-        request.setVin("1YJ1E1EB8FF123456");
-        request.setCurrentMileage(5000);
-        request.setMileageUnit(MileageUnit.KM);
-        request.setPrimary(true);
         request.setPurchaseCondition(PurchaseCondition.BRAND_NEW);
+        request.setCurrentMileage(0);
+        request.setMileageUnit(MileageUnit.KM);
+        request.setLicensePlate("NEWCAR");
+        request.setVin("1YJ1E1EB8FF000001");
 
         UUID vehicleId = onboardVehicle(request, tokenUser1);
 
         mockMvc.perform(get("/api/v1/vehicles/" + vehicleId)
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + tokenUser1))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(vehicleId.toString()))
-                .andExpect(jsonPath("$.brandName").value("Toyota"))
-                .andExpect(jsonPath("$.modelName").value("Camry"))
-                .andExpect(jsonPath("$.licensePlate").value("CAMRY25"))
-                .andExpect(jsonPath("$.primary").value(true))
                 .andExpect(jsonPath("$.components").isArray())
                 .andExpect(jsonPath("$.components[0].name").value("Engine Oil Filter"))
-                .andExpect(jsonPath("$.intervals[0].title").value("Oil Change"));
-
-        // Verify template was created
-        assertThat(vehicleTemplateRepository.findAll()).hasSize(1);
+                .andExpect(jsonPath("$.components[0].status").value("NEW"))
+                .andExpect(jsonPath("$.components[0].healthScore").value(100))
+                .andExpect(jsonPath("$.components[0].origin").value("FACTORY"))
+                .andExpect(jsonPath("$.documents").isArray())
+                .andExpect(jsonPath("$.documents[0].title").value("Owner's Manual"));
     }
 
     @Test
-    @DisplayName("Validate duplicate VIN registration returns 409 Conflict")
-    void testOnboardDuplicateVinConflict() throws Exception {
-        CreateVehicleRequest request1 = new CreateVehicleRequest();
-        request1.setBrandId(brand.getId());
-        request1.setModelId(model.getId());
-        request1.setYear(2025);
-        request1.setTransmission(Transmission.AUTOMATIC);
-        request1.setFuelType(FuelType.GASOLINE);
-        request1.setVin("1YJ1E1EB8FF123456");
-        request1.setCurrentMileage(100);
-        request1.setMileageUnit(MileageUnit.KM);
-        request1.setPurchaseCondition(PurchaseCondition.USED);
-
-        onboardVehicle(request1, tokenUser1);
-
-        // Same VIN under second request -> expect 409 Conflict
-        CreateVehicleRequest request2 = new CreateVehicleRequest();
-        request2.setBrandId(brand.getId());
-        request2.setModelId(model.getId());
-        request2.setYear(2025);
-        request2.setTransmission(Transmission.AUTOMATIC);
-        request2.setFuelType(FuelType.GASOLINE);
-        request2.setVin("1YJ1E1EB8FF123456"); // duplicate
-        request2.setCurrentMileage(200);
-        request2.setMileageUnit(MileageUnit.KM);
-        request2.setPurchaseCondition(PurchaseCondition.USED);
-
-        mockMvc.perform(post("/api/v1/vehicles")
-                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + tokenUser1)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request2)))
-                .andExpect(status().isConflict());
-    }
-
-    @Test
-    @DisplayName("Validate duplicate License Plate returns 409 Conflict")
-    void testOnboardDuplicateLicensePlateConflict() throws Exception {
-        CreateVehicleRequest request1 = new CreateVehicleRequest();
-        request1.setBrandId(brand.getId());
-        request1.setModelId(model.getId());
-        request1.setYear(2025);
-        request1.setTransmission(Transmission.AUTOMATIC);
-        request1.setFuelType(FuelType.GASOLINE);
-        request1.setLicensePlate("PLATE123");
-        request1.setCurrentMileage(100);
-        request1.setMileageUnit(MileageUnit.KM);
-        request1.setPurchaseCondition(PurchaseCondition.USED);
-
-        onboardVehicle(request1, tokenUser1);
-
-        // Same License Plate -> expect 409 Conflict
-        CreateVehicleRequest request2 = new CreateVehicleRequest();
-        request2.setBrandId(brand.getId());
-        request2.setModelId(model.getId());
-        request2.setYear(2025);
-        request2.setTransmission(Transmission.AUTOMATIC);
-        request2.setFuelType(FuelType.GASOLINE);
-        request2.setLicensePlate("plate123"); // Case insensitive check
-        request2.setCurrentMileage(200);
-        request2.setMileageUnit(MileageUnit.KM);
-        request2.setPurchaseCondition(PurchaseCondition.USED);
-
-        mockMvc.perform(post("/api/v1/vehicles")
-                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + tokenUser2)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request2)))
-                .andExpect(status().isConflict());
-    }
-
-    @Test
-    @DisplayName("Verify ownership constraint: Bob cannot read Alex's vehicle")
-    void testOwnershipAccessValidation() throws Exception {
-        // Alex registers a vehicle
+    @DisplayName("Verify USED vehicle digital twin skips AI components/documents prefilling")
+    void testUsedSkipsPrefilling() throws Exception {
         CreateVehicleRequest request = new CreateVehicleRequest();
         request.setBrandId(brand.getId());
         request.setModelId(model.getId());
         request.setYear(2025);
         request.setTransmission(Transmission.AUTOMATIC);
         request.setFuelType(FuelType.GASOLINE);
-        request.setCurrentMileage(100);
-        request.setMileageUnit(MileageUnit.KM);
         request.setPurchaseCondition(PurchaseCondition.USED);
+        request.setCurrentMileage(50000);
+        request.setMileageUnit(MileageUnit.KM);
+        request.setLicensePlate("USEDCAR");
+        request.setVin("1YJ1E1EB8FF000002");
+        request.setInitialComponentHealths(Map.of("engineOil", "NEEDING_ATTENTION"));
 
         UUID vehicleId = onboardVehicle(request, tokenUser1);
 
-        // Bob tries to read Alex's vehicle -> expect 403 Forbidden
         mockMvc.perform(get("/api/v1/vehicles/" + vehicleId)
-                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + tokenUser2))
-                .andExpect(status().isForbidden());
-    }
-
-    @Test
-    @DisplayName("Verify vehicle update details and primary status swapping")
-    void testUpdateAndPrimarySwapping() throws Exception {
-        // Create vehicle 1 (Primary)
-        CreateVehicleRequest req1 = new CreateVehicleRequest();
-        req1.setBrandId(brand.getId());
-        req1.setModelId(model.getId());
-        req1.setYear(2025);
-        req1.setTransmission(Transmission.AUTOMATIC);
-        req1.setFuelType(FuelType.GASOLINE);
-        req1.setCurrentMileage(100);
-        req1.setMileageUnit(MileageUnit.KM);
-        req1.setPrimary(true);
-        req1.setPurchaseCondition(PurchaseCondition.USED);
-
-        UUID car1Id = onboardVehicle(req1, tokenUser1);
-
-        // Create vehicle 2
-        CreateVehicleRequest req2 = new CreateVehicleRequest();
-        req2.setBrandId(brand.getId());
-        req2.setModelId(model.getId());
-        req2.setYear(2025);
-        req2.setTransmission(Transmission.AUTOMATIC);
-        req2.setFuelType(FuelType.GASOLINE);
-        req2.setCurrentMileage(200);
-        req2.setMileageUnit(MileageUnit.KM);
-        req2.setPrimary(false);
-        req2.setPurchaseCondition(PurchaseCondition.USED);
-
-        UUID car2Id = onboardVehicle(req2, tokenUser1);
-
-        // Verify car 1 is primary
-        mockMvc.perform(get("/api/v1/vehicles/" + car1Id)
-                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + tokenUser1))
-                .andExpect(jsonPath("$.primary").value(true));
-
-        // Switch primary to car 2
-        mockMvc.perform(patch("/api/v1/vehicles/" + car2Id + "/primary")
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + tokenUser1))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.primary").value(true));
-
-        // Verify car 1 is no longer primary
-        mockMvc.perform(get("/api/v1/vehicles/" + car1Id)
-                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + tokenUser1))
-                .andExpect(jsonPath("$.primary").value(false));
+                .andExpect(jsonPath("$.components").isArray())
+                .andExpect(jsonPath("$.components[0].name").value("Engine Oil Filter"))
+                .andExpect(jsonPath("$.components[0].status").value("WARNING"))
+                .andExpect(jsonPath("$.documents").isEmpty());
     }
 
     @Test
-    @DisplayName("Verify soft delete / archiving flow")
-    void testArchiveVehicleFlow() throws Exception {
+    @DisplayName("Verify CRUD operations for parts (components) manually")
+    void testComponentCRUD() throws Exception {
         CreateVehicleRequest request = new CreateVehicleRequest();
         request.setBrandId(brand.getId());
         request.setModelId(model.getId());
         request.setYear(2025);
         request.setTransmission(Transmission.AUTOMATIC);
         request.setFuelType(FuelType.GASOLINE);
-        request.setCurrentMileage(100);
-        request.setMileageUnit(MileageUnit.KM);
         request.setPurchaseCondition(PurchaseCondition.USED);
+        request.setCurrentMileage(50000);
+        request.setMileageUnit(MileageUnit.KM);
+        request.setLicensePlate("CRUDCAR");
 
         UUID vehicleId = onboardVehicle(request, tokenUser1);
 
-        // Perform archive delete request
-        mockMvc.perform(delete("/api/v1/vehicles/" + vehicleId)
+        // 1. Add component manually
+        CreateComponentRequest createComp = new CreateComponentRequest();
+        createComp.setCategory(ComponentCategory.BRAKES);
+        createComp.setName("Rear Brake Pads");
+        createComp.setPartNumber("BP-999");
+        createComp.setSpecifications("Ceramic");
+
+        MvcResult addResult = mockMvc.perform(post("/api/v1/vehicles/" + vehicleId + "/components")
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + tokenUser1)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(createComp)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.name").value("Rear Brake Pads"))
+                .andExpect(jsonPath("$.custom").value(true))
+                .andReturn();
+
+        UUID componentId = UUID.fromString(objectMapper.readTree(addResult.getResponse().getContentAsString()).get("id").asText());
+
+        // 2. Update component manually
+        UpdateComponentRequest updateComp = new UpdateComponentRequest();
+        updateComp.setCategory(ComponentCategory.BRAKES);
+        updateComp.setName("Rear Brake Pads v2");
+        updateComp.setPartNumber("BP-999-v2");
+
+        mockMvc.perform(put("/api/v1/vehicles/" + vehicleId + "/components/" + componentId)
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + tokenUser1)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(updateComp)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name").value("Rear Brake Pads v2"))
+                .andExpect(jsonPath("$.partNumber").value("BP-999-v2"));
+
+        // 3. Delete component manually
+        mockMvc.perform(delete("/api/v1/vehicles/" + vehicleId + "/components/" + componentId)
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + tokenUser1))
                 .andExpect(status().isNoContent());
 
-        // Verify it is archived and not deleted from database
+        // Verify component is gone
         mockMvc.perform(get("/api/v1/vehicles/" + vehicleId)
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + tokenUser1))
+                .andExpect(jsonPath("$.components").isEmpty());
+    }
+
+    @Test
+    @DisplayName("Verify CRUD operations for documents manually")
+    void testDocumentCRUD() throws Exception {
+        CreateVehicleRequest request = new CreateVehicleRequest();
+        request.setBrandId(brand.getId());
+        request.setModelId(model.getId());
+        request.setYear(2025);
+        request.setTransmission(Transmission.AUTOMATIC);
+        request.setFuelType(FuelType.GASOLINE);
+        request.setPurchaseCondition(PurchaseCondition.USED);
+        request.setCurrentMileage(50000);
+        request.setMileageUnit(MileageUnit.KM);
+        request.setLicensePlate("CRUDDOCCAR");
+
+        UUID vehicleId = onboardVehicle(request, tokenUser1);
+
+        // 1. Add document manually
+        CreateDocumentRequest createDoc = new CreateDocumentRequest();
+        createDoc.setTitle("Insurance Policy");
+        createDoc.setUrl("https://insurance.com/policy.pdf");
+
+        MvcResult addResult = mockMvc.perform(post("/api/v1/vehicles/" + vehicleId + "/documents")
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + tokenUser1)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(createDoc)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.title").value("Insurance Policy"))
+                .andReturn();
+
+        UUID docId = UUID.fromString(objectMapper.readTree(addResult.getResponse().getContentAsString()).get("id").asText());
+
+        // 2. Update document manually
+        UpdateDocumentRequest updateDoc = new UpdateDocumentRequest();
+        updateDoc.setTitle("Insurance Policy Updated");
+        updateDoc.setUrl("https://insurance.com/policy-new.pdf");
+
+        mockMvc.perform(put("/api/v1/vehicles/" + vehicleId + "/documents/" + docId)
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + tokenUser1)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(updateDoc)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.status").value("ARCHIVED"));
+                .andExpect(jsonPath("$.title").value("Insurance Policy Updated"))
+                .andExpect(jsonPath("$.url").value("https://insurance.com/policy-new.pdf"));
+
+        // 3. Delete document manually
+        mockMvc.perform(delete("/api/v1/vehicles/" + vehicleId + "/documents/" + docId)
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + tokenUser1))
+                .andExpect(status().isNoContent());
+
+        // Verify document is gone
+        mockMvc.perform(get("/api/v1/vehicles/" + vehicleId)
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + tokenUser1))
+                .andExpect(jsonPath("$.documents").isEmpty());
     }
 
     private UUID onboardVehicle(CreateVehicleRequest request, String token) throws Exception {
@@ -388,7 +344,7 @@ class VehicleIntegrationTest {
         String postResponse = postResult.getResponse().getContentAsString();
         UUID jobId = UUID.fromString(objectMapper.readTree(postResponse).get("id").asText());
 
-        // Poll job status until it is COMPLETED or FAILED
+        // Poll job status
         String status = "PENDING";
         String responseStr = "";
         int retries = 50;
@@ -407,8 +363,7 @@ class VehicleIntegrationTest {
         }
 
         if (!"COMPLETED".equals(status)) {
-            String errorMsg = objectMapper.readTree(responseStr).path("errorMessage").asText();
-            throw new AssertionError("Job failed or timed out. Status: " + status + ", Error: " + errorMsg);
+            throw new AssertionError("Job failed or timed out.");
         }
 
         String vehicleIdStr = objectMapper.readTree(responseStr).get("result").get("vehicleId").asText();

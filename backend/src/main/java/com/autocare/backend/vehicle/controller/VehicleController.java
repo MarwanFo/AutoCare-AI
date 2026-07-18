@@ -10,7 +10,13 @@ import com.autocare.backend.vehicle.dto.CreateVehicleRequest;
 import com.autocare.backend.vehicle.dto.UpdateVehicleRequest;
 import com.autocare.backend.vehicle.dto.VehicleResponse;
 import com.autocare.backend.vehicle.dto.VehicleSummaryResponse;
+import com.autocare.backend.vehicle.dto.CreateComponentRequest;
+import com.autocare.backend.vehicle.dto.UpdateComponentRequest;
+import com.autocare.backend.vehicle.dto.CreateDocumentRequest;
+import com.autocare.backend.vehicle.dto.UpdateDocumentRequest;
 import com.autocare.backend.vehicle.entity.UserVehicle;
+import com.autocare.backend.vehicle.entity.UserComponent;
+import com.autocare.backend.vehicle.entity.UserDocument;
 import com.autocare.backend.vehicle.entity.enums.VehicleStatus;
 import com.autocare.backend.vehicle.mapper.VehicleMapper;
 import com.autocare.backend.vehicle.service.VehicleService;
@@ -167,5 +173,79 @@ public class VehicleController {
         log.info("Setting vehicle ID: {} as primary for user: {}", id, userDetails.getUser().getId());
         UserVehicle vehicle = vehicleService.setPrimaryVehicle(userDetails.getUser().getId(), id);
         return ResponseEntity.ok(vehicleMapper.toResponse(vehicle));
+    }
+
+    @PostMapping("/{vehicleId}/components")
+    @Operation(summary = "Add a component manually", description = "Allows the user to manually add a component/part to their vehicle's digital twin.")
+    public ResponseEntity<VehicleResponse.ComponentResponse> addComponent(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PathVariable UUID vehicleId,
+            @Valid @RequestBody CreateComponentRequest request
+    ) {
+        log.info("Adding component manually to vehicle ID: {} for user: {}", vehicleId, userDetails.getUser().getId());
+        UserComponent component = vehicleService.addComponent(userDetails.getUser().getId(), vehicleId, request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(vehicleMapper.toComponentResponse(component));
+    }
+
+    @PutMapping("/{vehicleId}/components/{componentId}")
+    @Operation(summary = "Update a component manually", description = "Allows the user to manually update a component/part in their vehicle's digital twin.")
+    public ResponseEntity<VehicleResponse.ComponentResponse> updateComponent(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PathVariable UUID vehicleId,
+            @PathVariable UUID componentId,
+            @Valid @RequestBody UpdateComponentRequest request
+    ) {
+        log.info("Updating component ID: {} for vehicle ID: {} for user: {}", componentId, vehicleId, userDetails.getUser().getId());
+        UserComponent component = vehicleService.updateComponent(userDetails.getUser().getId(), vehicleId, componentId, request);
+        return ResponseEntity.ok(vehicleMapper.toComponentResponse(component));
+    }
+
+    @DeleteMapping("/{vehicleId}/components/{componentId}")
+    @Operation(summary = "Delete a component manually", description = "Allows the user to delete a manually added or cloned component/part from their vehicle's digital twin.")
+    public ResponseEntity<Void> deleteComponent(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PathVariable UUID vehicleId,
+            @PathVariable UUID componentId
+    ) {
+        log.info("Deleting component ID: {} for vehicle ID: {} for user: {}", componentId, vehicleId, userDetails.getUser().getId());
+        vehicleService.deleteComponent(userDetails.getUser().getId(), vehicleId, componentId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/{vehicleId}/documents")
+    @Operation(summary = "Add a document manually", description = "Allows the user to manually add a document (e.g. insurance, receipt) to their vehicle's profile.")
+    public ResponseEntity<VehicleResponse.DocumentResponse> addDocument(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PathVariable UUID vehicleId,
+            @Valid @RequestBody CreateDocumentRequest request
+    ) {
+        log.info("Adding document manually to vehicle ID: {} for user: {}", vehicleId, userDetails.getUser().getId());
+        UserDocument document = vehicleService.addDocument(userDetails.getUser().getId(), vehicleId, request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(vehicleMapper.toDocumentResponse(document));
+    }
+
+    @PutMapping("/{vehicleId}/documents/{documentId}")
+    @Operation(summary = "Update a document manually", description = "Allows the user to manually update document details (e.g. title, notes, expiry date).")
+    public ResponseEntity<VehicleResponse.DocumentResponse> updateDocument(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PathVariable UUID vehicleId,
+            @PathVariable UUID documentId,
+            @Valid @RequestBody UpdateDocumentRequest request
+    ) {
+        log.info("Updating document ID: {} for vehicle ID: {} for user: {}", documentId, vehicleId, userDetails.getUser().getId());
+        UserDocument document = vehicleService.updateDocument(userDetails.getUser().getId(), vehicleId, documentId, request);
+        return ResponseEntity.ok(vehicleMapper.toDocumentResponse(document));
+    }
+
+    @DeleteMapping("/{vehicleId}/documents/{documentId}")
+    @Operation(summary = "Delete a document manually", description = "Allows the user to delete a document from their vehicle's profile.")
+    public ResponseEntity<Void> deleteDocument(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PathVariable UUID vehicleId,
+            @PathVariable UUID documentId
+    ) {
+        log.info("Deleting document ID: {} for vehicle ID: {} for user: {}", documentId, vehicleId, userDetails.getUser().getId());
+        vehicleService.deleteDocument(userDetails.getUser().getId(), vehicleId, documentId);
+        return ResponseEntity.noContent().build();
     }
 }

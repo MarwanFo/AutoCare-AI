@@ -96,6 +96,17 @@ public class GeminiClientImpl implements GeminiClient {
             int2.setInspectionOnly(true);
 
             mockResponse.setIntervals(List.of(int1, int2));
+
+            GeminiVehicleProfileResponse.DocumentDto doc1 = new GeminiVehicleProfileResponse.DocumentDto();
+            doc1.setTitle("Owner's Manual");
+            doc1.setNotes("Standard digital copy of the owner's instruction manual.");
+
+            GeminiVehicleProfileResponse.DocumentDto doc2 = new GeminiVehicleProfileResponse.DocumentDto();
+            doc2.setTitle("Warranty Information Booklet");
+            doc2.setNotes("Details factory-backed 3-year/36,000-mile comprehensive warranty.");
+
+            mockResponse.setDocuments(List.of(doc1, doc2));
+
             return mockResponse;
         }
 

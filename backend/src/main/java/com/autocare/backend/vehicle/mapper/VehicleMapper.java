@@ -23,6 +23,10 @@ public interface VehicleMapper {
 
     List<VehicleResponse> toResponseList(List<UserVehicle> vehicles);
 
+    VehicleResponse.ComponentResponse toComponentResponse(UserComponent component);
+
+    VehicleResponse.DocumentResponse toDocumentResponse(UserDocument document);
+
     @Mapping(target = "brandName", source = "template.brand.name")
     @Mapping(target = "modelName", source = "template.model.name")
     @Mapping(target = "year", source = "template.year")

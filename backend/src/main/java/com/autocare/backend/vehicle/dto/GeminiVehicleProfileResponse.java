@@ -16,6 +16,15 @@ public class GeminiVehicleProfileResponse {
     private Map<String, Object> specifications;
     private List<ComponentDto> components;
     private List<IntervalDto> intervals;
+    private List<DocumentDto> documents;
+
+    @Getter
+    @Setter
+    @ToString
+    public static class DocumentDto {
+        private String title;
+        private String notes;
+    }
 
     @Getter
     @Setter

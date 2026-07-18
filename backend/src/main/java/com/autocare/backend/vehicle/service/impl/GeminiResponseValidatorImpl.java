@@ -66,6 +66,17 @@ public class GeminiResponseValidatorImpl implements GeminiResponseValidator {
             }
         }
 
+        // 4. Validate Documents list (optional or required structure check)
+        if (response.getDocuments() != null) {
+            for (int i = 0; i < response.getDocuments().size(); i++) {
+                GeminiVehicleProfileResponse.DocumentDto doc = response.getDocuments().get(i);
+                if (doc.getTitle() == null || doc.getTitle().isBlank()) {
+                    log.warn("Gemini response validation failed: document at index {} has null or blank title", i);
+                    return false;
+                }
+            }
+        }
+
         return true;
     }
 }

@@ -65,13 +65,19 @@ public class GeminiVehicleProfileServiceImpl implements GeminiVehicleProfileServ
         template.setYear(year);
         template.setTrimConfiguration(trimConfiguration != null && !trimConfiguration.isBlank() ? trimConfiguration : "Standard");
         java.util.Map<String, Object> specs = aiResponse.getSpecifications();
-        if (specs != null) {
-            if (aiResponse.getTransmission() != null) {
-                specs.put("transmission", aiResponse.getTransmission());
-            }
-            if (aiResponse.getFuelType() != null) {
-                specs.put("fuelType", aiResponse.getFuelType());
-            }
+        if (specs == null) {
+            specs = new java.util.HashMap<>();
+        } else {
+            specs = new java.util.HashMap<>(specs);
+        }
+        if (aiResponse.getTransmission() != null) {
+            specs.put("transmission", aiResponse.getTransmission());
+        }
+        if (aiResponse.getFuelType() != null) {
+            specs.put("fuelType", aiResponse.getFuelType());
+        }
+        if (aiResponse.getDocuments() != null) {
+            specs.put("documents", aiResponse.getDocuments());
         }
         template.setSpecifications(specs);
         template.setVersion(1);
