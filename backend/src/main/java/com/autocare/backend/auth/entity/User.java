@@ -37,6 +37,24 @@ public class User extends BaseEntity {
     @Column(name = "phone_number", length = 20)
     private String phoneNumber;
 
+    @Column(name = "avatar_url", length = 500)
+    private String avatarUrl;
+
+    @Column(name = "preferred_language", nullable = false, length = 10)
+    private String preferredLanguage = "en";
+
+    @Column(name = "preferred_currency", nullable = false, length = 10)
+    private String preferredCurrency = "USD";
+
+    @Column(name = "preferred_distance_unit", nullable = false, length = 10)
+    private String preferredDistanceUnit = "KM";
+
+    @Column(name = "push_notifications_enabled", nullable = false)
+    private boolean pushNotificationsEnabled = true;
+
+    @Column(name = "email_notifications_enabled", nullable = false)
+    private boolean emailNotificationsEnabled = true;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, columnDefinition = "account_status")
     @JdbcTypeCode(SqlTypes.NAMED_ENUM)

@@ -29,6 +29,12 @@ public interface UserMapper {
     @Mapping(target = "authTokens", ignore = true)
     @Mapping(target = "passwordHistory", ignore = true)
     @Mapping(target = "auditLogs", ignore = true)
+    @Mapping(target = "avatarUrl", ignore = true)
+    @Mapping(target = "preferredLanguage", ignore = true)
+    @Mapping(target = "preferredCurrency", ignore = true)
+    @Mapping(target = "preferredDistanceUnit", ignore = true)
+    @Mapping(target = "pushNotificationsEnabled", ignore = true)
+    @Mapping(target = "emailNotificationsEnabled", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "lastModifiedAt", ignore = true)
     @Mapping(target = "createdBy", ignore = true)
@@ -43,6 +49,7 @@ public interface UserMapper {
 
     @Mapping(target = "roles", source = "roles", qualifiedByName = "mapRoles")
     @Mapping(target = "permissions", source = "roles", qualifiedByName = "mapPermissions")
+    @Mapping(target = "isProfileCompleted", source = "profileCompleted")
     @Mapping(target = "status", source = "status")
     UserProfileResponse toUserProfileResponse(User user);
 
