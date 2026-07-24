@@ -1,32 +1,33 @@
-import React from 'react';
-import { ActivityIndicator, FlatList, Platform, StyleSheet, View, TouchableOpacity } from 'react-native';
+import React, { useState } from 'react';
+import {
+  FlatList,
+  RefreshControl,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+  StatusBar,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-
-import { AnimatedIcon } from '@/components/animated-icon';
-import { HintRow } from '@/components/hint-row';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { WebBadge } from '@/components/web-badge';
-import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
+import Svg, { Path } from 'react-native-svg';
 
 import { useVehicles } from '@/hooks/vehicle/useVehicles';
 import { VehicleOnboardingScreen } from '@/features/vehicle/screens/VehicleOnboardingScreen';
+import { VehicleDetailsModal } from '@/features/vehicle/components/VehicleDetailsModal';
+import { GarageVehicleCard } from '@/features/garage/components/GarageVehicleCard';
+import { GarageEmptyState } from '@/features/garage/components/GarageEmptyState';
+import { GarageSkeleton } from '@/features/garage/components/GarageSkeleton';
 
-export default function HomeScreen() {
-  const { data: vehiclesData, isLoading: loadingVehicles, refetch } = useVehicles();
-  const [showOnboarding, setShowOnboarding] = React.useState(false);
+export default function GarageHomeScreen() {
+  const { data: vehiclesData, isLoading, isRefetching, refetch } = useVehicles();
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [selectedVehicleId, setSelectedVehicleId] = useState<string | null>(null);
 
-  if (loadingVehicles) {
-    return (
-      <ThemedView style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#abc7ff" />
-      </ThemedView>
-    );
-  }
-
-  // If user has 0 vehicles, or explicitly requested onboarding, display the Onboarding Wizard
   const totalVehicles = vehiclesData?.totalElements ?? 0;
-  if (totalVehicles === 0 || showOnboarding) {
+  const vehicles = vehiclesData?.content ?? [];
+
+  // Launch Onboarding Wizard directly if requested
+  if (showOnboarding) {
     return (
       <VehicleOnboardingScreen
         onComplete={() => {
@@ -39,145 +40,152 @@ export default function HomeScreen() {
   }
 
   return (
-    <ThemedView style={styles.container}>
-      <SafeAreaView style={styles.safeArea}>
-        <ThemedView style={styles.heroSection}>
-          <AnimatedIcon />
-          <ThemedText type="title" style={styles.title}>
-            Your Garage ({totalVehicles})
-          </ThemedText>
-          <ThemedText type="subtitle" style={styles.subtitle}>
-            Digital twin active for your onboarding vehicle.
-          </ThemedText>
-          
+    <View style={styles.background}>
+      <StatusBar barStyle="light-content" backgroundColor="#0e0e0e" />
+      <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
+        {/* Screen Header */}
+        <View style={styles.header}>
+          <View style={styles.headerTitleRow}>
+            <View style={styles.brandBadgeIcon}>
+              <Svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                <Path
+                  d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.85 7h10.29l1.08 3.11H5.77L6.85 7zM7.5 16c-.83 0-1.5-.67-1.5-1.5S6.67 13 7.5 13s1.5.67 1.5 1.5S8.33 16 7.5 16zm9 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"
+                  fill="#abc7ff"
+                />
+              </Svg>
+            </View>
+            <View>
+              <Text style={styles.headerTitle}>Digital Garage</Text>
+              <Text style={styles.headerSubtitle}>
+                {totalVehicles > 0
+                  ? `${totalVehicles} ${totalVehicles === 1 ? 'vehicle' : 'vehicles'} active`
+                  : 'Manage vehicle digital twins'}
+              </Text>
+            </View>
+          </View>
+
+          {/* Primary Action Button */}
           <TouchableOpacity
-            onPress={() => setShowOnboarding(true)}
             style={styles.addButton}
-            activeOpacity={0.8}
+            onPress={() => setShowOnboarding(true)}
+            activeOpacity={0.85}
             accessibilityRole="button"
             accessibilityLabel="Add new vehicle"
           >
-            <ThemedText style={styles.addButtonText}>+ Add Vehicle</ThemedText>
+            <Svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+              <Path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" fill="#131313" />
+            </Svg>
+            <Text style={styles.addButtonText}>Add Vehicle</Text>
           </TouchableOpacity>
-        </ThemedView>
+        </View>
 
-        {/* List of current vehicles */}
-        <FlatList
-          data={vehiclesData?.content || []}
-          keyExtractor={(item) => item.id}
-          renderItem={({ item }) => (
-            <ThemedView type="backgroundElement" style={styles.vehicleCard}>
-              <ThemedText style={styles.vehicleName}>
-                {`${item.year} ${item.brandName} ${item.modelName}`}
-              </ThemedText>
-              <ThemedText type="small" style={styles.vehicleDetails}>
-                {`Plate: ${item.licensePlate || 'N/A'} • Odometer: ${item.currentMileage} ${item.mileageUnit}`}
-              </ThemedText>
-            </ThemedView>
-          )}
-          style={styles.vehiclesList}
-          showsVerticalScrollIndicator={false}
-        />
-
-        <ThemedView type="backgroundElement" style={styles.stepContainer}>
-          <HintRow
-            title="Try editing"
-            hint={<ThemedText type="code">src/app/index.tsx</ThemedText>}
+        {/* Content Section */}
+        {isLoading ? (
+          <GarageSkeleton />
+        ) : totalVehicles === 0 ? (
+          <GarageEmptyState onAddVehicle={() => setShowOnboarding(true)} />
+        ) : (
+          <FlatList
+            data={vehicles}
+            keyExtractor={(item) => item.id}
+            renderItem={({ item }) => (
+              <GarageVehicleCard
+                vehicle={item}
+                onPress={() => setSelectedVehicleId(item.id)}
+              />
+            )}
+            contentContainerStyle={styles.listContent}
+            showsVerticalScrollIndicator={false}
+            refreshControl={
+              <RefreshControl
+                refreshing={isRefetching}
+                onRefresh={refetch}
+                tintColor="#abc7ff"
+                colors={['#abc7ff']}
+              />
+            }
           />
-          <HintRow title="Dev tools" hint={<ThemedText type="small">use browser devtools</ThemedText>} />
-        </ThemedView>
-
-        {Platform.OS === 'web' && <WebBadge />}
+        )}
       </SafeAreaView>
-    </ThemedView>
+
+      {/* Vehicle Digital Twin Details Modal */}
+      {selectedVehicleId && (
+        <VehicleDetailsModal
+          vehicleId={selectedVehicleId}
+          visible={!!selectedVehicleId}
+          onClose={() => setSelectedVehicleId(null)}
+        />
+      )}
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  loadingContainer: {
+  background: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#131313',
-  },
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    flexDirection: 'row',
+    backgroundColor: '#0e0e0e',
   },
   safeArea: {
     flex: 1,
-    paddingHorizontal: Spacing.four,
+    paddingHorizontal: 18,
+  },
+  header: {
+    flexDirection: 'row',
     alignItems: 'center',
-    gap: Spacing.three,
-    paddingBottom: BottomTabInset + Spacing.three,
-    maxWidth: MaxContentWidth,
+    justifyContent: 'space-between',
+    paddingVertical: 16,
+    marginBottom: 8,
   },
-  heroSection: {
+  headerTitleRow: {
+    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 40,
-    marginBottom: 10,
-    gap: Spacing.two,
+    gap: 12,
   },
-  title: {
-    textAlign: 'center',
-  },
-  subtitle: {
-    textAlign: 'center',
-    fontSize: 14,
-    color: '#c4c7c8',
-  },
-  vehiclesList: {
-    flex: 1,
-    alignSelf: 'stretch',
-    marginTop: 10,
-  },
-  vehicleCard: {
-    padding: 16,
-    borderRadius: 16,
-    marginBottom: 12,
+  brandBadgeIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    backgroundColor: '#abc7ff15',
     borderWidth: 1,
-    borderColor: '#212225',
-    alignSelf: 'stretch',
+    borderColor: '#abc7ff35',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  vehicleName: {
-    fontFamily: 'Inter',
-    fontSize: 16,
+  headerTitle: {
+    fontSize: 22,
     fontWeight: '700',
     color: '#ffffff',
-    marginBottom: 4,
-  },
-  vehicleDetails: {
     fontFamily: 'Inter',
-    fontSize: 13,
-    color: '#c4c7c8',
+    letterSpacing: -0.3,
   },
-  stepContainer: {
-    gap: Spacing.three,
-    alignSelf: 'stretch',
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.four,
-    borderRadius: Spacing.four,
+  headerSubtitle: {
+    fontSize: 13,
+    color: '#8e9192',
+    fontFamily: 'Inter',
+    marginTop: 1,
   },
   addButton: {
-    backgroundColor: '#abc7ff',
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: 24,
-    marginTop: 8,
+    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
+    gap: 6,
+    backgroundColor: '#abc7ff',
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 20,
     shadowColor: '#abc7ff',
-    shadowOffset: { width: 0, height: 4 },
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
-    shadowRadius: 8,
+    shadowRadius: 6,
     elevation: 3,
   },
   addButtonText: {
-    fontFamily: 'Inter',
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: '700',
     color: '#131313',
+    fontFamily: 'Inter',
+  },
+  listContent: {
+    paddingBottom: 40,
+    paddingTop: 4,
   },
 });

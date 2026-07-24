@@ -68,7 +68,10 @@ public class GeminiPromptBuilderImpl implements GeminiPromptBuilder {
               .append("Instructions:\n")
               .append("1. If transmission or fuel type is not specified in the input above, you MUST determine the standard/most common transmission and fuel type for this specific vehicle model, year, and trim, and populate those top-level JSON fields accordingly.\n")
               .append("2. Under 'specifications', include factory-known specifications only: oil capacity, oil viscosity, tire size, battery group size, wiper blade sizes, spark plug gap, coolant type, brake fluid specification, and torque specs. Do NOT generate dynamic user or condition-based estimates.\n")
-              .append("3. Do not wrap the response in markdown blocks. Output raw JSON only.");
+              .append("3. Under 'components', you MUST generate a comprehensive list of standard service items (minimum of 12 components) including: Engine Oil, Engine Oil Filter, Engine Air Filter, Cabin Air Filter, Front Brake Pads, Rear Brake Pads, Brake Rotors, 12V Battery, Tires, Spark Plugs, Coolant, Transmission Fluid, and Wiper Blades.\n")
+              .append("4. Under 'intervals', include standard maintenance intervals corresponding to each component (minimum of 8 intervals).\n")
+              .append("5. Under 'documents', generate a list of at least 5 standard documents (e.g., Owner's Manual, Maintenance Guide, Warranty Booklet, Roadside Safety Guide, Infotainment Manual).\n")
+              .append("6. Do not wrap the response in markdown blocks. Output raw JSON only.");
 
         return prompt.toString();
     }
