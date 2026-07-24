@@ -14,6 +14,7 @@ import com.autocare.backend.auth.repository.UserRepository;
 import com.autocare.backend.auth.repository.UserSessionRepository;
 import com.autocare.backend.auth.service.PasswordResetService;
 import com.autocare.backend.auth.service.RefreshTokenService;
+import com.autocare.backend.auth.service.SessionService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -37,25 +38,23 @@ public class PasswordResetServiceImpl implements PasswordResetService {
     private final PasswordHistoryRepository passwordHistoryRepository;
     private final UserSessionRepository userSessionRepository;
     private final RefreshTokenService refreshTokenService;
+    private final SessionService sessionService;
     private final PasswordEncoder passwordEncoder;
 
     @Override
     public void initiateForgotPassword(ForgotPasswordRequest request) {
         Optional<User> userOpt = userRepository.findByEmail(request.email());
         if (userOpt.isEmpty()) {
-            // Prevent user enumeration by silent return
             log.warn("Password reset initiated for non-existent email: {}", request.email());
             return;
         }
 
         User user = userOpt.get();
 
-        // Invalidate active reset tokens
         Optional<AuthToken> existingOpt = authTokenRepository
                 .findByUserAndTokenTypeAndUsedAtIsNull(user, AuthTokenType.PASSWORD_RESET);
         existingOpt.ifPresent(token -> token.setUsedAt(Instant.now()));
 
-        // Generate raw reset token and hash it for DB persistence
         String rawToken = UUID.randomUUID().toString().replace("-", "");
         String tokenHash = refreshTokenService.hashToken(rawToken);
 
@@ -63,11 +62,10 @@ public class PasswordResetServiceImpl implements PasswordResetService {
         resetToken.setUser(user);
         resetToken.setTokenType(AuthTokenType.PASSWORD_RESET);
         resetToken.setTokenHash(tokenHash);
-        resetToken.setExpiresAt(Instant.now().plus(Duration.ofMinutes(15))); // Valid for 15 minutes
+        resetToken.setExpiresAt(Instant.now().plus(Duration.ofMinutes(15)));
 
         authTokenRepository.save(resetToken);
 
-        // Simulate asynchronous email transmission
         log.info("Password reset email sent to {}. Raw reset token: {}", user.getEmail(), rawToken);
     }
 
@@ -91,21 +89,17 @@ public class PasswordResetServiceImpl implements PasswordResetService {
 
         User user = resetToken.getUser();
 
-        // Prevent reuse check against last 5 passwords
         validatePasswordHistory(user, request.newPassword());
 
-        // Update password and record to history
         String hashedNewPassword = passwordEncoder.encode(request.newPassword());
         user.setPasswordHash(hashedNewPassword);
         userRepository.save(user);
 
         savePasswordToHistory(user, hashedNewPassword);
 
-        // Consume token
         resetToken.setUsedAt(Instant.now());
         authTokenRepository.save(resetToken);
 
-        // Revoke all active sessions for security
         userSessionRepository.revokeAllByUser(user, Instant.now());
 
         log.info("Password successfully reset for user {}", user.getEmail());
@@ -113,22 +107,32 @@ public class PasswordResetServiceImpl implements PasswordResetService {
 
     @Override
     public void changePassword(User user, ChangePasswordRequest request) {
+        changePassword(user, request, null);
+    }
+
+    @Override
+    public void changePassword(User user, ChangePasswordRequest request, UUID currentSessionId) {
         if (!passwordEncoder.matches(request.oldPassword(), user.getPasswordHash())) {
             throw new InvalidCredentialsException("Current password is incorrect");
         }
 
-        // Prevent reuse check against last 5 passwords
+        if (passwordEncoder.matches(request.newPassword(), user.getPasswordHash())) {
+            throw new AuthException("New password cannot be the same as your current password");
+        }
+
         validatePasswordHistory(user, request.newPassword());
 
-        // Update password and record to history
         String hashedNewPassword = passwordEncoder.encode(request.newPassword());
         user.setPasswordHash(hashedNewPassword);
         userRepository.save(user);
 
         savePasswordToHistory(user, hashedNewPassword);
 
-        // Revoke all sessions (forcing re-login across all devices for security)
-        userSessionRepository.revokeAllByUser(user, Instant.now());
+        if (currentSessionId != null) {
+            sessionService.revokeAllOtherSessions(user, currentSessionId);
+        } else {
+            userSessionRepository.revokeAllByUser(user, Instant.now());
+        }
 
         log.info("Password successfully changed for user {}", user.getEmail());
     }

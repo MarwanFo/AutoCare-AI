@@ -7,11 +7,16 @@ import com.autocare.backend.auth.exception.UserNotFoundException;
 import com.autocare.backend.auth.mapper.UserMapper;
 import com.autocare.backend.auth.repository.UserRepository;
 import com.autocare.backend.auth.service.UserService;
+import com.autocare.backend.infrastructure.storage.dto.StoredFile;
+import com.autocare.backend.infrastructure.storage.service.StorageService;
+import com.autocare.backend.user.dto.request.UpdatePreferencesRequest;
 import com.autocare.backend.user.dto.request.UpdateProfileRequest;
+import com.autocare.backend.user.dto.response.AvatarUploadResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.UUID;
 
@@ -23,6 +28,7 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final UserMapper userMapper;
+    private final StorageService storageService;
 
     @Override
     public UserProfileResponse getUserProfile(UUID userId) {
@@ -53,6 +59,59 @@ public class UserServiceImpl implements UserService {
 
         User savedUser = userRepository.save(user);
         return userMapper.toUserProfileResponse(savedUser);
+    }
+
+    @Override
+    @Transactional
+    public UserProfileResponse updatePreferences(UUID userId, UpdatePreferencesRequest request) {
+        log.info("Updating preferences for user ID: {}", userId);
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException("User with ID " + userId + " not found"));
+
+        user.setPreferredLanguage(request.preferredLanguage().trim().toUpperCase());
+        user.setPreferredCurrency(request.preferredCurrency().trim().toUpperCase());
+        user.setPreferredDistanceUnit(request.preferredDistanceUnit().trim().toUpperCase());
+        user.setPushNotificationsEnabled(request.pushNotificationsEnabled());
+        user.setEmailNotificationsEnabled(request.emailNotificationsEnabled());
+
+        User savedUser = userRepository.save(user);
+        return userMapper.toUserProfileResponse(savedUser);
+    }
+
+    @Override
+    @Transactional
+    public AvatarUploadResponse uploadAvatar(UUID userId, MultipartFile file) {
+        log.info("Uploading new avatar for user ID: {}", userId);
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException("User with ID " + userId + " not found"));
+
+        if (user.getAvatarUrl() != null && !user.getAvatarUrl().isBlank()) {
+            try {
+                storageService.delete(user.getAvatarUrl());
+            } catch (Exception e) {
+                log.warn("Could not delete previous avatar file at URL: {}", user.getAvatarUrl(), e);
+            }
+        }
+
+        StoredFile storedFile = storageService.store(file, "avatars");
+        user.setAvatarUrl(storedFile.fileUrl());
+        userRepository.save(user);
+
+        return new AvatarUploadResponse(storedFile.fileUrl());
+    }
+
+    @Override
+    @Transactional
+    public void deleteAvatar(UUID userId) {
+        log.info("Deleting custom avatar for user ID: {}", userId);
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException("User with ID " + userId + " not found"));
+
+        if (user.getAvatarUrl() != null && !user.getAvatarUrl().isBlank()) {
+            storageService.delete(user.getAvatarUrl());
+            user.setAvatarUrl(null);
+            userRepository.save(user);
+        }
     }
 
     @Override
