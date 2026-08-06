@@ -1,7 +1,9 @@
 package com.autocare.backend.auth.controller;
 
 import com.autocare.backend.auth.dto.*;
+import com.autocare.backend.auth.repository.UserSessionRepository;
 import com.autocare.backend.auth.service.AuthenticationService;
+import com.autocare.backend.auth.service.RefreshTokenService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -15,6 +17,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.Instant;
+
 @Slf4j
 @RestController
 @RequestMapping("/api/v1/auth/mobile")
@@ -23,6 +27,8 @@ import org.springframework.web.bind.annotation.*;
 public class MobileAuthenticationController {
 
     private final AuthenticationService authenticationService;
+    private final RefreshTokenService refreshTokenService;
+    private final UserSessionRepository userSessionRepository;
 
     @PostMapping("/login")
     @Operation(summary = "Authenticate mobile user", description = "Validates user login details and returns access and refresh tokens directly in the JSON response.")
@@ -75,11 +81,28 @@ public class MobileAuthenticationController {
     @Operation(summary = "Logout mobile session", description = "Invalidates the current session without using cookies.")
     @ApiResponse(responseCode = "204", description = "Logged out successfully")
     public ResponseEntity<Void> logout(
-            @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader
+            @RequestHeader(value = HttpHeaders.AUTHORIZATION, required = false) String authHeader,
+            @RequestBody(required = false) MobileLogoutRequest request
     ) {
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             String token = authHeader.substring(7);
-            authenticationService.logout(token);
+            try {
+                authenticationService.logout(token);
+            } catch (Exception e) {
+                log.warn("Failed session logout by access token: {}", e.getMessage());
+            }
+        }
+        if (request != null && request.refreshToken() != null && !request.refreshToken().isBlank()) {
+            try {
+                String tokenHash = refreshTokenService.hashToken(request.refreshToken());
+                userSessionRepository.findByTokenHash(tokenHash).ifPresent(session -> {
+                    session.setRevokedAt(Instant.now());
+                    userSessionRepository.save(session);
+                    log.info("Session ID {} revoked via refresh token logout", session.getId());
+                });
+            } catch (Exception e) {
+                log.warn("Failed session revocation by refresh token: {}", e.getMessage());
+            }
         }
         return ResponseEntity.noContent().build();
     }

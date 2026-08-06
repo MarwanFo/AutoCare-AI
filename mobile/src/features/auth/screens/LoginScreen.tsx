@@ -16,6 +16,7 @@ import * as z from 'zod';
 import { secureStore } from '@/storage/secureStore';
 import { useAuthStore } from '@/stores/authStore';
 import { apiClient } from '@/api/client';
+import { useAppTranslation } from '@/i18n/hooks/useAppTranslation';
 
 import { BrandHeader } from '../components/BrandHeader';
 import { AuthCard } from '../components/AuthCard';
@@ -40,6 +41,7 @@ const loginSchema = z.object({
 type LoginFormData = z.infer<typeof loginSchema>;
 
 export default function LoginScreen() {
+  const { t } = useAppTranslation(['auth', 'common', 'errors', 'validation']);
   const { setSession } = useAuthStore();
   const [currentScreen, setCurrentScreen] = useState<AuthScreen>(AuthScreen.LOGIN);
   const [registeredEmail, setRegisteredEmail] = useState('');
@@ -89,7 +91,7 @@ export default function LoginScreen() {
 
       const { accessToken, refreshToken, user } = response.data;
       if (!accessToken || !refreshToken) {
-        throw new Error('Invalid token payload returned from server');
+        throw new Error(t('errors:unexpected_error'));
       }
 
       await secureStore.setItem('access_token', accessToken);
@@ -99,11 +101,11 @@ export default function LoginScreen() {
       console.error('Mobile authentication failed:', error);
       if (error.response) {
         const serverError = error.response.data;
-        setErrorMessage(serverError?.message || serverError?.error || 'Invalid credentials or validation failed');
+        setErrorMessage(serverError?.message || serverError?.error || t('errors:unexpected_error'));
       } else if (error.request) {
-        setErrorMessage('Network connection lost. Please check your network connectivity and try again.');
+        setErrorMessage(t('errors:network_error'));
       } else {
-        setErrorMessage(error.message || 'An unexpected error occurred. Please try again.');
+        setErrorMessage(error.message || t('errors:unexpected_error'));
       }
     } finally {
       setIsLoading(false);
@@ -221,10 +223,10 @@ export default function LoginScreen() {
 
           {/* Footer Link (Centered Create Account row below card) */}
           <View style={styles.screenFooter}>
-            <Text style={styles.footerText}>Don't have an account?</Text>
+            <Text style={styles.footerText}>{t('auth:no_account_prompt')}</Text>
             <TouchableOpacity
               accessibilityRole="link"
-              accessibilityLabel="Create Account"
+              accessibilityLabel={t('auth:sign_up_button')}
               style={styles.footerLinkContainer}
               onPress={() => {
                 setErrorMessage(null);
@@ -232,7 +234,7 @@ export default function LoginScreen() {
               }}
               disabled={isLoading}
             >
-              <Text style={styles.footerLinkText}>Create Account</Text>
+              <Text style={styles.footerLinkText}>{t('auth:sign_up_button')}</Text>
             </TouchableOpacity>
           </View>
         </ScrollView>
@@ -244,18 +246,18 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#131313', // bg-surface-dim = #131313
+    backgroundColor: '#131313',
     position: 'relative',
     overflow: 'hidden',
   },
   keyboardView: {
     flex: 1,
-    zIndex: 10, // Main content layer
+    zIndex: 10,
   },
   scrollContent: {
     flexGrow: 1,
     justifyContent: 'center',
-    paddingHorizontal: 20, // p-container-padding-mobile
+    paddingHorizontal: 20,
     paddingVertical: 32,
   },
   topGlow: {
@@ -265,8 +267,8 @@ const styles = StyleSheet.create({
     width: '75%',
     aspectRatio: 1,
     borderRadius: 9999,
-    backgroundColor: '#abc7ff', // bg-secondary = #abc7ff
-    opacity: 0.05, // opacity-5
+    backgroundColor: '#abc7ff',
+    opacity: 0.05,
     zIndex: 1,
   },
   bottomGlow: {
@@ -276,12 +278,12 @@ const styles = StyleSheet.create({
     width: '60%',
     aspectRatio: 1,
     borderRadius: 9999,
-    backgroundColor: '#ffffff', // bg-primary = #ffffff
-    opacity: 0.05, // opacity-5
+    backgroundColor: '#ffffff',
+    opacity: 0.05,
     zIndex: 1,
   },
   screenFooter: {
-    marginTop: 32, // mt-8 = 32px
+    marginTop: 32,
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
@@ -289,7 +291,7 @@ const styles = StyleSheet.create({
   footerText: {
     fontFamily: 'Inter',
     fontSize: 14,
-    color: '#c4c7c8', // text-on-surface-variant = #c4c7c8
+    color: '#c4c7c8',
   },
   footerLinkContainer: {
     marginLeft: 8,
@@ -297,8 +299,8 @@ const styles = StyleSheet.create({
   footerLinkText: {
     fontFamily: 'Inter',
     fontSize: 14,
-    fontWeight: '600', // font-medium
-    color: '#ffffff', // text-primary = #ffffff
+    fontWeight: '600',
+    color: '#ffffff',
     textDecorationLine: 'underline',
   },
 });

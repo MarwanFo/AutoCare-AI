@@ -83,6 +83,18 @@ public class UserComponent extends BaseEntity {
     @Column(name = "estimated_remaining_life")
     private Integer estimatedRemainingLife;
 
+    @Column(name = "expected_lifespan_mileage")
+    private Integer expectedLifespanMileage;
+
+    @Column(name = "expected_lifespan_months")
+    private Integer expectedLifespanMonths;
+
+    @Column(name = "remaining_mileage")
+    private Integer remainingMileage;
+
+    @Column(name = "remaining_days")
+    private Integer remainingDays;
+
     @Column(name = "installation_mileage")
     private Integer installationMileage;
 

@@ -29,8 +29,8 @@
     citecolor=blue!70!black,
     urlcolor=blue!70!black,
     pdftitle={AutoCare AI - Cahier des Charges Version 3.0},
-    pdfauthor={Équipe AutoCare AI},
-    pdfsubject={Projet de Fin d'Études - Spécifications Techniques et Fonctionnelles}]{hyperref}
+    pdfauthor={Equipe AutoCare AI},
+    pdfsubject={Projet de Fin d'Etudes - Specifications Fonctionnelles et Techniques}]{hyperref}
 
 % =============================================================================
 % PALETTE DE COULEURS PROFESSIONNELLE
@@ -67,13 +67,13 @@
 \pagestyle{fancy}
 \fancyhf{}
 \fancyhead[L]{\small\color{gray}\textit{AutoCare AI — Cahier des Charges v3.0}}
-\fancyhead[R]{\small\color{gray}\textit{Spécifications Architecturale \& IA}}
+\fancyhead[R]{\small\color{gray}\textit{Specifications Fonctionnelles \& Techniques}}
 \fancyfoot[C]{\thepage}
 \renewcommand{\headrulewidth}{0.4pt}
 \renewcommand{\footrulewidth}{0.4pt}
 
 % =============================================================================
-% TCOLORBOX & LISTINGS CONFIGURATION
+% TCOLORBOX CONFIGURATION
 % =============================================================================
 \newtcolorbox{infoBox}[1][]{
   colback=lightGray,
@@ -95,27 +95,6 @@
   boxrule=0.8pt
 }
 
-\lstset{
-  language=Java,
-  basicstyle=\ttfamily\small,
-  keywordstyle=\color{primaryBlue}\bfseries,
-  stringstyle=\color{codeGreen},
-  commentstyle=\color{gray}\italic,
-  numbers=left,
-  numberstyle=\tiny\color{gray},
-  stepnumber=1,
-  numbersep=8pt,
-  backgroundcolor=\color{lightGray},
-  showspaces=false,
-  showstringspaces=false,
-  frame=single,
-  framerule=0.5pt,
-  rulecolor=\color{borderGray},
-  tabsize=2,
-  captionpos=b,
-  breaklines=true
-}
-
 % =============================================================================
 % DEBUT DU DOCUMENT
 % =============================================================================
@@ -133,33 +112,34 @@
     
     \vspace{0.5cm}
     {\Huge \bfseries \color{white} AutoCare AI} \\[0.4cm]
-    {\Large \color{accentBlue} Plateforme Intelligente de Gestion de Véhicules \& Jumeau Numérique} \\[2.5cm]
+    {\Large \color{accentBlue} Cahier des Charges Fonctionnel et Technique} \\[2.5cm]
     
     \begin{tcolorbox}[colback=white,colframe=primaryBlue,arc=4mm,boxrule=1.5pt,halign=center]
         \vspace{0.3cm}
         {\Huge \bfseries \color{primaryBlue} CAHIER DES CHARGES} \\[0.3cm]
-        {\Large \bfseries \color{secondaryBlue} Spécifications Fonctionnelles, Techniques \& IA} \\[0.2cm]
-        {\small \color{darkGray} Version 3.0 — Implémentation Effective \& Architecture Réelle}
+        {\Large \bfseries \color{secondaryBlue} Version 3.0} \\[0.2cm]
+        {\small \color{darkGray} Projet de Fin d'Etudes (PFE)}
         \vspace{0.3cm}
     \end{tcolorbox}
     
     \vfill
     
     \begin{minipage}{0.48\textwidth}
-        \begin{techBox}[Informations du Projet]
-            \textbf{Projet :} Projet de Fin d'Études (PFE) \\
-            \textbf{Domaine :} Automotive SaaS / IA Générative \\
-            \textbf{État :} Version 3.0 (Production-Ready) \\
-            \textbf{Date :} Juillet 2026
+        \begin{techBox}[Informations Generales]
+            \textbf{Auteur :} Etudiant PFE \\
+            \textbf{Projet :} AutoCare AI \\
+            \textbf{Date :} Juillet 2026 \\
+            \textbf{Statut :} Document de Ref\'erence v3.0
         \end{techBox}
     \end{minipage}
     \hfill
     \begin{minipage}{0.48\textwidth}
-        \begin{techBox}[Pile Technologique Majeure]
+        \begin{techBox}[Technologies Cibles]
             \textbf{Backend :} Spring Boot 3 (Java 21) \\
             \textbf{Mobile :} React Native / Expo (TS) \\
-            \textbf{Admin Web :} React 18 / Tailwind CSS \\
-            \textbf{Moteur IA :} Google Gemini API
+            \textbf{Admin Web :} React / Tailwind CSS \\
+            \textbf{Base de Donnees :} PostgreSQL \\
+            \textbf{Intelligence Artificielle :} Google Gemini
         \end{techBox}
     \end{minipage}
     
@@ -167,7 +147,7 @@
     
     \begin{center}
         \small \color{gray}
-        Document de référence d'architecture logicielle et de spécifications du système AutoCare AI.
+        Ce document definit les besoins, les fonctionnalites, les contraintes techniques et le perimetre du projet AutoCare AI dans le cadre d'un Projet de Fin d'Etudes.
     \end{center}
 \end{titlepage}
 
@@ -179,348 +159,403 @@
 \newpage
 
 % =============================================================================
-% CHAPITRE 1 : CONTEXTE ET PRESENTATION GENERALE
+% CHAPITRE 1 : INTRODUCTION ET GLOSSAIRE
 % =============================================================================
-\chapter{Contexte et Présentation Générale}
+\chapter{Introduction et Glossaire}
 
-\section{Contexte du Projet}
-L’entretien automobile est une composante critique pour la sécurité routière, l'efficience énergétique et la préservation de la valeur patrimoniale d'un véhicule. Cependant, la gestion traditionnelle du suivi technique souffre d'un manque de centralisation persistant :
-\begin{itemize}
-    \item \textbf{Fragmentation des données :} Factures papier égarées, suivis manuels incomplets ou carnets d'entretien perdus.
-    \item \textbf{Complexité technique :} Difficulté pour l'automobiliste moyen à comprendre les fréquences de remplacement des pièces d'usure (filtres, bougies, courroies, fluides).
-    \item \textbf{Réactivité au lieu de la proactivité :} Interventions souvent réalisées après l'apparition d'une panne sévère, engendrant des surcoûts majeurs.
+\section{Introduction}
+Le present document constitue le cahier des charges fonctionnel et technique du projet \textbf{AutoCare AI}. Ce projet s'inscrit dans le cadre d'un Projet de Fin d'Etudes (PFE) et vise a concevoir et developper une solution logicielle pour optimiser et automatiser le suivi de maintenance des vehicules. A travers une application mobile destinee aux conducteurs et une console web dediee aux administrateurs, le systeme centralise les donnees techniques et modelise l'etat d'usure des pieces sous la forme d'un profil numerique de suivi, avec l'appui de l'intelligence artificielle pour la structuration initiale des donnees constructeurs.
+
+\section{Glossaire}
+\begin{description}
+    \item[Jumeau Numerique (Digital Twin)] : Representation virtuelle et structuree d'un vehicule physique au sein de l'application, modelisant son etat actuel, ses specifications et son calendrier de maintenance.
+    \item[Composant (Piece)] : Element mecanique ou consommable du vehicule (ex. huile moteur, plaquettes de frein, batterie) suivi individuellement en termes d'usure ou d'echeance.
+    \item[Onboarding] : Processus d'inscription et de configuration initiale du profil d'un utilisateur ou de son vehicule dans l'application.
+    \item[Filtre d'usure] : Algorithme ou regle permettant d'estimer la degradation ou le besoin de maintenance d'une piece en fonction du temps ecoule ou des kilometres parcourus.
+\end{description}
+
+\section{Acronymes}
+\begin{itemize}[label=\textbullet]
+    \item \textbf{API} : Application Programming Interface
+    \item \textbf{JWT} : JSON Web Token
+    \item \textbf{REST} : Representational State Transfer
+    \item \textbf{UI / UX} : User Interface / User Experience
+    \item \textbf{UML} : Unified Modeling Language
+    \item \textbf{SaaS} : Software as a Service
+    \item \textbf{PFE} : Projet de Fin d'Etudes
 \end{itemize}
 
-L'émergence des technologies d'Intelligence Artificielle générative et de modélisation orientée \textit{Jumeau Numérique} (Digital Twin) offre une opportunité technologique majeure pour métamorphoser la maintenance automobile en un système prédictif, structuré et conversationnel.
+% =============================================================================
+% CHAPITRE 2 : ANALYSE DU BESOIN ET PROBLEMATIQUE
+% =============================================================================
+\chapter{Analyse du Besoin et Problematique}
 
-\section{Présentation d'AutoCare AI}
-\textbf{AutoCare AI} se positionne comme une plateforme SaaS (\textit{Software as a Service}) multi-plateforme (Mobile \& Web Admin) dédiée au suivi automobile intelligent. Elle permet de :
+\section{Pourquoi ? (Le besoin)}
+L'entretien regulier d'un vehicule est indispensable pour assurer la securite des passagers, reduire la consommation de carburant et eviter les pannes majeures. Pourtant, de nombreux conducteurs ne disposent pas d'un suivi clair des interventions necessaires ou effectuees. Les informations sont eparpillees dans des factures physiques, des carnets d'entretien papier souvent egarés, ou reposent sur des souvenirs approximatifs.
+
+\section{Pour qui ? (Les cibles)}
+La solution s'adresse a deux categories distinctes d'utilisateurs :
 \begin{enumerate}
-    \item \textbf{Instancier un Jumeau Numérique (Digital Twin) :} Générer automatiquement une représentation virtuelle complète du véhicule comportant sa cartographie mécanique (plus de 15 composants surveillés), son calendrier constructeur et ses spécifications techniques.
-    \item \textbf{Assister l'utilisateur par l'IA :} Exploiter la puissance de l'API Google Gemini via un prompt hautement structuré garantissant l'extraction exacte des pièces et préconisations constructeurs.
-    \item \textbf{Offrir une console d'administration décisionnelle :} Permettre aux administrateurs de piloter les utilisateurs, le catalogue constructeur (165+ marques, 1200+ modèles) et les files d'attente d'analyse IA.
+    \item \textbf{Les conducteurs particuliers (utilisateurs mobiles)} qui souhaitent simplifier et fiabiliser la gestion de leur(s) vehicule(s), conserver un historique d'entretien coherent et recevoir des alertes personnalisees.
+    \item \textbf{Les gestionnaires de la plateforme (administrateurs web)} chargeux de superviser les comptes utilisateurs, de valider et d'enrichir le catalogue des marques et modeles de vehicules, et de suivre les files d'attente d'analyse de donnees.
 \end{enumerate}
 
-\begin{infoBox}[Valeur Ajoutée Majeure]
-AutoCare AI transforme des données automobiles brutes et éparpillées en un profil structuré et synchrone, réduisant jusqu'à 30\% les pannes évitables grâce à la sensibilisation proactive de l'utilisateur.
+\section{Quel probleme ? (La problematique)}
+La gestion classique de la maintenance automobile pose plusieurs problemes majeurs :
+\begin{itemize}[label=\textbullet]
+    \item \textbf{L'absence de proactivite} : Les conducteurs attendent souvent la panne ou l'allumage d'un voyant avant d'agir.
+    \item \textbf{La perte de valeur a la revente} : L'incapacite a prouver le suivi regulier du vehicule deprecie sa valeur sur le marche de l'occasion.
+    \item \textbf{La difficulte d'identification des pieces} : Les references constructeurs (OEM) et les specifications des fluides sont complexes pour les non-inities.
+\end{itemize}
+
+\section{Quelle solution ?}
+\textbf{AutoCare AI} repond a ces defis en proposant une plateforme integree :
+\begin{itemize}[label=\textbullet]
+    \item \textbf{L'automatisation de la creation du profil vehicule} : A partir d'un assistant en ligne sur mobile, le systeme s'appuie sur un catalogue de reference (166+ marques, 1270+ modeles) et interroge un modele d'intelligence artificielle pour generer immediatement une cartographie de maintenance coherente (15+ composants standardises, intervalles et guides).
+    \item \textbf{La centralisation documentaire} : Un espace dedie pour stocker et associer les guides constructeurs et factures d'entretien.
+    \item \textbf{Un tableau de bord intuitif} : Permettant de visualiser en un coup d'oeil la sante mecanique du vehicule.
+\end{itemize}
+
+% =============================================================================
+% CHAPITRE 3 : UTILISATEURS, ROLES ET CAS D'UTILISATION
+% =============================================================================
+\chapter{Utilisateurs, Roles et Cas d'Utilisation}
+
+\section{Acteurs et Roles}
+Le systeme distingue deux roles principaux disposant de droits d'acces specifiques :
+\begin{itemize}[label=\textbullet]
+    \item \textbf{Conducteur / Utilisateur Mobile} : Il gere son propre profil, ajoute ses vehicules, suit l'usure de ses pieces de rechange, declare ses interventions et telecharge ses documents.
+    \item \textbf{Administrateur Web} : Il gere les utilisateurs et les vehicules, administre la base de reference des marques/modeles et suit l'execution des traitements de fonds du systeme.
+\end{itemize}
+
+\section{Diagramme des Cas d'Utilisation}
+Le diagramme UML ci-dessous decrit les interactions des acteurs avec le systeme :
+
+\begin{figure}[h!]
+\centering
+\begin{tikzpicture}[scale=0.8, every node/.style={transform shape}, >=Stealth]
+    % Acteurs
+    \node [circle, draw, minimum size=1cm, fill=lightGray] (user) at (-4, 2) {};
+    \draw (user.south) -- ++(0,-1.2) coordinate (body) -- ++(-0.6,-1) -- ++(0.6,1) -- ++(0.6,-1);
+    \draw (body) -- ++(0,0.8) coordinate (arms) -- ++(-0.8,0.2) -- ++(0.8,-0.2) -- ++(0.8,0.2);
+    \node [below=1.5cm of user, align=center] {Utilisateur Mobile\\(Conducteur)};
+
+    \node [circle, draw, minimum size=1cm, fill=lightGray] (admin) at (8, 2) {};
+    \draw (admin.south) -- ++(0,-1.2) coordinate (body2) -- ++(-0.6,-1) -- ++(0.6,1) -- ++(0.6,-1);
+    \draw (body2) -- ++(0,0.8) coordinate (arms2) -- ++(-0.8,0.2) -- ++(0.8,-0.2) -- ++(0.8,0.2);
+    \node [below=1.5cm of admin, align=center] {Administrateur Web};
+
+    % System boundary
+    \draw[borderGray, thick] (-1.5, -4) rectangle (5.5, 7.5);
+    \node[anchor=north west] at (-1.3, 7.3) {\textbf{Systeme AutoCare AI}};
+
+    % Cas d'utilisation
+    \node[draw, ellipse, fill=white, minimum width=2.5cm, align=center] (uc1) at (2, 6) {S'authentifier};
+    \node[draw, ellipse, fill=white, minimum width=2.5cm, align=center] (uc2) at (2, 4) {Ajouter / Gerer\\un vehicule};
+    \node[draw, ellipse, fill=white, minimum width=2.5cm, align=center] (uc3) at (2, 1.5) {Consulter le\\Jumeau Numerique};
+    \node[draw, ellipse, fill=white, minimum width=2.5cm, align=center] (uc4) at (2, -1) {Declarer une\\intervention};
+    \node[draw, ellipse, fill=white, minimum width=2.5cm, align=center] (uc5) at (2, -3) {Gerer le catalogue\\constructeur};
+
+    % Relations User
+    \draw[->] (-2.2, 1.5) -- (uc1);
+    \draw[->] (-2.2, 1.3) -- (uc2);
+    \draw[->] (-2.2, 1.1) -- (uc3);
+    \draw[->] (-2.2, 0.9) -- (uc4);
+
+    % Relations Admin
+    \draw[->] (6.2, 1.5) -- (uc1);
+    \draw[->] (6.2, 1.3) -- (uc2);
+    \draw[->] (6.2, 0.9) -- (uc5);
+\end{tikzpicture}
+\caption{Diagramme UML de Cas d'Utilisation Global}
+\label{fig:usecase}
+\end{figure}
+
+\section{User Stories Principales}
+\begin{infoBox}[US-01 : Ajout rapide de vehicule]
+    \textbf{En tant que} conducteur, \\
+    \textbf{Je veux} pouvoir selectionner la marque, le modele et l'annee de mon vehicule via un formulaire guide, \\
+    \textbf{Afin de} laisser le systeme generer automatiquement mon profil d'entretien numerique sans avoir a saisir manuellement toutes les pieces et preconisations.
+\end{infoBox}
+
+\begin{infoBox}[US-02 : Consultation de l'etat des pieces]
+    \textbf{En tant que} conducteur, \\
+    \textbf{Je veux} voir le pourcentage d'etat de mes bougies, huiles et plaquettes de frein, \\
+    \textbf{Afin de} planifier mon prochain passage au garage avant que les pieces ne s'abiment severement.
+\end{infoBox}
+
+\begin{infoBox}[US-03 : Gestion administrative]
+    \textbf{En tant qu'}administrateur, \\
+    \textbf{Je veux} pouvoir editer ou ajouter des marques et modeles de vehicules dans la base de donnees globale, \\
+    \textbf{Afin de} maintenir la base de donnees a jour avec les nouveaux modeles sortant sur le marche.
 \end{infoBox}
 
 % =============================================================================
-% CHAPITRE 2 : OBJECTIFS ET PROBLEMATIQUE
+% CHAPITRE 4 : SPECIFICATIONS FONCTIONNELLES
 % =============================================================================
-\chapter{Objectifs et Problématique}
+\chapter{Specifications Fonctionnelles}
 
-\section{Problématique Métier}
-Les propriétaires de véhicules ainsi que les gestionnaires de flottes sont confrontés aux défis résumés dans le Tableau~\ref{tab:problematiques}.
+\section{Matrice des Exigences Fonctionnelles (EF)}
+Les exigences fonctionnelles majeures de la plateforme sont synthetisees dans le Tableau~\ref{tab:exigences_fonc}.
 
-\begin{table}[h!]
-\centering
-\caption{Matrice des Problématiques et Impacts Métier}
-\label{tab:problematiques}
-\vspace{0.2cm}
-\begin{tabular}{@{}p{4cm}p{5.5cm}p{5.5cm}@{}}
+\begin{longtable}{@{}l p{6cm} c p{6cm}@{}}
+\caption{Matrice des Exigences Fonctionnelles} \label{tab:exigences_fonc} \\
 \toprule
-\textbf{Problématique} & \textbf{Cause Sous-jacente} & \textbf{Impact Métier / Financier} \\ \midrule
-Oubli des échéances & Absence de rappels automatisés & Panne mécanique grave, perte de garantie \\
-Perte d'historique & Supports papier non pérennes & Dépréciation de 15\% à 25\% à la revente \\
-Part-number inconnu & Complexité des références OEM & Achat de pièces incompatibles \\
-Budget non maîtrisé & Suivi financier inexistant & Surcoût d'entretien imprévu \\ \bottomrule
-\end{tabular}
-\end{table}
+\textbf{Code} & \textbf{Description de l'Exigence} & \textbf{Priorite} & \textbf{Module / Cible} \\ \midrule
+\endhead
+\toprule
+\endfoot
+\bottomrule
+\endlastfoot
+EF-AUTH-01 & Inscription et connexion de l'utilisateur avec validation d'adresse email. & Elevee & Securite (Mobile \& Web) \\
+EF-AUTH-02 & Gestion de session sécurisée (Authentification double-jeton : Acces et Refresh). & Elevee & Securite (Mobile \& Web) \\
+EF-VEH-01 & Assistant interactif d'onboarding de vehicules en 5 etapes clés. & Elevee & Gestion Vehicule (Mobile) \\
+EF-VEH-02 & Recherche dynamique par marque, modele, annee et finitions constructeur. & Elevee & Catalogue (Mobile \& Web) \\
+EF-TWIN-01 & Generation asynchrone du Jumeau Numerique incluant au moins 15 composants cles. & Elevee & Intelligence Artificielle \\
+EF-TWIN-02 & Affichage de l'etat d'usure des pieces avec bareme de couleurs et barres de progression. & Elevee & Jumeau Numerique (Mobile) \\
+EF-DOC-01 & Generation automatique de 5 documents PDF de reference constructeurs. & Moyenne & Gestion Documentaire (Mobile) \\
+EF-INT-01 & Calendrier et fiches de periodicite pour 8 intervalles de maintenance standards. & Elevee & Intervalles (Mobile) \\
+EF-ADM-01 & Consultation de l'activite de la plateforme (comptes, vehicules, etats des tâches IA). & Elevee & Backoffice (Web Admin) \\
+EF-ADM-02 & Gestion des sessions actives et invalidation a distance par l'administrateur. & Moyenne & Backoffice (Web Admin) \\
+\end{longtable}
 
-\section{Objectifs du Système (Version 3.0)}
-La Version 3.0 du système AutoCare AI répond à ces enjeux par la réalisation des objectifs suivants :
-\begin{itemize}
-    \item \textbf{Génération de Jumeau Numérique en temps réel :} Générer en moins de 10 secondes une modélisation mécanique et documentaire complète via l'IA.
-    \item \textbf{Sécurisation robuste des données :} Authentification basée sur les standards JWT (Access \& Refresh Tokens) avec gestion stricte des sessions et révocation.
-    \item \textbf{Gestion asynchrone des traitements IA :} Mise en place d'une file d'attente d'exécutions (\textit{Background Job Queue}) pour prévenir les blocages HTTP et assurer la scalabilité.
-    \item \textbf{Multi-plateforme cohérente :} Application mobile intuitive pour le conducteur et portail web réactif pour les administrateurs.
-\end{itemize}
-
-% =============================================================================
-% CHAPITRE 3 : UTILISATEURS, ROLES ET SECURITE
-% =============================================================================
-\chapter{Utilisateurs, Rôles et Modèle de Sécurité}
-
-\section{Acteurs du Système}
-Le système distingue deux catégories d'acteurs principales associées à des permissions fines (\textit{Role-Based Access Control - RBAC}) :
-
-\begin{subsection}{Conducteur / Utilisateur Mobile (ROLE\_USER)}
-\begin{itemize}
-    \item Inscription, vérification d'email et gestion du profil.
-    \item Création et gestion de son garage virtuel (véhicules neufs ou d'occasion).
-    \item Consultation du Jumeau Numérique : état des pièces, kilométrage et carnets d'entretien.
-    \item Consultation des documents constructeurs générés par l'IA.
-\end{itemize}
-\end{subsection}
-
-\begin{subsection}{Administrateur Système (ROLE\_ADMIN)}
-\begin{itemize}
-    \item Gestion des comptes utilisateurs (activation, suspension, réinitialisation).
-    \item Supervision du catalogue constructeur (marques, modèles, générations).
-    \item Consultation des journaux d'audit (\textit{Audit Logs}) et supervision des jobs IA.
-    \item Gestion des sessions actives et révocation à distance.
-\end{itemize}
-\end{subsection}
-
-\section{Modèle de Sécurité et d'Authentification}
-Le sous-système de sécurité est articulé autour de Spring Security et du protocole JWT :
-\begin{figure}[h!]
-\centering
-\begin{tikzpicture}[node distance=1.5cm, auto, >=Stealth]
-    \node [draw, rectangle, fill=lightGray, rounded corners, minimum width=3cm, minimum height=1cm] (client) {Client (Mobile / Web)};
-    \node [draw, rectangle, fill=accentBlue!40, rounded corners, minimum width=3.5cm, minimum height=1cm, right=2.5cm of client] (filter) {JwtAuthenticationFilter};
-    \node [draw, rectangle, fill=primaryBlue, text=white, rounded corners, minimum width=3.5cm, minimum height=1cm, right=2.5cm of filter] (provider) {SecurityContext};
-
-    \draw [->, thick] (client) -- node[above] {\small Request + Bearer JWT} (filter);
-    \draw [->, thick] (filter) -- node[above] {\small Validate Token} (provider);
-\end{tikzpicture}
-\caption{Flux d'Authentification Sécurisé JWT}
-\end{figure}
-
-\begin{itemize}
-    \item \textbf{Access Token :} Durée de vie courte (15 minutes), signé via HMAC-SHA512.
-    \item \textbf{Refresh Token :} Durée de vie longue (7 jours), stocké de manière sécurisée et révocable en base de données.
-    \item \textbf{Chiffrement des mots de passe :} Algorithme BCrypt avec facteur de travail (\textit{strength}) de 10.
-\end{itemize}
-
-% =============================================================================
-% CHAPITRE 4 : SPECIFICATIONS FONCTIONNELLES DETAILLES
-% =============================================================================
-\chapter{Spécifications Fonctionnelles Détaillées}
-
-\section{Module Authentification \& Gestion des Sessions}
-\begin{itemize}
-    \item \textbf{F-AUTH-01 :} Inscription avec validation du format email et complexité du mot de passe.
-    \item \textbf{F-AUTH-02 :} Double-jeton d'authentification (Access Token \& Refresh Token).
-    \item \textbf{F-AUTH-03 :} Réinitialisation du mot de passe via jeton sécurisé expirable envoyé par email.
-    \item \textbf{F-AUTH-04 :} Traçabilité des sessions utilisateur (IP, User-Agent, Date de dernière activité).
-\end{itemize}
-
-\section{Module Véhicules \& Assistant Onboarding}
-\begin{itemize}
-    \item \textbf{F-VEH-01 :} Assistant d'intégration (\textit{Onboarding Wizard}) en 5 étapes (Marque, Modèle, Année, Finition, Conditions d'achat).
-    \item \textbf{F-VEH-02 :} Sélection dynamique basée sur un catalogue pré-chargé de 165+ marques et 1200+ modèles.
-    \item \textbf{F-VEH-03 :} Prise en compte du statut \textit{BRAND\_NEW} (génération complète à 100\% de santé) vs \textit{USED} (onboarding étalonné).
-\end{itemize}
-
-\section{Module Jumeau Numérique \& Composants}
-\begin{itemize}
-    \item \textbf{F-TWIN-01 :} Génération automatique de 15+ composants standardisés (Huile moteur, Filtre à air, Bougies, Disques de frein, Batterie AGM, Essuie-glaces, etc.).
-    \item \textbf{F-TWIN-02 :} Calcul de la santé dynamique (\textit{Health Score}) de chaque composant en pourcentage.
-    \item \textbf{F-TWIN-03 :} Association des numéros de pièces OEM d'origine et des spécifications fluides/viscosités.
-    \item \textbf{F-TWIN-04 :} Génération et mise à disposition des documents techniques (Manuel propriétaire, Carnet de garantie, Guide d'urgence).
-\end{itemize}
-
-\section{Module Web Admin}
-\begin{itemize}
-    \item \textbf{F-ADM-01 :} Tableau de bord synthétique affichant le volume d'utilisateurs, de véhicules et l'état des jobs IA.
-    \item \textbf{F-ADM-02 :} Management du catalogue constructeur (ajout/édition de marques et logos).
-    \item \textbf{F-ADM-03 :} Invalidation des sessions suspectes et supervision des privilèges.
-\end{itemize}
-
-% =============================================================================
-% CHAPITRE 5 : INTÉGRATION IA & CONCEPT DE JUMEAU NUMÉRIQUE
-% =============================================================================
-\chapter{Intégration IA \& Concept de Jumeau Numérique}
-
-\section{Moteur d'Intelligence Artificielle Google Gemini}
-Le moteur IA repose sur l'intégration directe de l'API REST Google Gemini (via `GeminiClientImpl`). Afin d'éviter toute dérive dans les réponses générées (\textit{hallucinations}), le système utilise un générateur de prompt strict (`GeminiPromptBuilderImpl`) imposant un schéma JSON normé.
-
-\begin{subsection}{Structure du JSON Imposé à l'IA}
-Le prompt force l'IA à retourner la structure suivante :
-\begin{lstlisting}[language=json,caption={Schéma JSON Imposé à l'API Gemini}]
-{
-  "transmission": "AUTOMATIC",
-  "fuelType": "GASOLINE",
-  "specifications": {
-    "engine_oil_capacity": "4.8 quarts",
-    "recommended_fuel": "Unleaded 87"
-  },
-  "components": [
-    {
-      "category": "ENGINE",
-      "name": "Engine Timing Chain",
-      "standardPartNumber": "OEM-TC-77291",
-      "standardSpecifications": "Heavy Duty Steel Link"
-    }
-  ],
-  "intervals": [
-    {
-      "title": "Engine Oil Change",
-      "intervalMileage": 10000,
-      "intervalMonths": 12
-    }
-  ],
-  "documents": [
-    {
-      "title": "Owner's Manual",
-      "notes": "Official operator instruction guide"
-    }
-  ]
-}
-\end{lstlisting}
-\end{subsection}
-
-\section{Système de File d'Attente Asynchrone (Job Queue System)}
-Afin de garantir une expérience utilisateur fluide et de respecter le temps de réponse HTTP, la génération du Jumeau Numérique est exécutée en arrière-plan :
-\begin{enumerate}
-    \item Le client mobile soumet la demande de création de véhicule.
-    \item Le backend enregistre un job (`JobEntity`) avec le statut `PENDING` et retourne un ID de suivi (`jobId`).
-    \item Le service asynchrone invoque l'API Gemini, valide le JSON via `GeminiResponseValidatorImpl`, puis instancie les entités en base de données.
-    \item Le mobile consulte l'état du job via un polling optimisé (React Query) jusqu'au statut `COMPLETED`.
+\section{Regles de Gestion (RG)}
+\begin{enumerate}[label=\textbf{RG-\arabic*}]
+    \item \textbf{RG-Email-Unique} : Deux comptes utilisateurs ne peuvent pas posseder la meme adresse email.
+    \item \textbf{RG-Status-Onboarding} : Un vehicule en cours de generation par l'IA doit posseder le statut transitoire \textit{PENDING} et ne peut pas etre consulte tant que sa cartographie technique n'est pas complete.
+    \item \textbf{RG-Age-Vehicule} : L'annee de fabrication saisie pour un vehicule doit etre comprise entre 1900 et l'annee en cours majorée d'un an.
+    \item \textbf{RG-Validite-Jeton} : Un jeton d'acces expire doit etre automatiquement renouvele a l'aide du jeton de rafraichissement si ce dernier est toujours valide en base de donnees.
 \end{enumerate}
 
-% =============================================================================
-% CHAPITRE 6 : ARCHITECTURE TECHNIQUE & DESIGN PATTERNS
-% =============================================================================
-\chapter{Architecture Technique \& Design Patterns}
-
-\section{Vue d'Ensemble de l'Architecture}
-L'architecture globale d'AutoCare AI respecte les principes de la \textit{Clean Architecture} et du découpage en couches (\textit{Layered Architecture}).
+\section{Diagramme de Sequence : Generation du Jumeau Numerique}
+Le diagramme ci-dessous illustre l'echange lors de la creation d'un vehicule :
 
 \begin{figure}[h!]
 \centering
-\begin{tikzpicture}[node distance=1.2cm, auto, >=Stealth]
-    % Boxes
-    \node [draw, rectangle, fill=lightGray, rounded corners, minimum width=10cm, minimum height=1cm] (client) {\textbf{Couche Présentation :} React Native (Mobile) / React (Web Admin)};
-    \node [draw, rectangle, fill=accentBlue!30, rounded corners, minimum width=10cm, minimum height=1cm, below=of client] (api) {\textbf{Couche REST API :} Controllers (Spring MVC, Swagger / OpenAPI)};
-    \node [draw, rectangle, fill=secondaryBlue!30, rounded corners, minimum width=10cm, minimum height=1cm, below=of api] (service) {\textbf{Couche Métier :} Services, Gemini Engine, Job Queue, Mappers};
-    \node [draw, rectangle, fill=primaryBlue!30, rounded corners, minimum width=10cm, minimum height=1cm, below=of service] (repo) {\textbf{Couche Accès Données :} Repositories (Spring Data JPA, Hibernate)};
-    \node [draw, rectangle, fill=darkGray, text=white, rounded corners, minimum width=10cm, minimum height=1cm, below=of repo] (db) {\textbf{Stockage \& IA Externalisée :} PostgreSQL / Google Gemini API};
+\begin{tikzpicture}[scale=0.8, every node/.style={transform shape}, >=Stealth]
+    % Lifelines
+    \draw[thick] (0, 0) -- (0, -7) node[below] {Utilisateur};
+    \draw[thick] (3, 0) -- (3, -7) node[below] {App Mobile};
+    \draw[thick] (6, 0) -- (6, -7) node[below] {REST API};
+    \draw[thick] (9, 0) -- (9, -7) node[below] {Background Job};
+    \draw[thick] (12, 0) -- (12, -7) node[below] {Gemini API};
 
-    % Connectors
-    \draw [<->, thick] (client) -- (api);
-    \draw [<->, thick] (api) -- (service);
-    \draw [<->, thick] (service) -- (repo);
-    \draw [<->, thick] (repo) -- (db);
+    % Steps
+    \draw[->] (0, -1) -- (3, -1) node[midway, above] {1. Renseigne Vehicule};
+    \draw[->] (3, -2) -- (6, -2) node[midway, above] {2. POST /vehicles};
+    \draw[->] (6, -3) -- (9, -3) node[midway, above] {3. Soumet Job (Asynchrone)};
+    \draw[->] (6, -3.5) -- (3, -3.5) node[midway, above] {4. Retourne Job ID};
+    \draw[->] (9, -4.5) -- (12, -4.5) node[midway, above] {5. Analyse (Prompt structur\'e)};
+    \draw[<-] (9, -5.5) -- (12, -5.5) node[midway, above] {6. Reponse JSON};
+    \draw[->] (9, -6.5) -- (6, -6.5) node[midway, above] {7. Sauvegarde & Cloture Job};
 \end{tikzpicture}
-\caption{Architecture Logicielle en Couches d'AutoCare AI}
+\caption{Diagramme de Sequence Simplifie de la Generation du Jumeau Numerique}
+\label{fig:sequence}
 \end{figure}
 
-\section{Stack Technique Réelle (Version 3.0)}
-\begin{table}[h!]
-\centering
-\caption{Technologies Réelles et Inchangées du Projet}
-\label{tab:stack}
-\vspace{0.2cm}
-\begin{tabular}{@{}p{3.5cm}p{5.5cm}p{5.5cm}@{}}
-\toprule
-\textbf{Composant} & \textbf{Technologie} & \textbf{Rôle / Usage} \\ \midrule
-\textbf{Backend Framework} & Java 21 / Spring Boot 3.5 & Core REST API, Sécurité, Transactions \\
-\textbf{Database} & PostgreSQL 18 & Base relationnelle principale \\
-\textbf{Database Migration} & Flyway & Migration de schéma versionnée (V1-V12) \\
-\textbf{Mobile Client} & React Native / Expo 57 & Application hybride mobile \\
-\textbf{Admin Client} & React 18 / Tailwind CSS & Console Web Administrateur \\
-\textbf{Data Fetching} & TanStack Query (React Query) & Caching et état asynchrone côté client \\
-\textbf{Intelligence Artificielle} & Google Gemini REST API & Génération structurée du Jumeau Numérique \\ \bottomrule
-\end{tabular}
-\end{table}
+% =============================================================================
+% CHAPITRE 5 : SPECIFICATIONS TECHNIQUES ET ARCHITECTURE
+% =============================================================================
+\chapter{Specifications Techniques et Architecture}
 
-\section{Patrons de Conception (\textit{Design Patterns}) Appliqués}
-\begin{itemize}
-    \item \textbf{DTO / Mapper Pattern :} Structuration stricte des entrées/sorties via MapStruct pour prévenir le surexposition des entités JPA.
-    \item \textbf{Repository Pattern :} Abstraction totale de l'accès aux données grâce à Spring Data JPA.
-    \item \textbf{Factory \& Builder Patterns :} Construction dynamique des prompts complexes pour Gemini (`GeminiPromptBuilderImpl`).
-    \item \textbf{Global Exception Handler :} Centralisation de la gestion des erreurs HTTP via `@ControllerAdvice` et formats de réponse ProblemDetail (RFC 7807).
+\section{Contraintes Techniques}
+La plateforme doit respecter les architectures et technologies retenues pour le projet :
+\begin{itemize}[label=\textbullet]
+    \item \textbf{Backend} : Developpe en \textbf{Java 21} avec le framework \textbf{Spring Boot 3} et l'ecosysteme \textbf{Spring Security} pour la gestion de l'authentification et des roles.
+    \item \textbf{Mobile} : Developpe en \textbf{React Native} et \textbf{TypeScript} sous l'environnement \textbf{Expo}.
+    \item \textbf{Web Administrateur} : Construit en \textbf{React} avec le framework de style \textbf{Tailwind CSS}.
+    \item \textbf{Base de Donnees} : \textbf{PostgreSQL} avec gestion de l'evolution du schema par des scripts de migration versionnes.
+    \item \textbf{Intelligence Artificielle} : Int\'egration directe de l'API \textbf{Google Gemini} pour la generation de profils automobiles structures.
+\end{itemize}
+
+\section{Diagramme de Deploiement Physique}
+Le diagramme de deploiement UML de la Figure~\ref{fig:deploy} illustre la distribution physique des differents composants du systeme :
+
+\begin{figure}[h!]
+\centering
+\begin{tikzpicture}[scale=0.9, every node/.style={transform shape}, node distance=2.5cm, >=Stealth]
+    % Node client Mobile
+    \node[draw, rectangle, fill=lightGray!40, minimum width=3.5cm, minimum height=1.5cm, align=center] (mobileNode) {
+        \textbf{Terminal Mobile} \\
+        \small [Expo Client] \\
+        React Native App
+    };
+    
+    % Node client Web
+    \node[draw, rectangle, fill=lightGray!40, minimum width=3.5cm, minimum height=1.5cm, align=center, below=of mobileNode] (webNode) {
+        \textbf{Navigateur Client} \\
+        \small [Web Admin Console] \\
+        React / Tailwind
+    };
+
+    % Node serveur backend
+    \node[draw, rectangle, fill=accentBlue!30, minimum width=4cm, minimum height=2.2cm, align=center, right=3cm of mobileNode, yshift=-1cm] (backendNode) {
+        \textbf{Serveur d'Application} \\
+        \small [API Backend Node] \\
+        Spring Boot 3 (Java 21) \\
+        Spring Security / Job Engine
+    };
+
+    % Node Base de donnees
+    \node[draw, cylinder, fill=secondaryBlue!30, shape border rotate=90, minimum width=2.5cm, minimum height=2cm, align=center, right=3.5cm of backendNode] (dbNode) {
+        \textbf{Serveur BD} \\
+        PostgreSQL
+    };
+
+    % Cloud externalisé API Gemini
+    \node[draw, cloud, cloud puffs=11, fill=primaryBlue!20, minimum width=3cm, minimum height=1.8cm, align=center, below=2cm of dbNode] (geminiNode) {
+        \textbf{Service IA Externalis\'e} \\
+        Google Gemini API
+    };
+
+    % Liaisons
+    \draw[thick] (mobileNode) -- node[above, align=center] {\small REST/HTTPS \\ \small Port 8080} (backendNode);
+    \draw[thick] (webNode) -- node[below, align=center] {\small REST/HTTPS \\ \small Port 8080} (backendNode);
+    \draw[thick] (backendNode) -- node[above] {\small JDBC / SQL} (dbNode);
+    \draw[thick] (backendNode) -- node[left, align=center] {\small HTTP REST \\ \small JSON} (geminiNode);
+
+\end{tikzpicture}
+\caption{Diagramme de Deploiement du Systeme AutoCare AI}
+\label{fig:deploy}
+\end{figure}
+
+\section{Data Flow Diagram (DFD)}
+Le flux des donnees au sein du systeme s'articule comme suit :
+\begin{itemize}[label=\textbullet]
+    \item \textbf{Flux d'inscription} : Les informations d'authentification transitent depuis le client mobile ou web vers le controleur de securite, qui chiffre le mot de passe et l'enregistre en base de donnees. Un jeton JWT contenant les roles est retourne.
+    \item \textbf{Flux de creation de vehicule} : Les criteres saisis par l'utilisateur sont transmis au service backend, qui verifie si les references de marques et modeles existent dans la base locale. Le service envoie ensuite une requete formateee au modele d'IA. La reponse de ce dernier est verifiee syntaxiquement avant d'etre parseee et stockee dans les tables correspondantes.
 \end{itemize}
 
 % =============================================================================
-% CHAPITRE 7 : MODELLE DE DONNEES ET BASE DE DONNEES
+% CHAPITRE 6 : MODELE DE DONNEES ET BASE DE DONNEES
 % =============================================================================
-\chapter{Modèle de Données et Base de Données}
+\chapter{Modele de Donnees et Base de Donnees}
 
-\section{Structure Rérelationnelle}
-La base de données PostgreSQL d'AutoCare AI est intégralement normalisée. Le catalogue pré-chargé compte plus de **165 marques** et **1207 modèles**.
+\section{Diagramme de Classes Simplifie}
+Le modele conceptuel de donnees est illustre par le diagramme UML de la Figure~\ref{fig:class}.
 
 \begin{figure}[h!]
 \centering
-\begin{tikzpicture}[node distance=2.2cm, auto, >=Stealth]
-    \node [draw, rectangle, fill=lightGray, rounded corners, align=center] (user) {\textbf{users} \\ id, email, password\_hash, status};
-    \node [draw, rectangle, fill=accentBlue!30, rounded corners, align=center, right=of user] (vehicle) {\textbf{user\_vehicles} \\ id, user\_id, model\_id, vin, mileage};
-    \node [draw, rectangle, fill=secondaryBlue!30, rounded corners, align=center, right=of vehicle] (comp) {\textbf{user\_components} \\ id, vehicle\_id, name, category, health\_score};
-    \node [draw, rectangle, fill=primaryBlue!30, text=white, rounded corners, align=center, below=of vehicle] (doc) {\textbf{user\_documents} \\ id, vehicle\_id, title, url};
+\begin{tikzpicture}[scale=0.9, every node/.style={transform shape}, node distance=2cm, >=Stealth]
+    % Classe User
+    \node[draw, rectangle, fill=lightGray!40, minimum width=4.5cm, minimum height=2.2cm, align=left] (userClass) {
+        \textbf{User} \\
+        \hline
+        - id : Long \\
+        - email : String \\
+        - passwordHash : String \\
+        - status : String
+    };
 
-    \draw [->, thick] (user) -- node[above] {1:N} (vehicle);
-    \draw [->, thick] (vehicle) -- node[above] {1:N} (comp);
-    \draw [->, thick] (vehicle) -- node[left] {1:N} (doc);
+    % Classe Vehicle
+    \node[draw, rectangle, fill=accentBlue!20, minimum width=4.5cm, minimum height=2.2cm, align=left, right=3.5cm of userClass] (vehicleClass) {
+        \textbf{Vehicle} \\
+        \hline
+        - id : Long \\
+        - licensePlate : String \\
+        - purchaseCondition : String \\
+        - purchaseMileage : Integer \\
+        - currentMileage : Integer
+    };
+
+    % Classe Component
+    \node[draw, rectangle, fill=secondaryBlue!20, minimum width=4.5cm, minimum height=2.2cm, align=left, below=3cm of vehicleClass] (compClass) {
+        \textbf{Component} \\
+        \hline
+        - id : Long \\
+        - name : String \\
+        - category : String \\
+        - healthScore : Integer \\
+        - partNumber : String
+    };
+
+    % Relations
+    \draw[thick] (userClass) -- node[above, near start] {1} node[above, near end] {0..*} (vehicleClass);
+    \draw[thick] (vehicleClass) -- node[left, near start] {1} node[left, near end] {0..*} (compClass);
+
 \end{tikzpicture}
-\caption{Extrait du Schéma Entité-Association Clé}
+\caption{Diagramme de Classes Conceptuel (Entites Principales)}
+\label{fig:class}
 \end{figure}
 
-\section{Historique des Migrations Flyway (V1 à V12)}
-Le schéma de la base de données est versionné et appliqué automatiquement via Flyway :
+\section{Schema Relationnel et Migrations}
+Le schema de base de donnees est gere de maniere incrementale a l'aide de scripts Flyway. Les grandes etapes de l'evolution du schema sont :
+\begin{itemize}[label=\textbullet]
+    \item \textbf{Gestion des comptes} : Creation des tables des utilisateurs, rôles, sessions actives et historique de securite.
+    \item \textbf{Gestion des vehicules} : Creation de la table du catalogue des marques et modeles, de la table des vehicules lies aux conducteurs et de la table des jobs d'arriere-plan.
+    \item \textbf{Modellisation du Jumeau Numerique} : Table des composants (nom, categorie, numero de reference standard constructeur) et table des intervalles preconises.
+\end{itemize}
+
+% =============================================================================
+% CHAPITRE 7 : EXIGENCES NON-FONCTIONNELLES ET SECURITE
+% =============================================================================
+\chapter{Exigences Non-Fonctionnelles et Securite}
+
+\section{Exigences Non-Fonctionnelles (ENF)}
+Les exigences non-fonctionnelles definissent les standards de qualite du systeme. Elles sont detaillees dans le Tableau~\ref{tab:exigences_non_fonc}.
+
+\begin{table}[h!]
+\centering
+\caption{Matrice des Exigences Non-Fonctionnelles}
+\label{tab:exigences_non_fonc}
+\vspace{0.2cm}
+\begin{tabular}{@{}l p{6cm} c p{6cm}@{}}
+\toprule
+\textbf{Code} & \textbf{Description de l'Exigence} & \textbf{Priorite} & \textbf{Cible} \\ \midrule
+ENF-PERF-01 & Temps de reponse moyen des APIs REST inferieur a 200 ms hors requete vers l'IA. & Elevee & Performance du Backend \\
+ENF-DISP-01 & Taux de disponibilite de la plateforme superieur a 99\% en conditions normales. & Elevee & Infrastructure \\
+ENF-SEC-01 & Chiffrement systematique des mots de passe des utilisateurs en base de donnees. & Elevee & Securite des Donnees \\
+ENF-SEC-02 & Validation de la validite des jetons JWT a chaque requete privee. & Elevee & Securite des APIs \\
+ENF-UTIL-01 & Interface mobile ergonomique et responsive offrant un guidage clair de l'utilisateur. & Elevee & Ergonomie (UI/UX) \\
+ENF-CONF-01 & Isolation complete des donnees : un conducteur ne peut voir que ses vehicules. & Elevee & Securite des Donnees \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Securite et Confidentialite}
+\begin{itemize}[label=\textbullet]
+    \item \textbf{Chiffrement au repos} : Toutes les informations sensibles (telles que les mots de passe) sont cryptees en utilisant l'algorithme standard BCrypt avec un facteur de securite adapte.
+    \item \textbf{Securisation des echanges} : Les flux d'API utilisent exclusivement le protocole securise HTTPS. Les en-tetes CORS (Cross-Origin Resource Sharing) sont configures pour restreindre les acces non autorises.
+\end{itemize}
+
+% =============================================================================
+% CHAPITRE 8 : PLANIFICATION ET CRITERES D'ACCEPTATION
+% =============================================================================
+\chapter{Planification et Criteres d'Acceptation}
+
+\section{Livrables Attendus}
+Le projet doit fournir les livrables suivants a l'issue du stage :
 \begin{enumerate}
-    \item \textbf{V1 à V4 :} Schéma d'authentification initial, rôles, permissions et contraintes sur les numéros de téléphone.
-    \item \textbf{V5 à V7 :} Création du schéma des véhicules, entités composants, historique et système de jobs asynchrones.
-    \item \textbf{V8 \& V9 :} Insertion du catalogue massif (165+ marques et 1207+ modèles) et association des URLs des logos.
-    \item \textbf{V10 à V12 :} Refinancement du Jumeau Numérique IA, seeding des utilisateurs de développement et gestion du kilométrage à l'achat.
+    \item \textbf{Le code source du backend} Spring Boot 3 documente par une specification OpenAPI/Swagger.
+    \item \textbf{Le code source de l'application mobile} React Native (Expo) compilable et installable pour test.
+    \item \textbf{Le code source de la console web} d'administration React.
+    \item \textbf{La base de donnees PostgreSQL} initialisee avec son historique de scripts de migration Flyway.
+    \item \textbf{Les documentations associees} : Rapport de PFE et manuel d'installation technique.
 \end{enumerate}
 
-% =============================================================================
-% CHAPITRE 8 : EXIGENCES NON FONCTIONNELLES & SECURITE
-% =============================================================================
-\chapter{Exigences Non-Fonctionnelles \& Sécurité}
-
-\begin{table}[h!]
-\centering
-\caption{Exigences Non-Fonctionnelles du Système}
-\label{tab:non_fonct}
-\vspace{0.2cm}
-\begin{tabular}{@{}p{3.5cm}p{11cm}@{}}
-\toprule
-\textbf{Critère} & \textbf{Exigence Spécifiée} \\ \midrule
-\textbf{Performance API} & Temps de réponse $< 150$ ms pour 95\% des requêtes hors IA. \\
-\textbf{Disponibilité} & Objectif de disponibilité du backend Spring Boot de 99.9\%. \\
-\textbf{Temps IA} & Traitement asynchrone des profils IA Gemini $< 8$ secondes. \\
-\textbf{Sécurité} & Protection contre OWASP Top 10, détection XSS, CORS restreint. \\
-\textbf{Scalabilité} & Architecture sans état (\textit{Stateless REST}) permettant la montée en charge horizontalement. \\ \bottomrule
-\end{tabular}
-\end{table}
-
-% =============================================================================
-% CHAPITRE 9 : PERIMETRE MVP VS EVOLUTIONS FUTURES
-% =============================================================================
-\chapter{Périmètre MVP vs Évolutions Futures}
-
-\section{Matrice de Couverture des Fonctionnalités}
-\begin{table}[h!]
-\centering
-\caption{Matrice d'Avancement Fonctionnel (MVP Version 3.0 vs V4.0)}
-\label{tab:mvp}
-\vspace{0.2cm}
-\begin{tabular}{@{}p{7cm}p{4cm}p{4cm}@{}}
-\toprule
-\textbf{Fonctionnalité} & \textbf{Statut Actuel (v3.0)} & \textbf{Cible (v4.0)} \\ \midrule
-Authentification JWT \& Multi-session & \textbf{Implémenté (MVP)} & Déploiement OAuth2 / Social Login \\
-Catalogue 165+ Marques \& 1200+ Modèles & \textbf{Implémenté (MVP)} & Mise à jour automatique d'API OEM \\
-Génération Jumeau Numérique Gemini & \textbf{Implémenté (MVP)} & Custom Fine-Tuned Model Local \\
-Modalité Détails Véhicule (15+ pièces) & \textbf{Implémenté (MVP)} & Visualisation 3D Interactive \\
-Interface Admin Web & \textbf{Implémenté (MVP)} & Analytics & Machine Learning Ventes \\
-Scanner de Factures OCR & Prévu & Implémentation Vision LLM \\
-Predictive Maintenance OBD-II & Prévu & Dongle Bluetooth OBD-II Integration \\ \bottomrule
-\end{tabular}
-\end{table}
-
-% =============================================================================
-% CHAPITRE 10 : PLANNING, LIVRABLES ET ACCEPTATION
-% =============================================================================
-\chapter{Planning, Livrables et Critères d'Acceptation}
-
-\section{Livrables Effectivement Produits}
-\begin{itemize}
-    \item \textbf{Backend REST API :} Code source Spring Boot 3 complet, documenté Swagger UI (`/swagger-ui.html`).
-    \item \textbf{Applications Clients :} Code React Native (Mobile Expo) et console React (Web Admin).
-    \item \textbf{Base de Données :} Scripts Flyway auto-exécutables garantissant la reproductibilité du schéma.
-    \item \textbf{Documentation Techniques :} Spécifications des APIs (`auth_api_contract.md`, `architecture_design.md`).
+\section{Criteres d'Acceptation pour Validation (Recette)}
+La validation finale repose sur le succes des tests suivants :
+\begin{itemize}[label=\textbullet]
+    \item[\checkmark] L'utilisateur peut s'inscrire, verifier son compte par courriel et se connecter de maniere securisee.
+    \item[\checkmark] L'assistant d'onboarding mobile complete les 5 etapes sans erreur de navigation et cree un vehicule.
+    \item[\checkmark] La creation du vehicule declare un job d'arriere-plan, interroge l'IA et insere en base un jumeau numerique complet (composants cles avec specifications, intervals de vidange, documents associes).
+    \item[\checkmark] L'administrateur de la console web peut voir les statistiques et invalider les sessions des utilisateurs connectes.
 \end{itemize}
 
-\section{Critères d'Acceptation Validés}
-\begin{itemize}
-    \item[\checkmark] Un utilisateur peut créer un compte, se connecter et instancier un véhicule dans son garage.
-    \item[\checkmark] Le sous-système IA Gemini génère un Jumeau Numérique cohérent contenant 15+ pièces d'usure, 8 intervalles et 6 documents.
-    \item[\checkmark] L'administrateur peut visualiser et révoquer les sessions utilisateurs actives depuis le portail Web Admin.
-    \item[\checkmark] Les requêtes API invalides sont rejetées avec un message d'erreur standardisé et sécurisé.
-\end{itemize}
+\section{Analyse des Risques}
+\begin{table}[h!]
+\centering
+\caption{Matrice d'Analyse des Risques du Projet}
+\label{tab:risques}
+\vspace{0.2cm}
+\begin{tabular}{@{}p{3.5cm} c p{4cm} p{6cm}@{}}
+\toprule
+\textbf{Risque} & \textbf{Severite} & \textbf{Impact} & \textbf{Plan d'Attenuation} \\ \midrule
+Temps de latence de l'API IA & Moyenne & Blocage de l'interface client & Dechargement de l'appel dans une file de jobs asynchrones avec indicateur de chargement. \\
+Indisponibilite du service IA & Elevee & Impossibilite de creer un vehicule & Mise en place d'un profil de donnees d'entretien par defaut et pre-enregistre. \\
+Vol de donnees de session & Elevee & Acces non autorise aux profils & Utilisation de jetons a duree de vie courte et stockage crypte. \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 \end{document}

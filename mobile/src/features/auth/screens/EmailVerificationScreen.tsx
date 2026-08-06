@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import * as Linking from 'expo-linking';
 import { apiClient } from '@/api/client';
 import { EmailActionScreen } from '../components/EmailActionScreen';
+import { useAppTranslation } from '@/i18n/hooks/useAppTranslation';
 
 interface EmailVerificationScreenProps {
   email: string;
@@ -12,6 +13,7 @@ export function EmailVerificationScreen({
   email,
   onBackToLogin,
 }: EmailVerificationScreenProps) {
+  const { t } = useAppTranslation(['auth', 'common', 'errors']);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [showSuccessConfirmation, setShowSuccessConfirmation] = useState(false);
@@ -67,10 +69,8 @@ export function EmailVerificationScreen({
         email: email,
       });
 
-      // Show the success confirmation banner inside EmailActionScreen
       setShowSuccessConfirmation(true);
 
-      // Automatically dismiss confirmation and start 60s cooldown after 4 seconds
       autoStartRef.current = setTimeout(() => {
         dismissConfirmationAndStartCooldown();
       }, 4000);
@@ -78,9 +78,9 @@ export function EmailVerificationScreen({
     } catch (error: any) {
       console.error('Resend verification failed:', error);
       if (error.response) {
-        setErrorMessage(error.response.data?.message || 'Failed to resend verification email.');
+        setErrorMessage(error.response.data?.message || t('errors:unexpected_error'));
       } else {
-        setErrorMessage('Network connection lost. Please try again.');
+        setErrorMessage(t('errors:network_error'));
       }
     } finally {
       setIsLoading(false);
@@ -95,11 +95,11 @@ export function EmailVerificationScreen({
       if (canOpen) {
         await Linking.openURL(mailtoUrl);
       } else {
-        setErrorMessage("We couldn't find a default email application on this device. Please open your mail app manually.");
+        setErrorMessage(t('errors:unexpected_error'));
       }
     } catch (error) {
       console.error('Failed to open email app:', error);
-      setErrorMessage('An error occurred while trying to open your email client.');
+      setErrorMessage(t('errors:unexpected_error'));
     }
   };
 
@@ -112,27 +112,27 @@ export function EmailVerificationScreen({
 
   return (
     <EmailActionScreen
-      title="Verify your email"
-      subtitle={`We've sent a verification link to your email address.\nPlease verify your account before signing in.`}
+      title={t('auth:verify_email_title')}
+      subtitle={t('auth:verify_email_subtitle')}
       email={email}
       primaryButtonTitle="Open Email App"
       onPrimaryPress={handleOpenEmailApp}
       isPrimaryLoading={isLoading}
       secondaryButtonTitle={
         isLoading
-          ? 'Sending...'
+          ? t('auth:sending_button')
           : cooldown > 0
-          ? `Resend in ${formatCooldown(cooldown)}`
-          : 'Resend verification email'
+          ? `${t('auth:resend_code')} (${formatCooldown(cooldown)})`
+          : t('auth:resend_code')
       }
       onSecondaryPress={handleResend}
       isSecondaryDisabled={cooldown > 0 || isLoading}
       showSuccessConfirmation={showSuccessConfirmation}
-      successTitle="Email Sent"
-      successText="A new verification link has been sent to your inbox."
+      successTitle={t('common:success')}
+      successText={t('auth:reset_link_sent_msg')}
       onDismissSuccess={dismissConfirmationAndStartCooldown}
       onFooterPress={onBackToLogin}
-      footerLinkText="Back to Login"
+      footerLinkText={t('auth:back_to_sign_in')}
       errorMessage={errorMessage}
     />
   );

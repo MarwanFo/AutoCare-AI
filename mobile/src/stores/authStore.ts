@@ -7,6 +7,7 @@ export interface User {
   roles: string[];
   permissions: string[];
   status?: string;
+  avatarUrl?: string;
 }
 
 interface AuthState {
@@ -17,6 +18,7 @@ interface AuthState {
   setSession: (accessToken: string, user: User) => void;
   clearSession: () => void;
   setLoading: (isLoading: boolean) => void;
+  updateUser: (user: Partial<User>) => void;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
@@ -27,4 +29,8 @@ export const useAuthStore = create<AuthState>((set) => ({
   setSession: (accessToken, user) => set({ accessToken, user, isAuthenticated: true, isLoading: false }),
   clearSession: () => set({ accessToken: null, user: null, isAuthenticated: false, isLoading: false }),
   setLoading: (isLoading) => set({ isLoading }),
+  updateUser: (updatedUser) =>
+    set((state) => ({
+      user: state.user ? { ...state.user, ...updatedUser } : null,
+    })),
 }));

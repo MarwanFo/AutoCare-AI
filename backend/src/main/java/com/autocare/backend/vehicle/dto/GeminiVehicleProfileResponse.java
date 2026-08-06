@@ -24,6 +24,7 @@ public class GeminiVehicleProfileResponse {
     public static class DocumentDto {
         private String title;
         private String notes;
+        private String fileUrl;
     }
 
     @Getter
@@ -34,6 +35,8 @@ public class GeminiVehicleProfileResponse {
         private String name;
         private String standardPartNumber;
         private String standardSpecifications;
+        private Integer expectedLifespanMileage;
+        private Integer expectedLifespanMonths;
     }
 
     @Getter

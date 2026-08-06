@@ -17,8 +17,10 @@ import { VehicleDetailsModal } from '@/features/vehicle/components/VehicleDetail
 import { GarageVehicleCard } from '@/features/garage/components/GarageVehicleCard';
 import { GarageEmptyState } from '@/features/garage/components/GarageEmptyState';
 import { GarageSkeleton } from '@/features/garage/components/GarageSkeleton';
+import { useAppTranslation } from '@/i18n/hooks/useAppTranslation';
 
 export default function GarageHomeScreen() {
+  const { t } = useAppTranslation('garage');
   const { data: vehiclesData, isLoading, isRefetching, refetch } = useVehicles();
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [selectedVehicleId, setSelectedVehicleId] = useState<string | null>(null);
@@ -55,11 +57,14 @@ export default function GarageHomeScreen() {
               </Svg>
             </View>
             <View>
-              <Text style={styles.headerTitle}>Digital Garage</Text>
+              <Text style={styles.headerTitle}>{t('garage:dashboard.title')}</Text>
               <Text style={styles.headerSubtitle}>
                 {totalVehicles > 0
-                  ? `${totalVehicles} ${totalVehicles === 1 ? 'vehicle' : 'vehicles'} active`
-                  : 'Manage vehicle digital twins'}
+                  ? t('garage:dashboard.subtitle_active', {
+                      count: totalVehicles,
+                      defaultValue: `${totalVehicles} vehicles active`,
+                    })
+                  : t('garage:dashboard.subtitle_empty')}
               </Text>
             </View>
           </View>
@@ -69,13 +74,14 @@ export default function GarageHomeScreen() {
             style={styles.addButton}
             onPress={() => setShowOnboarding(true)}
             activeOpacity={0.85}
+            accessible={true}
             accessibilityRole="button"
-            accessibilityLabel="Add new vehicle"
+            accessibilityLabel={t('garage:dashboard.add_vehicle')}
           >
             <Svg width="16" height="16" viewBox="0 0 24 24" fill="none">
               <Path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" fill="#131313" />
             </Svg>
-            <Text style={styles.addButtonText}>Add Vehicle</Text>
+            <Text style={styles.addButtonText}>{t('garage:dashboard.add_vehicle')}</Text>
           </TouchableOpacity>
         </View>
 

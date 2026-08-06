@@ -1,0 +1,141 @@
+{
+  "tabs": {
+    "components": "Pieces",
+    "documents": "Documents",
+    "intervals": "Intervals",
+    "specs": "Specs"
+  },
+  "danger": {
+    "banner_title": "CRITICAL SAFETY WARNING",
+    "banner_subtitle": "One or more vehicle components have reached critical wear. Inspect car immediately!"
+  },
+  "actions": {
+    "add_component": "Add Custom Piece",
+    "add_component_short": "+ Add Piece",
+    "add_document": "Add Custom Document",
+    "add_document_short": "+ Add Document",
+    "add_interval": "Add Custom Interval",
+    "add_interval_short": "+ Add Interval"
+  },
+  "form": {
+    "component_name": "Piece Name *",
+    "component_name_placeholder": "e.g. Performance Exhaust",
+    "category": "Category",
+    "document_title": "Document Title *",
+    "document_url": "PDF Document Link / URL",
+    "interval_title": "Interval Title *",
+    "interval_mileage": "Interval Mileage (KM / MI)",
+    "interval_months": "Interval Months",
+    "inspection_only": "Inspection Only (No Replacement)"
+  },
+  "condition": {
+    "brand_new": "Brand New",
+    "used": "Used"
+  },
+  "categories": {
+    "ENGINE": "Engine",
+    "TRANSMISSION": "Transmission",
+    "BRAKES": "Brakes",
+    "FLUIDS": "Fluids",
+    "FILTERS": "Filters",
+    "TIRES": "Tires",
+    "BATTERY": "Battery",
+    "OTHER": "Other"
+  },
+  "components_list": {
+    "ENGINE_TIMING_SYSTEM": "Engine Timing Chain / Belt",
+    "SPARK_PLUGS_SET": "Spark Plugs Set",
+    "TRANSMISSION_CLUTCH": "Transmission Clutch / Torque Converter",
+    "FRONT_BRAKE_PADS": "Front Brake Pads",
+    "REAR_BRAKE_PADS": "Rear Brake Pads",
+    "FRONT_BRAKE_ROTORS": "Brake Rotors (Front)",
+    "REAR_BRAKE_ROTORS": "Brake Rotors (Rear)",
+    "ENGINE_OIL": "Engine Oil",
+    "BRAKE_FLUID": "Brake Fluid",
+    "ENGINE_COOLANT": "Engine Coolant",
+    "TRANSMISSION_FLUID": "Transmission Fluid",
+    "ENGINE_OIL_FILTER": "Engine Oil Filter",
+    "CABIN_AIR_FILTER": "Cabin Air Filter",
+    "ENGINE_AIR_FILTER": "Engine Air Filter",
+    "FUEL_FILTER": "Fuel Filter",
+    "ALL_SEASON_TIRES": "All-Season Tires Set",
+    "BATTERY_12V": "12V AGM Battery",
+    "WIPER_BLADES": "Wiper Blades Set"
+  },
+  "documents_section": {
+    "title": "AI Generated Documents",
+    "no_documents": "No documents generated for this vehicle.",
+    "view_pdf": "View PDF Document"
+  },
+  "specs_section": {
+    "title": "Full Vehicle Specifications",
+    "transmission": "Transmission",
+    "fuel_type": "Fuel Type",
+    "color": "Color",
+    "vin": "VIN",
+    "primary": "Primary",
+    "status": "Status",
+    "completeness_score": "Completeness Score",
+    "estimated_annual_mileage": "Estimated Annual Mileage",
+    "driving_profile": "Driving Profile",
+    "climate_assumptions": "Climate Assumptions",
+    "yes": "Yes",
+    "no": "No"
+  },
+  "dashboard": {
+    "title": "Maintenance Schedule",
+    "subtitle": "Track service intervals, component wear, and upcoming tasks",
+    "health_overview": "Component Health Overview",
+    "oil_change": "Oil Change",
+    "tire_rotation": "Tire Rotation",
+    "brake_maintenance": "Brake System Maintenance",
+    "battery_health": "Battery System Health"
+  },
+  "service": {
+    "intervals": "Maintenance Schedule Intervals",
+    "inspection": "Inspection",
+    "replacement": "Replacement",
+    "view_pdf": "View PDF Document",
+    "no_intervals": "No scheduled intervals available."
+  },
+  "history": {
+    "title": "Service History",
+    "empty": "No maintenance history recorded for this vehicle."
+  },
+  "reminders": {
+    "upcoming_one": "1 upcoming service",
+    "upcoming_other": "{{count}} upcoming services",
+    "completed_one": "1 completed service",
+    "completed_other": "{{count}} completed services",
+    "overdue_one": "1 overdue item",
+    "overdue_other": "{{count}} overdue items",
+    "every_distance": "Every {{distance}} {{unit}}",
+    "every_months": "Every {{months}} months",
+    "remaining_mileage": "{{remainingMileage}} {{unit}} remaining",
+    "days_remaining": "{{days}} days remaining",
+    "health_percentage": "{{percentage}}% Health"
+  },
+  "components": {
+    "title": "Digital Twin Component Health",
+    "part_number": "OEM Part Number",
+    "specifications": "Specifications",
+    "notes": "Notes",
+    "no_components": "No components registered for this vehicle."
+  },
+  "dialogs": {
+    "confirm_service": "Mark Service Complete",
+    "confirm_message": "Are you sure you want to mark {{serviceName}} as completed for {{vehicleName}}?",
+    "cancel": "Cancel",
+    "save": "Save"
+  },
+  "filters": {
+    "all_services": "All Services",
+    "pending": "Pending",
+    "overdue": "Overdue",
+    "completed": "Completed"
+  },
+  "empty": {
+    "title": "No Maintenance Records",
+    "subtitle": "No scheduled service intervals found for {{vehicleName}}."
+  }
+}

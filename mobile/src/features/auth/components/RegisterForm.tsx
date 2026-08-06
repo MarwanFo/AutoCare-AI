@@ -7,6 +7,7 @@ import { FloatingInput, MailIcon, PasswordInput } from './PasswordInput';
 import { PasswordStrengthBar } from './PasswordStrengthBar';
 import { PhoneInput } from './PhoneInput';
 import { PrimaryButton } from './PrimaryButton';
+import { useAppTranslation } from '@/i18n/hooks/useAppTranslation';
 
 export interface RegisterFormData {
   fullName: string;
@@ -45,6 +46,8 @@ export function RegisterForm({
   onSubmit,
   watchedPassword = '',
 }: RegisterFormProps) {
+  const { t } = useAppTranslation('auth');
+
   return (
     <View style={styles.container}>
       {/* Full Name Input Field */}
@@ -53,7 +56,7 @@ export function RegisterForm({
         name="fullName"
         render={({ field: { onChange, onBlur, value } }) => (
           <FloatingInput
-            label="Full Name"
+            label={t('auth:full_name_label')}
             value={value}
             onChangeText={onChange}
             onBlur={onBlur}
@@ -71,7 +74,7 @@ export function RegisterForm({
         name="email"
         render={({ field: { onChange, onBlur, value } }) => (
           <FloatingInput
-            label="Email Address"
+            label={t('auth:email_label')}
             value={value}
             onChangeText={onChange}
             onBlur={onBlur}
@@ -89,7 +92,7 @@ export function RegisterForm({
         name="phoneNumber"
         render={({ field: { onChange, onBlur, value } }) => (
           <PhoneInput
-            label="Phone Number"
+            label={t('auth:phone_label')}
             value={value}
             onChangeText={onChange}
             onBlur={onBlur}
@@ -105,7 +108,7 @@ export function RegisterForm({
         name="password"
         render={({ field: { onChange, onBlur, value } }) => (
           <PasswordInput
-            label="Password"
+            label={t('auth:password_label')}
             value={value}
             onChangeText={onChange}
             onBlur={onBlur}
@@ -124,7 +127,7 @@ export function RegisterForm({
         name="confirmPassword"
         render={({ field: { onChange, onBlur, value } }) => (
           <PasswordInput
-            label="Confirm Password"
+            label={t('auth:confirm_password_label')}
             value={value}
             onChangeText={onChange}
             onBlur={onBlur}
@@ -137,7 +140,7 @@ export function RegisterForm({
       {/* Register Submit Button */}
       <View style={styles.actionContainer}>
         <PrimaryButton
-          title="Create Account"
+          title={t('auth:sign_up_button')}
           isLoading={isLoading}
           onPress={handleSubmit(onSubmit)}
         />

@@ -248,4 +248,82 @@ public class VehicleController {
         vehicleService.deleteDocument(userDetails.getUser().getId(), vehicleId, documentId);
         return ResponseEntity.noContent().build();
     }
+
+    @PostMapping("/{vehicleId}/intervals")
+    @Operation(summary = "Add a maintenance interval manually", description = "Allows the user to manually add a maintenance interval to their vehicle's digital twin.")
+    public ResponseEntity<VehicleResponse.IntervalResponse> addInterval(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PathVariable UUID vehicleId,
+            @Valid @RequestBody com.autocare.backend.vehicle.dto.CreateIntervalRequest request
+    ) {
+        log.info("Adding interval manually to vehicle ID: {} for user: {}", vehicleId, userDetails.getUser().getId());
+        com.autocare.backend.vehicle.entity.UserInterval interval = vehicleService.addInterval(userDetails.getUser().getId(), vehicleId, request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(vehicleMapper.toIntervalResponse(interval));
+    }
+
+    @PutMapping("/{vehicleId}/intervals/{intervalId}")
+    @Operation(summary = "Update a maintenance interval manually", description = "Allows the user to manually update a maintenance interval in their vehicle's digital twin.")
+    public ResponseEntity<VehicleResponse.IntervalResponse> updateInterval(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PathVariable UUID vehicleId,
+            @PathVariable UUID intervalId,
+            @Valid @RequestBody com.autocare.backend.vehicle.dto.UpdateIntervalRequest request
+    ) {
+        log.info("Updating interval ID: {} for vehicle ID: {} for user: {}", intervalId, vehicleId, userDetails.getUser().getId());
+        com.autocare.backend.vehicle.entity.UserInterval interval = vehicleService.updateInterval(userDetails.getUser().getId(), vehicleId, intervalId, request);
+        return ResponseEntity.ok(vehicleMapper.toIntervalResponse(interval));
+    }
+
+    @DeleteMapping("/{vehicleId}/intervals/{intervalId}")
+    @Operation(summary = "Delete a maintenance interval manually", description = "Allows the user to delete a maintenance interval from their vehicle's digital twin.")
+    public ResponseEntity<Void> deleteInterval(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PathVariable UUID vehicleId,
+            @PathVariable UUID intervalId
+    ) {
+        log.info("Deleting interval ID: {} for vehicle ID: {} for user: {}", intervalId, vehicleId, userDetails.getUser().getId());
+        vehicleService.deleteInterval(userDetails.getUser().getId(), vehicleId, intervalId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping("/{vehicleId}/components/batch-dates")
+    @Operation(summary = "Batch update component last-changed dates", description = "Updates the last-changed dates for multiple components at once. Used during pre-owned vehicle onboarding after AI generation.")
+    @ApiResponse(responseCode = "200", description = "Component dates updated successfully")
+    @ApiResponse(responseCode = "400", description = "Invalid date format")
+    @ApiResponse(responseCode = "401", description = "Unauthorized")
+    @ApiResponse(responseCode = "403", description = "Forbidden")
+    @ApiResponse(responseCode = "404", description = "Vehicle not found")
+    public ResponseEntity<VehicleResponse> batchUpdateComponentDates(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PathVariable UUID vehicleId,
+            @Valid @RequestBody com.autocare.backend.vehicle.dto.BatchComponentDatesRequest request
+    ) {
+        log.info("Batch updating component dates for vehicle ID: {} for user: {}", vehicleId, userDetails.getUser().getId());
+        vehicleService.batchUpdateComponentDates(userDetails.getUser().getId(), vehicleId, request.getComponentDates());
+        UserVehicle vehicle = vehicleService.getVehicleById(userDetails.getUser().getId(), vehicleId);
+        return ResponseEntity.ok(vehicleMapper.toResponse(vehicle));
+    }
+
+    @PostMapping("/{vehicleId}/ai-advisor")
+    @Operation(summary = "Consult vehicle AI advisor", description = "Asks the AI assistant a question regarding maintenance, specs, or troubleshooting tailored to this vehicle's digital twin.")
+    public ResponseEntity<com.autocare.backend.vehicle.dto.AiAdvisorResponse> consultAiAdvisor(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PathVariable UUID vehicleId,
+            @Valid @RequestBody com.autocare.backend.vehicle.dto.AiAdvisorRequest request
+    ) {
+        log.info("Consulting AI advisor for vehicle ID: {} for user: {}", vehicleId, userDetails.getUser().getId());
+        com.autocare.backend.vehicle.dto.AiAdvisorResponse response = vehicleService.consultAiAdvisor(userDetails.getUser().getId(), vehicleId, request);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/{vehicleId}/export-report")
+    @Operation(summary = "Export vehicle digital twin health report", description = "Generates a structured health inspection report for downloading or sharing.")
+    public ResponseEntity<com.autocare.backend.vehicle.dto.VehicleReportResponse> exportVehicleReport(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PathVariable UUID vehicleId
+    ) {
+        log.info("Exporting health report for vehicle ID: {} for user: {}", vehicleId, userDetails.getUser().getId());
+        com.autocare.backend.vehicle.dto.VehicleReportResponse report = vehicleService.exportVehicleReport(userDetails.getUser().getId(), vehicleId);
+        return ResponseEntity.ok(report);
+    }
 }

@@ -6,6 +6,7 @@ import com.autocare.backend.auth.service.JwtService;
 import com.autocare.backend.auth.service.PasswordResetService;
 import com.autocare.backend.auth.service.UserService;
 import com.autocare.backend.security.CustomUserDetails;
+import com.autocare.backend.user.dto.request.DeactivateAccountRequest;
 import com.autocare.backend.user.dto.request.UpdatePreferencesRequest;
 import com.autocare.backend.user.dto.request.UpdateProfileRequest;
 import com.autocare.backend.user.dto.response.AvatarUploadResponse;
@@ -141,5 +142,19 @@ public class UserController {
         return ResponseEntity.ok(Map.of(
                 "message", "Password changed successfully. Other active device sessions have been revoked for your security."
         ));
+    }
+
+    @DeleteMapping("/me")
+    @Operation(summary = "Deactivate authenticated user account", description = "Requires password confirmation, marks account status as SUSPENDED, sets deletedAt timestamp, and revokes all active sessions.")
+    @ApiResponse(responseCode = "204", description = "Account deactivated successfully")
+    @ApiResponse(responseCode = "400", description = "Incorrect confirmation password")
+    @ApiResponse(responseCode = "401", description = "Unauthorized - Valid JWT required")
+    public ResponseEntity<Void> deactivateAccount(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @Valid @RequestBody DeactivateAccountRequest request
+    ) {
+        log.info("Deactivating user account for user ID: {}", userDetails.getId());
+        userService.deactivateAccount(userDetails.getId(), request);
+        return ResponseEntity.noContent().build();
     }
 }

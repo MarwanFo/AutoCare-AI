@@ -1,0 +1,15 @@
+{
+  "app_name": "AutoCare AI",
+  "save": "Save",
+  "cancel": "Cancel",
+  "delete": "Delete",
+  "confirm": "Confirm",
+  "loading": "Loading...",
+  "retry": "Retry",
+  "success": "Success",
+  "nav_home": "Home",
+  "nav_explore": "Explore",
+  "nav_profile": "Profile",
+  "something_went_wrong": "Something went wrong",
+  "error_boundary_message": "An error occurred in the component tree. Please try reloading."
+}

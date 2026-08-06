@@ -1,0 +1,5 @@
+{
+  "network_error": "Network connection error",
+  "unexpected_error": "An unexpected error occurred",
+  "unauthorized": "Session expired. Please log in again"
+}

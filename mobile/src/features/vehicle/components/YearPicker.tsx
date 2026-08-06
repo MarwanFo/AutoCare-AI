@@ -1,5 +1,5 @@
 import React from 'react';
-import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 
 interface YearPickerProps {
@@ -10,32 +10,28 @@ interface YearPickerProps {
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 export function YearPicker({ selectedYear, onSelectYear }: YearPickerProps) {
-  // Generate years from current year + 2 down to 1990
+  // Generate years from current year + 2 down to 1980
   const currentYear = new Date().getFullYear();
   const years = Array.from({ length: currentYear + 2 - 1980 + 1 }, (_, index) => currentYear + 2 - index);
 
-  const renderItem = ({ item: year }: { item: number }) => {
-    const isSelected = selectedYear === year;
-    return (
-      <YearGridItem
-        year={year}
-        isSelected={isSelected}
-        onPress={() => onSelectYear(year)}
-      />
-    );
-  };
-
   return (
     <View style={styles.container}>
-      <FlatList
-        data={years}
-        renderItem={renderItem}
-        keyExtractor={(item) => item.toString()}
-        numColumns={3}
-        columnWrapperStyle={styles.columnWrapper}
+      <ScrollView
         contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
-      />
+        nestedScrollEnabled={true}
+      >
+        <View style={styles.gridWrapper}>
+          {years.map((year) => (
+            <YearGridItem
+              key={year}
+              year={year}
+              isSelected={selectedYear === year}
+              onPress={() => onSelectYear(year)}
+            />
+          ))}
+        </View>
+      </ScrollView>
     </View>
   );
 }
@@ -97,13 +93,14 @@ const styles = StyleSheet.create({
   listContent: {
     paddingVertical: 8,
   },
-  columnWrapper: {
-    justifyContent: 'space-between',
-    paddingHorizontal: 8,
+  gridWrapper: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
     gap: 8,
+    paddingHorizontal: 4,
   },
   yearItem: {
-    flex: 1,
+    width: '31%',
     height: 52,
     borderRadius: 14,
     backgroundColor: '#1c1c1c',

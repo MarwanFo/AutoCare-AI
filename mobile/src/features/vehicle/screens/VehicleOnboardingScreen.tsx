@@ -21,8 +21,11 @@ import { YearPicker } from '../components/YearPicker';
 import { TrimCard } from '../components/TrimCard';
 import { ConfirmationCard } from '../components/ConfirmationCard';
 import { AiGenerationScreen } from '../components/AiGenerationScreen';
+import { PreownedComponentsStep } from '../components/PreownedComponentsStep';
+import { DatePickerInput } from '../components/DatePickerInput';
 import { ErrorBanner } from '@/features/auth/components/ErrorBanner';
 import { FloatingInput } from '@/features/auth/components/PasswordInput';
+import { useAppTranslation } from '@/i18n/hooks/useAppTranslation';
 import Svg, { Path } from 'react-native-svg';
 import { FuelType, MileageUnit, Transmission, OnboardingStep, PurchaseCondition } from '@/types/vehicle';
 
@@ -50,6 +53,7 @@ export function VehicleOnboardingScreen({
   onCancel?: () => void;
 }) {
   const store = useVehicleOnboardingStore();
+  const { t } = useAppTranslation(['garage', 'common']);
   
   const handleCancel = () => {
     store.resetOnboarding();
@@ -62,6 +66,7 @@ export function VehicleOnboardingScreen({
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [serverError, setServerError] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [createdVehicleIdForDates, setCreatedVehicleIdForDates] = useState<string | null>(null);
 
   // React Query hooks
   const { data: brands = [], isLoading: loadingBrands, error: brandsError } = useBrands();
@@ -109,11 +114,18 @@ export function VehicleOnboardingScreen({
     // Purchase Date (Required for BRAND_NEW, optional for USED)
     if (isBrandNew) {
       if (!store.purchaseDate || store.purchaseDate.trim() === '') {
-        errors.purchaseDate = 'Purchase date is required';
+        errors.purchaseDate = t('garage:onboarding.date_required_error', { defaultValue: 'Purchase date is required for brand new vehicles' });
       } else {
         const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
         if (!dateRegex.test(store.purchaseDate)) {
           errors.purchaseDate = 'Date must be in YYYY-MM-DD format';
+        } else {
+          const selected = new Date(store.purchaseDate);
+          const today = new Date();
+          today.setHours(23, 59, 59, 999);
+          if (selected > today) {
+            errors.purchaseDate = t('garage:onboarding.future_date_error', { defaultValue: 'Purchase date cannot be in the future' });
+          }
         }
       }
     } else {
@@ -121,6 +133,13 @@ export function VehicleOnboardingScreen({
         const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
         if (!dateRegex.test(store.purchaseDate)) {
           errors.purchaseDate = 'Date must be in YYYY-MM-DD format';
+        } else {
+          const selected = new Date(store.purchaseDate);
+          const today = new Date();
+          today.setHours(23, 59, 59, 999);
+          if (selected > today) {
+            errors.purchaseDate = t('garage:onboarding.future_date_error', { defaultValue: 'Purchase date cannot be in the future' });
+          }
         }
       }
     }
@@ -164,12 +183,25 @@ export function VehicleOnboardingScreen({
     }
   };
 
+  if (createdVehicleIdForDates) {
+    return (
+      <PreownedComponentsStep
+        vehicleId={createdVehicleIdForDates}
+        onComplete={() => {
+          setCreatedVehicleIdForDates(null);
+          store.resetOnboarding();
+          if (onComplete) onComplete();
+        }}
+      />
+    );
+  }
+
   if (isGenerating) {
     const isBrandNew = store.purchaseCondition === 'BRAND_NEW';
     const requestPayload = {
-      brandId: store.selectedBrand!.id,
-      modelId: store.selectedModel!.id,
-      year: store.selectedYear!,
+      brandId: store.selectedBrand?.id || '',
+      modelId: store.selectedModel?.id || '',
+      year: store.selectedYear || new Date().getFullYear(),
       trimConfiguration: store.selectedTrim,
       color: store.color.trim() !== '' ? store.color : undefined,
       licensePlate: store.licensePlate.trim() !== '' ? store.licensePlate : undefined,
@@ -181,7 +213,6 @@ export function VehicleOnboardingScreen({
       purchaseCondition: store.purchaseCondition!,
       nickname: store.nickname.trim() !== '' ? store.nickname : undefined,
       purchaseDate: store.purchaseDate.trim() !== '' ? store.purchaseDate : undefined,
-      initialComponentHealths: store.purchaseCondition === 'USED' ? store.initialComponentHealths : undefined,
     };
 
     return (
@@ -190,8 +221,12 @@ export function VehicleOnboardingScreen({
         onCancel={() => setIsGenerating(false)}
         onCompleted={(vehicleId) => {
           setIsGenerating(false);
-          store.resetOnboarding();
-          if (onComplete) onComplete();
+          if (store.purchaseCondition === 'USED') {
+            setCreatedVehicleIdForDates(vehicleId);
+          } else {
+            store.resetOnboarding();
+            if (onComplete) onComplete();
+          }
         }}
       />
     );
@@ -326,7 +361,10 @@ export function VehicleOnboardingScreen({
                   name={brand.name}
                   logoUrl={brand.logoUrl}
                   isSelected={store.selectedBrand?.id === brand.id}
-                  onPress={() => store.selectBrand(brand)}
+                  onPress={() => {
+                    store.selectBrand(brand);
+                    setTimeout(() => store.nextStep(), 150);
+                  }}
                 />
               )}
               style={styles.list}
@@ -369,7 +407,10 @@ export function VehicleOnboardingScreen({
                 <ModelCard
                   name={model.name}
                   isSelected={store.selectedModel?.id === model.id}
-                  onPress={() => store.selectModel(model)}
+                  onPress={() => {
+                    store.selectModel(model);
+                    setTimeout(() => store.nextStep(), 150);
+                  }}
                 />
               )}
               style={styles.list}
@@ -504,10 +545,16 @@ export function VehicleOnboardingScreen({
           {/* Purchase Date */}
           <View style={styles.inputGroup}>
             <Text style={styles.groupLabel}>Purchase Info</Text>
-            <FloatingInput
-              label={store.purchaseCondition === 'BRAND_NEW' ? "Purchase Date (YYYY-MM-DD)" : "Purchase Date (YYYY-MM-DD, Optional)"}
+            <DatePickerInput
+              label={
+                store.purchaseCondition === 'BRAND_NEW'
+                  ? t('garage:onboarding.purchase_date_label_required', { defaultValue: 'Purchase Date' })
+                  : t('garage:onboarding.purchase_date_label_optional', { defaultValue: 'Purchase Date (Optional)' })
+              }
+              placeholder={t('garage:onboarding.select_purchase_date_placeholder', { defaultValue: 'Select acquisition date' })}
               value={store.purchaseDate}
-              onChangeText={(val) => {
+              required={store.purchaseCondition === 'BRAND_NEW'}
+              onChange={(val) => {
                 store.updateDetails({ purchaseDate: val });
                 if (formErrors.purchaseDate) {
                   setFormErrors((prev) => {
@@ -518,14 +565,6 @@ export function VehicleOnboardingScreen({
                 }
               }}
               error={formErrors.purchaseDate}
-              prefixIcon={
-                <Svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                  <Path
-                    d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2z"
-                    fill="#c4c7c8"
-                  />
-                </Svg>
-              }
             />
           </View>
 
@@ -764,18 +803,18 @@ export function VehicleOnboardingScreen({
       {store.step === OnboardingStep.CONFIRMATION && (
         <View style={styles.stepContainer}>
           <ConfirmationCard
-            brandName={store.selectedBrand!.name}
+            brandName={store.selectedBrand?.name || 'Unspecified'}
             brandLogoUrl={store.selectedBrand?.logoUrl}
-            modelName={store.selectedModel!.name}
-            year={store.selectedYear!}
-            trim={store.selectedTrim}
+            modelName={store.selectedModel?.name || 'Unspecified'}
+            year={store.selectedYear || new Date().getFullYear()}
+            trim={store.selectedTrim || 'Standard'}
             mileage={store.currentMileage}
             mileageUnit={store.mileageUnit}
             vin={store.vin}
             licensePlate={store.licensePlate}
             color={store.color}
             nickname={store.nickname}
-            purchaseCondition={store.purchaseCondition!}
+            purchaseCondition={store.purchaseCondition || 'BRAND_NEW'}
             isPrimary={store.isPrimary}
             purchaseDate={store.purchaseDate.trim() !== '' ? store.purchaseDate : undefined}
             initialComponentHealths={store.initialComponentHealths}

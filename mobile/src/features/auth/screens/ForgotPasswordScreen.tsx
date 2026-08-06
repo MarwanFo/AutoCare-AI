@@ -15,6 +15,7 @@ import * as z from 'zod';
 import Animated, { FadeIn } from 'react-native-reanimated';
 
 import { apiClient } from '@/api/client';
+import { useAppTranslation } from '@/i18n/hooks/useAppTranslation';
 import { BrandHeader } from '../components/BrandHeader';
 import { AuthCard } from '../components/AuthCard';
 import { PrimaryButton } from '../components/PrimaryButton';
@@ -36,6 +37,7 @@ export function ForgotPasswordScreen({
   onBackToLogin,
   onForgotPasswordSuccess,
 }: ForgotPasswordScreenProps) {
+  const { t } = useAppTranslation(['auth', 'common', 'errors', 'validation']);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -59,9 +61,9 @@ export function ForgotPasswordScreen({
     } catch (error: any) {
       console.error('Forgot password request failed:', error);
       if (error.response) {
-        setErrorMessage(error.response.data?.message || 'Failed to request password reset link.');
+        setErrorMessage(error.response.data?.message || t('errors:unexpected_error'));
       } else {
-        setErrorMessage('Network connection lost. Please try again.');
+        setErrorMessage(t('errors:network_error'));
       }
     } finally {
       setIsLoading(false);
@@ -95,11 +97,11 @@ export function ForgotPasswordScreen({
               <View style={styles.cardContent}>
                 
                 {/* Title */}
-                <Text style={styles.cardTitle}>Forgot your password?</Text>
+                <Text style={styles.cardTitle}>{t('auth:forgot_password_title')}</Text>
 
                 {/* Subtitle */}
                 <Text style={styles.cardBody}>
-                  Enter the email associated with your account and we'll send you a password reset link.
+                  {t('auth:forgot_password_subtitle')}
                 </Text>
 
                 {/* Email Input Field */}
@@ -108,7 +110,7 @@ export function ForgotPasswordScreen({
                   name="email"
                   render={({ field: { onChange, onBlur, value } }) => (
                     <FloatingInput
-                      label="Email Address"
+                      label={t('auth:email_label')}
                       value={value}
                       onChangeText={onChange}
                       onBlur={onBlur}
@@ -124,7 +126,7 @@ export function ForgotPasswordScreen({
                 <View style={styles.buttonsContainer}>
                   {/* Primary Button */}
                   <PrimaryButton
-                    title="Send reset link"
+                    title={t('auth:send_reset_link')}
                     isLoading={isLoading}
                     onPress={handleSubmit(onSubmit)}
                   />
@@ -137,12 +139,12 @@ export function ForgotPasswordScreen({
           <View style={styles.footer}>
             <TouchableOpacity
               accessibilityRole="link"
-              accessibilityLabel="Back to Login"
+              accessibilityLabel={t('auth:back_to_sign_in')}
               onPress={onBackToLogin}
               style={styles.footerLinkContainer}
               disabled={isLoading}
             >
-              <Text style={styles.footerLinkText}>Back to Login</Text>
+              <Text style={styles.footerLinkText}>{t('auth:back_to_sign_in')}</Text>
             </TouchableOpacity>
           </View>
         </ScrollView>
@@ -154,7 +156,7 @@ export function ForgotPasswordScreen({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#131313', // bg-surface-dim = #131313
+    backgroundColor: '#131313',
     position: 'relative',
     overflow: 'hidden',
   },
@@ -165,7 +167,7 @@ const styles = StyleSheet.create({
   scrollContent: {
     flexGrow: 1,
     justifyContent: 'center',
-    paddingHorizontal: 20, // p-container-padding-mobile
+    paddingHorizontal: 20,
     paddingVertical: 32,
   },
   topGlow: {
@@ -175,7 +177,7 @@ const styles = StyleSheet.create({
     width: '75%',
     aspectRatio: 1,
     borderRadius: 9999,
-    backgroundColor: '#abc7ff', // bg-secondary = #abc7ff
+    backgroundColor: '#abc7ff',
     opacity: 0.05,
     zIndex: 1,
   },
@@ -186,7 +188,7 @@ const styles = StyleSheet.create({
     width: '60%',
     aspectRatio: 1,
     borderRadius: 9999,
-    backgroundColor: '#ffffff', // bg-primary = #ffffff
+    backgroundColor: '#ffffff',
     opacity: 0.05,
     zIndex: 1,
   },
@@ -209,7 +211,7 @@ const styles = StyleSheet.create({
   cardBody: {
     fontSize: 14,
     fontFamily: 'Inter',
-    color: '#c4c7c8', // text-on-surface-variant = #c4c7c8
+    color: '#c4c7c8',
     lineHeight: 22,
     textAlign: 'center',
     marginBottom: 24,
@@ -230,8 +232,8 @@ const styles = StyleSheet.create({
   footerLinkText: {
     fontFamily: 'Inter',
     fontSize: 14,
-    fontWeight: '600', // font-medium
-    color: '#ffffff', // text-primary = #ffffff
+    fontWeight: '600',
+    color: '#ffffff',
     textDecorationLine: 'underline',
   },
 });

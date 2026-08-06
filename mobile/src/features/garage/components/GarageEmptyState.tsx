@@ -1,12 +1,15 @@
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import Svg, { Path, Circle, Rect } from 'react-native-svg';
+import Svg, { Path } from 'react-native-svg';
+import { useAppTranslation } from '@/i18n/hooks/useAppTranslation';
 
 interface GarageEmptyStateProps {
   onAddVehicle: () => void;
 }
 
 export function GarageEmptyState({ onAddVehicle }: GarageEmptyStateProps) {
+  const { t } = useAppTranslation('garage');
+
   return (
     <View style={styles.container}>
       {/* AI Digital Twin Graphic Ring */}
@@ -30,10 +33,10 @@ export function GarageEmptyState({ onAddVehicle }: GarageEmptyStateProps) {
         </View>
       </View>
 
-      <Text style={styles.title}>Your Digital Garage is Empty</Text>
+      <Text style={styles.title}>{t('garage:empty.title')}</Text>
 
       <Text style={styles.subtitle}>
-        Onboard your first vehicle to build its AI Digital Twin, track component wear, and receive predictive maintenance intelligence.
+        {t('garage:empty.subtitle')}
       </Text>
 
       {/* Feature Pills */}
@@ -42,13 +45,13 @@ export function GarageEmptyState({ onAddVehicle }: GarageEmptyStateProps) {
           <Svg width="14" height="14" viewBox="0 0 24 24" fill="none">
             <Path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" fill="#abc7ff" />
           </Svg>
-          <Text style={styles.featureText}>AI Profile & Maintenance Guide</Text>
+          <Text style={styles.featureText}>{t('garage:empty.feature_ai_profile')}</Text>
         </View>
         <View style={styles.featurePill}>
           <Svg width="14" height="14" viewBox="0 0 24 24" fill="none">
             <Path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" fill="#abc7ff" />
           </Svg>
-          <Text style={styles.featureText}>Live Component Health Tracking</Text>
+          <Text style={styles.featureText}>{t('garage:empty.feature_health_tracking')}</Text>
         </View>
       </View>
 
@@ -57,13 +60,14 @@ export function GarageEmptyState({ onAddVehicle }: GarageEmptyStateProps) {
         style={styles.actionButton}
         onPress={onAddVehicle}
         activeOpacity={0.85}
+        accessible={true}
         accessibilityRole="button"
-        accessibilityLabel="Add your first vehicle"
+        accessibilityLabel={t('garage:empty.action_onboard')}
       >
         <Svg width="20" height="20" viewBox="0 0 24 24" fill="none">
           <Path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" fill="#131313" />
         </Svg>
-        <Text style={styles.actionButtonText}>Onboard Your Vehicle</Text>
+        <Text style={styles.actionButtonText}>{t('garage:empty.action_onboard')}</Text>
       </TouchableOpacity>
     </View>
   );

@@ -1,0 +1,77 @@
+{
+  "dashboard": {
+    "title": "Garage Numérique",
+    "subtitle_active_one": "1 véhicule actif",
+    "subtitle_active_other": "{{count}} véhicules actifs",
+    "subtitle_empty": "Gérez vos jumeaux numériques",
+    "add_vehicle": "Ajouter un véhicule",
+    "fleet_health_overview": "Aperçu de la santé de la flotte",
+    "overall_status": "Statut général du jumeau numérique",
+    "optimal_state": "État opérationnel optimal",
+    "predictive_maintenance": "Maintenance prédictive",
+    "gemini_engine": "Moteur d'intelligence Gemini",
+    "telemetry_description": "Les modèles de dégradation des composants sont actifs. Tous les niveaux de fluides et intervalles sont conformes."
+  },
+  "vehicle": {
+    "odometer": "Compteur",
+    "plate": "Plaque",
+    "unassigned_plate": "Non assignée",
+    "powertrain": "Moteur / Trans",
+    "primary": "PRINCIPAL",
+    "view_twin": "Voir le jumeau",
+    "standard_trim": "Finition standard"
+  },
+  "status": {
+    "ai_twin_active": "Jumeau IA actif",
+    "ai_twin_configuring": "Configuration du jumeau IA",
+    "healthy": "En bon état"
+  },
+  "onboarding": {
+    "title": "Ajouter votre véhicule",
+    "subtitle": "Sélectionnez le constructeur, le modèle et les spécifications pour créer le jumeau numérique",
+    "step_brand": "Marque",
+    "step_model": "Modèle",
+    "step_year": "Année",
+    "step_trim": "Finition",
+    "step_specs": "Spécifications",
+    "step_confirm": "Confirmer",
+    "step_generating": "Génération du jumeau...",
+    "select_brand": "Sélectionner la marque",
+    "select_model": "Sélectionner le modèle",
+    "select_year": "Sélectionner l'année",
+    "select_trim": "Sélectionner la finition",
+    "enter_mileage": "Kilométrage actuel",
+    "license_plate": "Plaque d'immatriculation",
+    "nickname": "Surnom du véhicule",
+    "purchase_date_label_required": "Date d'achat",
+    "purchase_date_label_optional": "Date d'achat (Optionnelle)",
+    "select_purchase_date_placeholder": "Sélectionner la date d'acquisition",
+    "future_date_error": "La date d'achat ne peut pas être dans le futur",
+    "date_required_error": "La date d'achat est requise pour les véhicules neufs",
+    "select_date": "Sélectionner la date",
+    "confirm_date": "Confirmer la date",
+    "clear_date": "Effacer la date",
+    "generate_twin_button": "Créer le jumeau numérique",
+    "cancel": "Annuler",
+    "back": "Retour",
+    "next": "Suivant"
+  },
+  "filters": {
+    "search_placeholder": "Rechercher par nom, plaque ou marque...",
+    "all_brands": "Toutes les marques",
+    "sort_by": "Trier par"
+  },
+  "empty": {
+    "title": "Votre garage numérique est vide",
+    "subtitle": "Ajoutez votre premier véhicule pour créer son jumeau numérique IA, suivre l'usure des pièces et recevoir des conseils prédictifs.",
+    "feature_ai_profile": "Profil IA et guide d'entretien",
+    "feature_health_tracking": "Suivi en direct de la santé des composants",
+    "action_onboard": "Ajouter votre véhicule"
+  },
+  "dialogs": {
+    "delete_title": "Supprimer le véhicule",
+    "delete_message": "Voulez-vous vraiment retirer {{vehicleName}} de votre garage numérique ?",
+    "delete_confirm": "Supprimer le véhicule",
+    "cancel": "Annuler"
+  }
+}

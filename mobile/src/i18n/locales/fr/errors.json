@@ -1,0 +1,5 @@
+{
+  "network_error": "Erreur de connexion réseau",
+  "unexpected_error": "Une erreur inattendue s'est produite",
+  "unauthorized": "Session expirée. Veuillez vous reconnecter"
+}

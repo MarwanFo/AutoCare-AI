@@ -45,4 +45,10 @@ public class TemplateComponent extends BaseEntity {
 
     @Column(name = "standard_specifications", columnDefinition = "text")
     private String standardSpecifications;
+
+    @Column(name = "expected_lifespan_mileage")
+    private Integer expectedLifespanMileage;
+
+    @Column(name = "expected_lifespan_months")
+    private Integer expectedLifespanMonths;
 }

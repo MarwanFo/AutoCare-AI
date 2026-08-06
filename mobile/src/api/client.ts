@@ -29,12 +29,22 @@ export const apiClient = axios.create({
   },
 });
 
+import { useI18nStore } from '@/i18n/i18nStore';
+
 // Request Interceptor
 apiClient.interceptors.request.use(
   async (config: InternalAxiosRequestConfig) => {
     const token = useAuthStore.getState().accessToken;
-    if (token && config.headers) {
-      config.headers.Authorization = `Bearer ${token}`;
+    const currentLanguage = useI18nStore.getState().currentLanguage;
+
+    if (config.headers) {
+      config.headers['Accept-Language'] = currentLanguage;
+      if (!config.headers['User-Agent']) {
+        config.headers['User-Agent'] = 'AutoCare-Mobile/1.0';
+      }
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
     }
     return config;
   },

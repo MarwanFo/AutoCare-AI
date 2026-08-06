@@ -85,8 +85,7 @@ export const useVehicleOnboardingStore = create<OnboardingState>((set) => ({
   setStep: (step) => set({ step }),
   
   nextStep: () => set((state) => {
-    // If BRAND_NEW, skip COMPONENT_HEALTH
-    if (state.step === OnboardingStep.DETAILS && state.purchaseCondition === 'BRAND_NEW') {
+    if (state.step === OnboardingStep.DETAILS) {
       return { step: OnboardingStep.CONFIRMATION };
     }
     const currentIndex = ONBOARDING_STEPS.indexOf(state.step);
@@ -97,8 +96,7 @@ export const useVehicleOnboardingStore = create<OnboardingState>((set) => ({
   }),
   
   prevStep: () => set((state) => {
-    // If BRAND_NEW and going back from CONFIRMATION, go straight to DETAILS
-    if (state.step === OnboardingStep.CONFIRMATION && state.purchaseCondition === 'BRAND_NEW') {
+    if (state.step === OnboardingStep.CONFIRMATION) {
       return { step: OnboardingStep.DETAILS };
     }
     const currentIndex = ONBOARDING_STEPS.indexOf(state.step);

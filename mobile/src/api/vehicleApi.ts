@@ -52,4 +52,15 @@ export const vehicleApi = {
     const response = await apiClient.patch<VehicleResponse>(ENDPOINTS.VEHICLES.PRIMARY(id));
     return response.data;
   },
+
+  batchUpdateComponentDates: async (
+    vehicleId: string,
+    componentDates: Record<string, string>
+  ): Promise<VehicleResponse> => {
+    const response = await apiClient.patch<VehicleResponse>(
+      ENDPOINTS.VEHICLES.BATCH_COMPONENT_DATES(vehicleId),
+      { componentDates }
+    );
+    return response.data;
+  },
 };

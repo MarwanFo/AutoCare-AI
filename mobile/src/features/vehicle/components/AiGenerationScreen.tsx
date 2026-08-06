@@ -21,12 +21,19 @@ import { useCreateVehicle } from '@/hooks/vehicle/useCreateVehicle';
 import { useJob } from '@/hooks/job/useJob';
 import { useCancelJob } from '@/hooks/job/useCancelJob';
 import { CreateVehicleRequest } from '@/types/vehicle';
-import { v4 as uuidv4 } from 'uuid';
 import {
   UI_PROGRESS_STEPS,
   getProgressPercentage,
   getStepStatus,
 } from '@/utils/jobProgress';
+
+function generateUuidV4(): string {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+    const r = (Math.random() * 16) | 0;
+    const v = c === 'x' ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
+}
 
 const SUCCESS_ANIMATION_DURATION_MS = 2000;
 
@@ -42,7 +49,7 @@ export function AiGenerationScreen({
   onCompleted,
 }: AiGenerationScreenProps) {
   const [jobId, setJobId] = useState<string | null>(null);
-  const [clientRequestId, setClientRequestId] = useState(() => uuidv4());
+  const [clientRequestId, setClientRequestId] = useState(() => generateUuidV4());
   const hasTriggeredInit = useRef(false);
   const onCompletedCalled = useRef(false);
 
@@ -92,7 +99,7 @@ export function AiGenerationScreen({
   });
 
   const handleRetry = () => {
-    const newReqId = uuidv4();
+    const newReqId = generateUuidV4();
     setClientRequestId(newReqId);
     onCompletedCalled.current = false;
     startGeneration(newReqId);

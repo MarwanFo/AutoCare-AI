@@ -14,6 +14,18 @@ import {
 import Svg, { Path } from 'react-native-svg';
 import { useVehicle } from '@/hooks/vehicle/useVehicle';
 import { Spacing } from '@/constants/theme';
+import { useAppTranslation } from '@/i18n/hooks/useAppTranslation';
+import { useRTL } from '@/i18n/hooks/useRTL';
+import { resolveCategoryLabel, resolveComponentName } from '../utils/componentResolver';
+import { AddComponentModal } from './AddComponentModal';
+import { AddDocumentModal } from './AddDocumentModal';
+import { AddIntervalModal } from './AddIntervalModal';
+import { useDeleteComponent, useDeleteDocument, useDeleteInterval } from '@/hooks/vehicle/useVehicleMutations';
+
+import { AiAdvisorTab } from './AiAdvisorTab';
+import { CostBudgetCard } from './CostBudgetCard';
+import { vehicleAdvisorApi } from '@/api/vehicleAdvisorApi';
+import { Alert, Share } from 'react-native';
 
 interface VehicleDetailsModalProps {
   vehicleId: string;
@@ -21,14 +33,33 @@ interface VehicleDetailsModalProps {
   onClose: () => void;
 }
 
-type TabType = 'COMPONENTS' | 'DOCUMENTS' | 'INTERVALS' | 'SPECS';
+type TabType = 'COMPONENTS' | 'BUDGET' | 'AI_ADVISOR' | 'DOCUMENTS' | 'INTERVALS' | 'SPECS';
 
 export function VehicleDetailsModal({ vehicleId, visible, onClose }: VehicleDetailsModalProps) {
+  const { t } = useAppTranslation(['maintenance', 'common']);
+  const { isRTL } = useRTL();
   const { data: vehicle, isLoading, error } = useVehicle(vehicleId);
   const [activeTab, setActiveTab] = useState<TabType>('COMPONENTS');
 
-  const openDocumentUrl = (url: string) => {
-    Linking.openURL(url).catch((err) => console.error("Failed to open URL", err));
+  const [showAddComponent, setShowAddComponent] = useState(false);
+  const [showAddDocument, setShowAddDocument] = useState(false);
+  const [showAddInterval, setShowAddInterval] = useState(false);
+
+  const deleteComponentMutation = useDeleteComponent(vehicleId);
+  const deleteDocumentMutation = useDeleteDocument(vehicleId);
+  const deleteIntervalMutation = useDeleteInterval(vehicleId);
+
+  const openDocumentUrl = async (url?: string) => {
+    if (!url) return;
+    let targetUrl = url.trim();
+    if (!targetUrl.startsWith('http://') && !targetUrl.startsWith('https://')) {
+      targetUrl = `https://${targetUrl}`;
+    }
+    try {
+      await Linking.openURL(targetUrl);
+    } catch (err) {
+      console.error("Failed to open document URL:", err);
+    }
   };
 
   const getHealthColor = (score?: number) => {
@@ -84,10 +115,12 @@ export function VehicleDetailsModal({ vehicleId, visible, onClose }: VehicleDeta
           ) : (
             <View style={{ flex: 1 }}>
               {/* Vehicle Sub-Info */}
-              <View style={styles.metaRow}>
+              <View style={[styles.metaRow, isRTL && { flexDirection: 'row-reverse' }]}>
                 <View style={styles.metaBadge}>
                   <Text style={styles.metaBadgeText}>
-                    {vehicle.purchaseCondition === 'BRAND_NEW' ? 'Brand New' : 'Used'}
+                    {vehicle.purchaseCondition === 'BRAND_NEW'
+                      ? t('maintenance:condition.brand_new')
+                      : t('maintenance:condition.used')}
                   </Text>
                 </View>
                 {vehicle.licensePlate && (
@@ -102,40 +135,132 @@ export function VehicleDetailsModal({ vehicleId, visible, onClose }: VehicleDeta
                 </View>
               </View>
 
-              {/* Tabs Navigation */}
-              <View style={styles.tabBar}>
-                {(['COMPONENTS', 'DOCUMENTS', 'INTERVALS', 'SPECS'] as TabType[]).map((tab) => (
-                  <TouchableOpacity
-                    key={tab}
-                    style={[styles.tabButton, activeTab === tab && styles.activeTabButton]}
-                    onPress={() => setActiveTab(tab)}
-                  >
-                    <Text style={[styles.tabButtonText, activeTab === tab && styles.activeTabButtonText]}>
-                      {tab === 'COMPONENTS' ? 'Pieces' : tab.charAt(0) + tab.slice(1).toLowerCase()}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
+              {/* Action & Tabs Navigation */}
+              <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12, gap: 8 }}>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ flex: 1 }}>
+                  <View style={[styles.tabBar, isRTL && { flexDirection: 'row-reverse' }]}>
+                    {(['COMPONENTS', 'BUDGET', 'AI_ADVISOR', 'DOCUMENTS', 'INTERVALS', 'SPECS'] as TabType[]).map((tab) => (
+                      <TouchableOpacity
+                        key={tab}
+                        style={[styles.tabButton, activeTab === tab && styles.activeTabButton]}
+                        onPress={() => setActiveTab(tab)}
+                      >
+                        <Text style={[styles.tabButtonText, activeTab === tab && styles.activeTabButtonText]}>
+                          {tab === 'AI_ADVISOR' ? '🤖 AI Advisor' : tab === 'BUDGET' ? '💰 Budget' : t(`maintenance:tabs.${tab.toLowerCase()}`, { defaultValue: tab })}
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                </ScrollView>
+
+                <TouchableOpacity
+                  style={{
+                    backgroundColor: '#abc7ff20',
+                    borderColor: '#abc7ff',
+                    borderWidth: 1,
+                    paddingHorizontal: 10,
+                    paddingVertical: 8,
+                    borderRadius: 12,
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    gap: 4,
+                  }}
+                  onPress={async () => {
+                    try {
+                      const rep = await vehicleAdvisorApi.getHealthReport(vehicleId);
+                      const text = `🚗 Digital Twin Health Report for ${rep.vehicleTitle}\n` +
+                        `• Overall Health: ${rep.overallHealthScore}%\n` +
+                        `• Mileage: ${rep.currentMileage} ${rep.mileageUnit}\n` +
+                        `• Components Tracked: ${rep.components?.length || 0}\n` +
+                        `• Critical Alerts: ${rep.criticalWarnings?.length || 0}\n` +
+                        `Generated by AutoCare AI Enterprise.`;
+                      await Share.share({ message: text, title: `Health Report - ${rep.vehicleTitle}` });
+                    } catch (err) {
+                      Alert.alert('Report Export', 'Digital Twin Health Certificate generated.');
+                    }
+                  }}
+                >
+                  <Svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                    <Path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z" fill="#abc7ff" />
+                  </Svg>
+                  <Text style={{ fontFamily: 'Inter', fontSize: 11, fontWeight: '700', color: '#abc7ff' }}>Export</Text>
+                </TouchableOpacity>
               </View>
 
               {/* Tab Content */}
               <ScrollView style={styles.scrollContainer} showsVerticalScrollIndicator={false}>
+                {activeTab === 'BUDGET' && (
+                  <CostBudgetCard components={vehicle.components} />
+                )}
+
+                {activeTab === 'AI_ADVISOR' && (
+                  <AiAdvisorTab
+                    vehicleId={vehicle.id}
+                    vehicleName={`${vehicle.year} ${vehicle.brandName} ${vehicle.modelName}`}
+                  />
+                )}
+
                 {activeTab === 'COMPONENTS' && (
                   <View style={styles.tabContentContainer}>
-                    <Text style={styles.sectionTitle}>Digital Twin Component Health</Text>
+                    <View style={[styles.sectionHeaderRow, isRTL && { flexDirection: 'row-reverse' }]}>
+                      <Text style={[styles.sectionTitle, isRTL && { textAlign: 'right' }]}>{t('maintenance:components.title')}</Text>
+                      <TouchableOpacity
+                        style={[styles.addInlineBtn, isRTL && { flexDirection: 'row-reverse' }]}
+                        onPress={() => setShowAddComponent(true)}
+                      >
+                        <Svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                          <Path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" fill="#abc7ff" />
+                        </Svg>
+                        <Text style={styles.addInlineBtnText}>{t('maintenance:actions.add_component_short', { defaultValue: '+ Add Piece' })}</Text>
+                      </TouchableOpacity>
+                    </View>
+
+                    {vehicle.components?.some((c) => (c.healthScore ?? 100) < 25) && (
+                      <View style={[styles.dangerBanner, isRTL && { flexDirection: 'row-reverse' }]}>
+                        <Svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+                          <Path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" fill="#f87171" />
+                        </Svg>
+                        <View style={{ flex: 1 }}>
+                          <Text style={[styles.dangerBannerTitle, isRTL && { textAlign: 'right' }]}>
+                            {t('maintenance:danger.banner_title', { defaultValue: 'CRITICAL SAFETY WARNING' })}
+                          </Text>
+                          <Text style={[styles.dangerBannerSub, isRTL && { textAlign: 'right' }]}>
+                            {t('maintenance:danger.banner_subtitle', { defaultValue: 'One or more vehicle components have reached critical wear. Inspect car immediately!' })}
+                          </Text>
+                        </View>
+                      </View>
+                    )}
+
                     {vehicle.components && vehicle.components.length > 0 ? (
                       vehicle.components.map((comp) => {
                         const healthCol = getHealthColor(comp.healthScore);
                         return (
                           <View key={comp.id} style={styles.componentCard}>
-                            <View style={styles.componentHeader}>
-                              <View>
-                                <Text style={styles.componentName}>{comp.name}</Text>
-                                <Text style={styles.componentCategory}>{comp.category}</Text>
-                              </View>
-                              <View style={[styles.healthBadge, { backgroundColor: `${healthCol}20` }]}>
-                                <Text style={[styles.healthText, { color: healthCol }]}>
-                                  {comp.healthScore}% Health
+                            <View style={[styles.componentHeader, isRTL && { flexDirection: 'row-reverse' }]}>
+                              <View style={{ flex: 1 }}>
+                                <Text style={[styles.componentName, isRTL && { textAlign: 'right' }]}>
+                                  {resolveComponentName(comp.name, (comp as any).canonicalCode, (comp as any).isCustom, t)}
                                 </Text>
+                                <Text style={[styles.componentCategory, isRTL && { textAlign: 'right' }]}>
+                                  {resolveCategoryLabel(comp.category, t)}
+                                </Text>
+                              </View>
+                              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                                <View style={[styles.healthBadge, { backgroundColor: `${healthCol}20` }]}>
+                                  <Text style={[styles.healthText, { color: healthCol }]}>
+                                    {t('maintenance:reminders.health_percentage', { percentage: comp.healthScore, defaultValue: `${comp.healthScore}% Health` })}
+                                  </Text>
+                                </View>
+                                {(comp as any).isCustom && (
+                                  <TouchableOpacity
+                                    style={styles.deleteCardBtn}
+                                    onPress={() => deleteComponentMutation.mutate(comp.id)}
+                                  >
+                                    <Svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                      <Path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z" fill="#f87171" />
+                                    </Svg>
+                                  </TouchableOpacity>
+                                )}
                               </View>
                             </View>
 
@@ -149,22 +274,40 @@ export function VehicleDetailsModal({ vehicleId, visible, onClose }: VehicleDeta
                               />
                             </View>
 
+                            {/* Remaining Lifespan Badges */}
+                            <View style={[styles.lifespanRow, isRTL && { flexDirection: 'row-reverse' }]}>
+                              {(comp as any).remainingMileage !== undefined && (comp as any).remainingMileage !== null && (
+                                <View style={styles.lifespanBadge}>
+                                  <Text style={styles.lifespanBadgeText}>
+                                    {t('maintenance:reminders.remaining_mileage', { remainingMileage: ((comp as any).remainingMileage ?? 0).toLocaleString(), unit: vehicle.mileageUnit, defaultValue: `${((comp as any).remainingMileage ?? 0).toLocaleString()} ${vehicle.mileageUnit} remaining` })}
+                                  </Text>
+                                </View>
+                              )}
+                              {(comp as any).remainingDays !== undefined && (comp as any).remainingDays !== null && (
+                                <View style={styles.lifespanBadge}>
+                                  <Text style={styles.lifespanBadgeText}>
+                                    {t('maintenance:reminders.days_remaining', { days: (comp as any).remainingDays ?? 0, defaultValue: `${(comp as any).remainingDays ?? 0} days remaining` })}
+                                  </Text>
+                                </View>
+                              )}
+                            </View>
+
                             <View style={styles.componentMetaGrid}>
                               {comp.partNumber && (
                                 <View style={styles.componentMetaItem}>
-                                  <Text style={styles.metaLabel}>OEM Part Number</Text>
+                                  <Text style={styles.metaLabel}>{t('maintenance:components.part_number')}</Text>
                                   <Text style={styles.metaValue}>{comp.partNumber}</Text>
                                 </View>
                               )}
                               {comp.specifications && (
                                 <View style={styles.componentMetaItem}>
-                                  <Text style={styles.metaLabel}>Specifications</Text>
+                                  <Text style={styles.metaLabel}>{t('maintenance:components.specifications')}</Text>
                                   <Text style={styles.metaValue}>{comp.specifications}</Text>
                                 </View>
                               )}
                               {comp.notes && (
                                 <View style={[styles.componentMetaItem, { width: '100%' }]}>
-                                  <Text style={styles.metaLabel}>Notes</Text>
+                                  <Text style={styles.metaLabel}>{t('maintenance:components.notes')}</Text>
                                   <Text style={styles.metaValue}>{comp.notes}</Text>
                                 </View>
                               )}
@@ -174,7 +317,7 @@ export function VehicleDetailsModal({ vehicleId, visible, onClose }: VehicleDeta
                       })
                     ) : (
                       <View style={styles.emptyContainer}>
-                        <Text style={styles.emptyText}>No components registered for this vehicle.</Text>
+                        <Text style={styles.emptyText}>{t('maintenance:components.no_components')}</Text>
                       </View>
                     )}
                   </View>
@@ -182,7 +325,19 @@ export function VehicleDetailsModal({ vehicleId, visible, onClose }: VehicleDeta
 
                 {activeTab === 'DOCUMENTS' && (
                   <View style={styles.tabContentContainer}>
-                    <Text style={styles.sectionTitle}>AI Generated Documents</Text>
+                    <View style={[styles.sectionHeaderRow, isRTL && { flexDirection: 'row-reverse' }]}>
+                      <Text style={[styles.sectionTitle, isRTL && { textAlign: 'right' }]}>{t('maintenance:documents_section.title')}</Text>
+                      <TouchableOpacity
+                        style={[styles.addInlineBtn, isRTL && { flexDirection: 'row-reverse' }]}
+                        onPress={() => setShowAddDocument(true)}
+                      >
+                        <Svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                          <Path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" fill="#abc7ff" />
+                        </Svg>
+                        <Text style={styles.addInlineBtnText}>{t('maintenance:actions.add_document_short', { defaultValue: '+ Add Document' })}</Text>
+                      </TouchableOpacity>
+                    </View>
+
                     {vehicle.documents && vehicle.documents.length > 0 ? (
                       vehicle.documents.map((doc) => (
                         <View key={doc.id} style={styles.documentCard}>
@@ -195,14 +350,24 @@ export function VehicleDetailsModal({ vehicleId, visible, onClose }: VehicleDeta
                             </Svg>
                           </View>
                           <View style={styles.documentInfo}>
-                            <Text style={styles.documentTitle}>{doc.title}</Text>
-                            {doc.notes && <Text style={styles.documentNotes}>{doc.notes}</Text>}
+                            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                              <Text style={[styles.documentTitle, isRTL && { textAlign: 'right' }, { flex: 1 }]}>{doc.title}</Text>
+                              <TouchableOpacity
+                                style={styles.deleteCardBtn}
+                                onPress={() => deleteDocumentMutation.mutate(doc.id)}
+                              >
+                                <Svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                  <Path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z" fill="#f87171" />
+                                </Svg>
+                              </TouchableOpacity>
+                            </View>
+                            {doc.notes && <Text style={[styles.documentNotes, isRTL && { textAlign: 'right' }]}>{doc.notes}</Text>}
                             <TouchableOpacity
-                              style={styles.viewDocButton}
+                              style={[styles.viewDocButton, isRTL && { flexDirection: 'row-reverse' }]}
                               onPress={() => openDocumentUrl(doc.url)}
                             >
-                              <Text style={styles.viewDocText}>View PDF Document</Text>
-                              <Svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                              <Text style={styles.viewDocText}>{t('maintenance:documents_section.view_pdf')}</Text>
+                              <Svg width="14" height="14" viewBox="0 0 24 24" fill="none" style={isRTL ? { transform: [{ scaleX: -1 }] } : undefined}>
                                 <Path
                                   d="M19 19H5V5H12V3H5C3.89 3 3 3.9 3 5V19C3 20.1 3.89 21 5 21H19C20.1 21 21 20.1 21 19V12H19V19ZM14 3V5H17.59L7.76 14.83L9.17 16.24L19 6.41V10H21V3H14Z"
                                   fill="#abc7ff"
@@ -214,7 +379,7 @@ export function VehicleDetailsModal({ vehicleId, visible, onClose }: VehicleDeta
                       ))
                     ) : (
                       <View style={styles.emptyContainer}>
-                        <Text style={styles.emptyText}>No documents generated for this vehicle.</Text>
+                        <Text style={styles.emptyText}>{t('maintenance:documents_section.no_documents')}</Text>
                       </View>
                     )}
                   </View>
@@ -222,30 +387,52 @@ export function VehicleDetailsModal({ vehicleId, visible, onClose }: VehicleDeta
 
                 {activeTab === 'INTERVALS' && (
                   <View style={styles.tabContentContainer}>
-                    <Text style={styles.sectionTitle}>Maintenance Schedule Intervals</Text>
+                    <View style={[styles.sectionHeaderRow, isRTL && { flexDirection: 'row-reverse' }]}>
+                      <Text style={[styles.sectionTitle, isRTL && { textAlign: 'right' }]}>{t('maintenance:service.intervals')}</Text>
+                      <TouchableOpacity
+                        style={[styles.addInlineBtn, isRTL && { flexDirection: 'row-reverse' }]}
+                        onPress={() => setShowAddInterval(true)}
+                      >
+                        <Svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                          <Path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" fill="#abc7ff" />
+                        </Svg>
+                        <Text style={styles.addInlineBtnText}>{t('maintenance:actions.add_interval_short', { defaultValue: '+ Add Interval' })}</Text>
+                      </TouchableOpacity>
+                    </View>
+
                     {vehicle.intervals && vehicle.intervals.length > 0 ? (
                       vehicle.intervals.map((interval) => (
                         <View key={interval.id} style={styles.intervalCard}>
-                          <View style={styles.intervalHeader}>
-                            <Text style={styles.intervalTitle}>{interval.title}</Text>
-                            <View style={styles.intervalBadge}>
-                              <Text style={styles.intervalBadgeText}>
-                                {interval.isInspectionOnly ? 'Inspection' : 'Replacement'}
-                              </Text>
+                          <View style={[styles.intervalHeader, isRTL && { flexDirection: 'row-reverse' }]}>
+                            <Text style={[styles.intervalTitle, isRTL && { textAlign: 'right' }, { flex: 1 }]}>{interval.title}</Text>
+                            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                              <View style={styles.intervalBadge}>
+                                <Text style={styles.intervalBadgeText}>
+                                  {interval.isInspectionOnly ? t('maintenance:service.inspection') : t('maintenance:service.replacement')}
+                                </Text>
+                              </View>
+                              <TouchableOpacity
+                                style={styles.deleteCardBtn}
+                                onPress={() => deleteIntervalMutation.mutate(interval.id)}
+                              >
+                                <Svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                  <Path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z" fill="#f87171" />
+                                </Svg>
+                              </TouchableOpacity>
                             </View>
                           </View>
                           {interval.description && (
-                            <Text style={styles.intervalDesc}>{interval.description}</Text>
+                            <Text style={[styles.intervalDesc, isRTL && { textAlign: 'right' }]}>{interval.description}</Text>
                           )}
-                          <View style={styles.intervalSpecs}>
+                          <View style={[styles.intervalSpecs, isRTL && { flexDirection: 'row-reverse' }]}>
                             {interval.intervalMileage && (
                               <Text style={styles.intervalSpecItem}>
-                                Every {interval.intervalMileage.toLocaleString()} {vehicle.mileageUnit}
+                                {t('maintenance:reminders.every_distance', { distance: interval.intervalMileage.toLocaleString(), unit: vehicle.mileageUnit, defaultValue: `Every ${interval.intervalMileage.toLocaleString()} ${vehicle.mileageUnit}` })}
                               </Text>
                             )}
                             {interval.intervalMonths && (
                               <Text style={styles.intervalSpecItem}>
-                                Every {interval.intervalMonths} months
+                                {t('maintenance:reminders.every_months', { months: interval.intervalMonths, defaultValue: `Every ${interval.intervalMonths} months` })}
                               </Text>
                             )}
                           </View>
@@ -253,7 +440,7 @@ export function VehicleDetailsModal({ vehicleId, visible, onClose }: VehicleDeta
                       ))
                     ) : (
                       <View style={styles.emptyContainer}>
-                        <Text style={styles.emptyText}>No scheduled intervals available.</Text>
+                        <Text style={styles.emptyText}>{t('maintenance:service.no_intervals')}</Text>
                       </View>
                     )}
                   </View>
@@ -261,23 +448,23 @@ export function VehicleDetailsModal({ vehicleId, visible, onClose }: VehicleDeta
 
                 {activeTab === 'SPECS' && (
                   <View style={styles.tabContentContainer}>
-                    <Text style={styles.sectionTitle}>Full Vehicle Specifications</Text>
+                    <Text style={[styles.sectionTitle, isRTL && { textAlign: 'right' }]}>{t('maintenance:specs_section.title')}</Text>
                     <View style={styles.specsTable}>
                       {[
-                        { label: 'Transmission', value: vehicle.transmission || 'N/A' },
-                        { label: 'Fuel Type', value: vehicle.fuelType || 'N/A' },
-                        { label: 'Color', value: vehicle.color || 'N/A' },
-                        { label: 'VIN', value: vehicle.vin || 'N/A' },
-                        { label: 'Primary', value: vehicle.isPrimary ? 'Yes' : 'No' },
-                        { label: 'Status', value: vehicle.status || 'N/A' },
-                        { label: 'Completeness Score', value: vehicle.completenessScore ? `${vehicle.completenessScore}%` : 'N/A' },
-                        { label: 'Estimated Annual Mileage', value: vehicle.estimatedAnnualMileage ? `${vehicle.estimatedAnnualMileage.toLocaleString()} ${vehicle.mileageUnit}` : 'N/A' },
-                        { label: 'Driving Profile', value: vehicle.drivingProfile || 'N/A' },
-                        { label: 'Climate Assumptions', value: vehicle.climateAssumptions || 'N/A' },
+                        { label: t('maintenance:specs_section.transmission'), value: vehicle.transmission || 'N/A' },
+                        { label: t('maintenance:specs_section.fuel_type'), value: vehicle.fuelType || 'N/A' },
+                        { label: t('maintenance:specs_section.color'), value: vehicle.color || 'N/A' },
+                        { label: t('maintenance:specs_section.vin'), value: vehicle.vin || 'N/A' },
+                        { label: t('maintenance:specs_section.primary'), value: vehicle.isPrimary ? t('maintenance:specs_section.yes') : t('maintenance:specs_section.no') },
+                        { label: t('maintenance:specs_section.status'), value: vehicle.status || 'N/A' },
+                        { label: t('maintenance:specs_section.completeness_score'), value: vehicle.completenessScore ? `${vehicle.completenessScore}%` : 'N/A' },
+                        { label: t('maintenance:specs_section.estimated_annual_mileage'), value: vehicle.estimatedAnnualMileage ? `${vehicle.estimatedAnnualMileage.toLocaleString()} ${vehicle.mileageUnit}` : 'N/A' },
+                        { label: t('maintenance:specs_section.driving_profile'), value: vehicle.drivingProfile || 'N/A' },
+                        { label: t('maintenance:specs_section.climate_assumptions'), value: vehicle.climateAssumptions || 'N/A' },
                       ].map((row, idx) => (
-                        <View key={idx} style={styles.specsRow}>
-                          <Text style={styles.specsLabel}>{row.label}</Text>
-                          <Text style={styles.specsValue}>{row.value}</Text>
+                        <View key={idx} style={[styles.specsRow, isRTL && { flexDirection: 'row-reverse' }]}>
+                          <Text style={[styles.specsLabel, isRTL && { textAlign: 'right' }]}>{row.label}</Text>
+                          <Text style={[styles.specsValue, isRTL && { textAlign: 'left' }]}>{row.value}</Text>
                         </View>
                       ))}
                     </View>
@@ -288,6 +475,23 @@ export function VehicleDetailsModal({ vehicleId, visible, onClose }: VehicleDeta
           )}
         </View>
       </View>
+
+      {/* Add Item Modals */}
+      <AddComponentModal
+        vehicleId={vehicleId}
+        visible={showAddComponent}
+        onClose={() => setShowAddComponent(false)}
+      />
+      <AddDocumentModal
+        vehicleId={vehicleId}
+        visible={showAddDocument}
+        onClose={() => setShowAddDocument(false)}
+      />
+      <AddIntervalModal
+        vehicleId={vehicleId}
+        visible={showAddInterval}
+        onClose={() => setShowAddInterval(false)}
+      />
     </Modal>
   );
 }
@@ -628,5 +832,77 @@ const styles = StyleSheet.create({
     color: '#c4c7c8',
     fontSize: 14,
     textAlign: 'center',
+  },
+  sectionHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: Spacing.three,
+  },
+  addInlineBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: '#abc7ff18',
+    borderWidth: 1,
+    borderColor: '#abc7ff40',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 12,
+  },
+  addInlineBtnText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#abc7ff',
+    fontFamily: 'Inter',
+  },
+  deleteCardBtn: {
+    padding: 6,
+    borderRadius: 8,
+    backgroundColor: '#f8717115',
+  },
+  dangerBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    backgroundColor: '#f8717120',
+    borderWidth: 1,
+    borderColor: '#f8717170',
+    borderRadius: 14,
+    padding: 12,
+    marginBottom: 16,
+  },
+  dangerBannerTitle: {
+    fontSize: 13,
+    fontWeight: '800',
+    color: '#f87171',
+    fontFamily: 'Inter',
+  },
+  dangerBannerSub: {
+    fontSize: 11,
+    color: '#fca5a5',
+    fontFamily: 'Inter',
+    marginTop: 2,
+  },
+  lifespanRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 6,
+    marginTop: 8,
+    marginBottom: 8,
+  },
+  lifespanBadge: {
+    backgroundColor: '#27272a',
+    borderRadius: 8,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderWidth: 1,
+    borderColor: '#3f3f46',
+  },
+  lifespanBadgeText: {
+    fontSize: 11,
+    color: '#abc7ff',
+    fontWeight: '600',
+    fontFamily: 'Inter',
   },
 });

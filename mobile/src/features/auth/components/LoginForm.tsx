@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Control, Controller, FieldErrors, UseFormHandleSubmit } from 'react-hook-form';
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
@@ -6,6 +6,7 @@ import Svg, { Path } from 'react-native-svg';
 
 import { FloatingInput, MailIcon, PasswordInput } from './PasswordInput';
 import { PrimaryButton } from './PrimaryButton';
+import { useAppTranslation } from '@/i18n/hooks/useAppTranslation';
 
 export interface LoginFormData {
   email: string;
@@ -69,6 +70,7 @@ export function LoginForm({
   onSubmit,
   onForgotPassword,
 }: LoginFormProps) {
+  const { t } = useAppTranslation(['auth', 'common']);
   const googleBtnScale = useSharedValue(1);
 
   // Google button active spring press animation
@@ -94,7 +96,7 @@ export function LoginForm({
         name="email"
         render={({ field: { onChange, onBlur, value } }) => (
           <FloatingInput
-            label="Email Address"
+            label={t('auth:email_label')}
             value={value}
             onChangeText={onChange}
             onBlur={onBlur}
@@ -112,7 +114,7 @@ export function LoginForm({
         name="password"
         render={({ field: { onChange, onBlur, value } }) => (
           <PasswordInput
-            label="Password"
+            label={t('auth:password_label')}
             value={value}
             onChangeText={onChange}
             onBlur={onBlur}
@@ -134,7 +136,7 @@ export function LoginForm({
               disabled={isLoading}
               accessibilityRole="checkbox"
               accessibilityState={{ checked: !!value }}
-              accessibilityLabel="Remember me"
+              accessibilityLabel={t('auth:remember_me')}
             >
               <View
                 style={[
@@ -144,18 +146,18 @@ export function LoginForm({
               >
                 <CheckboxIcon checked={!!value} />
               </View>
-              <Text style={styles.rememberText}>Remember me</Text>
+              <Text style={styles.rememberText}>{t('auth:remember_me')}</Text>
             </Pressable>
           )}
         />
 
         <Pressable
           accessibilityRole="link"
-          accessibilityLabel="Forgot password?"
+          accessibilityLabel={t('auth:forgot_password_link')}
           disabled={isLoading}
           onPress={onForgotPassword}
         >
-          <Text style={styles.forgotText}>Forgot password?</Text>
+          <Text style={styles.forgotText}>{t('auth:forgot_password_link')}</Text>
         </Pressable>
       </View>
 
@@ -163,7 +165,7 @@ export function LoginForm({
       <View style={styles.actionContainer}>
         {/* Core Login Button */}
         <PrimaryButton
-          title="Login"
+          title={t('auth:sign_in_button')}
           isLoading={isLoading}
           onPress={handleSubmit(onSubmit)}
         />
@@ -175,11 +177,11 @@ export function LoginForm({
           onPressOut={handleGooglePressOut}
           disabled={isLoading}
           accessibilityRole="button"
-          accessibilityLabel="Continue with Google"
+          accessibilityLabel={t('auth:continue_with_google')}
         >
           <View style={styles.googleContent}>
             <GoogleIcon />
-            <Text style={styles.googleText}>Continue with Google</Text>
+            <Text style={styles.googleText}>{t('auth:continue_with_google')}</Text>
           </View>
         </AnimatedPressable>
       </View>
@@ -194,44 +196,44 @@ const styles = StyleSheet.create({
   rememberForgotRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between', // space-between flex equivalent
+    justifyContent: 'space-between',
     width: '100%',
-    marginBottom: 32, // spacing alignment before CTA actions
+    marginBottom: 32,
   },
   checkboxContainer: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   checkbox: {
-    width: 20, // w-5 = 20px
-    height: 20, // h-5 = 20px
-    borderRadius: 4, // border radius for check box
+    width: 20,
+    height: 20,
+    borderRadius: 4,
     borderWidth: 1,
-    borderColor: '#444748', // border-outline-variant
-    backgroundColor: '#353534', // bg-surface-variant = #353534
+    borderColor: '#444748',
+    backgroundColor: '#353534',
     alignItems: 'center',
     justifyContent: 'center',
   },
   rememberText: {
     fontSize: 14,
     fontFamily: 'Inter',
-    color: '#c4c7c8', // text-on-surface-variant = #c4c7c8
-    marginLeft: 12, // ml-3 equivalent
+    color: '#c4c7c8',
+    marginLeft: 12,
   },
   forgotText: {
     fontSize: 14,
     fontFamily: 'Inter',
-    color: '#abc7ff', // text-secondary = #abc7ff
+    color: '#abc7ff',
   },
   actionContainer: {
     alignSelf: 'stretch',
-    gap: 16, // space-y-4 = 16px vertical gap
+    gap: 16,
   },
   googleButton: {
-    height: 56, // py-4 px-6 = ~56px height
-    borderRadius: 9999, // rounded-full
+    height: 56,
+    borderRadius: 9999,
     borderWidth: 1,
-    borderColor: '#444748', // border-outline-variant
+    borderColor: '#444748',
     backgroundColor: 'transparent',
     justifyContent: 'center',
     alignItems: 'center',
@@ -243,11 +245,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   googleText: {
-    fontSize: 14, // text-button = 14px
+    fontSize: 14,
     fontFamily: 'Inter',
-    fontWeight: '600', // font-button = 600
-    letterSpacing: 0.14, // letterSpacing = 0.01em
-    color: '#e5e2e1', // text-on-surface = #e5e2e1
-    marginLeft: 12, // mr-3 equivalent (on left of Google text)
+    fontWeight: '600',
+    letterSpacing: 0.14,
+    color: '#e5e2e1',
+    marginLeft: 12,
   },
 });

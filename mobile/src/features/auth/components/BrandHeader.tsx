@@ -2,8 +2,11 @@ import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import Svg, { Path } from 'react-native-svg';
+import { useAppTranslation } from '@/i18n/hooks/useAppTranslation';
 
 export function BrandHeader() {
+  const { t } = useAppTranslation('auth');
+
   return (
     <Animated.View
       entering={FadeInDown.duration(550).delay(100)}
@@ -24,9 +27,7 @@ export function BrandHeader() {
       <Text style={styles.title}>AutoCare AI</Text>
       
       {/* Tagline Subtitle (16px body size) */}
-      <Text style={styles.subtitle}>
-        Welcome back. Your vehicle's health is our priority.
-      </Text>
+      <Text style={styles.subtitle}>{t('auth:subtitle')}</Text>
     </Animated.View>
   );
 }
@@ -36,35 +37,35 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     alignSelf: 'stretch',
-    marginBottom: 48, // mb-12 = 48px
+    marginBottom: 48,
   },
   logoContainer: {
-    width: 64, // w-16 = 64px
-    height: 64, // h-16 = 64px
-    borderRadius: 16, // rounded-2xl = 16px
-    backgroundColor: '#2a2a2a', // bg-surface-container-high
+    width: 64,
+    height: 64,
+    borderRadius: 16,
+    backgroundColor: '#2a2a2a',
     borderWidth: 1,
-    borderColor: 'rgba(68, 71, 72, 0.3)', // border-outline-variant/30
+    borderColor: 'rgba(68, 71, 72, 0.3)',
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 24, // mb-6 = 24px
+    marginBottom: 24,
   },
   title: {
     fontFamily: 'Inter',
-    fontSize: 48, // text-display-lg = 48px
+    fontSize: 48,
     lineHeight: 56,
-    letterSpacing: -0.96, // letter-spacing: -0.02em
+    letterSpacing: -0.96,
     fontWeight: '700',
-    color: '#ffffff', // text-primary
+    color: '#ffffff',
     textAlign: 'center',
-    marginBottom: 8, // mb-2 = 8px
+    marginBottom: 8,
   },
   subtitle: {
     fontFamily: 'Inter',
-    fontSize: 16, // text-body-md = 16px
+    fontSize: 16,
     lineHeight: 24,
     fontWeight: '400',
-    color: '#c4c7c8', // text-on-surface-variant
+    color: '#c4c7c8',
     textAlign: 'center',
     maxWidth: 320,
   },

@@ -68,19 +68,9 @@ public class VehicleTemplateCloneServiceImpl implements VehicleTemplateCloneServ
         // 2. Clone template components into UserVehicle
         if (managedTemplate.getComponents() != null) {
             for (TemplateComponent tc : managedTemplate.getComponents()) {
-                if (isBrandNew) {
-                    // Pre-fill ALL components for brand new vehicles
-                    UserComponent uc = vehicleCloneMapper.toUserComponent(tc, userVehicle, purchaseCondition, initialComponentHealths);
-                    userVehicle.addComponent(uc);
-                } else {
-                    // For USED vehicles, ONLY pre-fill components user explicitly calibrated during onboarding.
-                    // The rest are input manually one-by-one by the user post-onboarding.
-                    String healthKey = getMatchingHealthKey(tc);
-                    if (healthKey != null && initialComponentHealths != null && initialComponentHealths.containsKey(healthKey)) {
-                        UserComponent uc = vehicleCloneMapper.toUserComponent(tc, userVehicle, purchaseCondition, initialComponentHealths);
-                        userVehicle.addComponent(uc);
-                    }
-                }
+                // Clone ALL components for both BRAND_NEW and USED vehicles
+                UserComponent uc = vehicleCloneMapper.toUserComponent(tc, userVehicle, purchaseCondition, initialComponentHealths);
+                userVehicle.addComponent(uc);
             }
         }
 
@@ -104,8 +94,8 @@ public class VehicleTemplateCloneServiceImpl implements VehicleTemplateCloneServ
             }
         }
 
-        // 4. Populate documents for BRAND_NEW vehicle from template specifications JSON
-        if (isBrandNew && managedTemplate.getSpecifications() != null && managedTemplate.getSpecifications().containsKey("documents")) {
+        // 4. Populate documents for vehicle from template specifications JSON
+        if (managedTemplate.getSpecifications() != null && managedTemplate.getSpecifications().containsKey("documents")) {
             Object docsObj = managedTemplate.getSpecifications().get("documents");
             if (docsObj instanceof java.util.List) {
                 for (Object docObj : (java.util.List<?>) docsObj) {
@@ -113,13 +103,21 @@ public class VehicleTemplateCloneServiceImpl implements VehicleTemplateCloneServ
                         java.util.Map<?, ?> docMap = objectMapper.convertValue(docObj, java.util.Map.class);
                         String title = (String) docMap.get("title");
                         String notes = (String) docMap.get("notes");
+                        String fileUrl = (String) docMap.get("fileUrl");
+                        if (fileUrl == null || fileUrl.trim().isEmpty()) {
+                            fileUrl = (String) docMap.get("url");
+                        }
                         if (title != null && !title.trim().isEmpty()) {
                             UserDocument ud = new UserDocument();
                             ud.setUserVehicle(userVehicle);
                             ud.setTitle(title.trim());
                             ud.setNotes(notes != null ? notes.trim() : null);
-                            // Standard placeholder URL for generated documents
-                            ud.setUrl("https://autocare.ai/templates/documents/" + java.util.UUID.randomUUID().toString() + ".pdf");
+                            
+                            if (fileUrl != null && !fileUrl.trim().isEmpty() && !fileUrl.contains("autocare.ai/templates")) {
+                                ud.setUrl(fileUrl.trim());
+                            } else {
+                                ud.setUrl(resolveRealSamplePdfUrl(title));
+                            }
                             userVehicle.addDocument(ud);
                         }
                     } catch (Exception e) {
@@ -133,24 +131,17 @@ public class VehicleTemplateCloneServiceImpl implements VehicleTemplateCloneServ
         return userVehicleRepository.save(userVehicle);
     }
 
-    private String getMatchingHealthKey(TemplateComponent tc) {
-        String name = tc.getName().toLowerCase();
-        String cat = tc.getCategory().name().toLowerCase();
-        if (name.contains("oil") && (cat.contains("fluid") || cat.contains("engine") || cat.contains("filter"))) {
-            return "engineOil";
+    private String resolveRealSamplePdfUrl(String title) {
+        String t = title.toLowerCase();
+        if (t.contains("manual") || t.contains("owner")) {
+            return "https://raw.githubusercontent.com/mozilla/pdf.js/master/web/compressed.tracemonkey-pldi-09.pdf";
         }
-        if ((name.contains("coolant") || name.contains("antifreeze")) && (cat.contains("fluid") || cat.contains("engine"))) {
-            return "coolant";
+        if (t.contains("warranty")) {
+            return "https://www.orimi.com/pdf-test.pdf";
         }
-        if ((name.contains("tire") || name.contains("tyre")) && cat.contains("tire")) {
-            return "tires";
+        if (t.contains("emergency") || t.contains("roadside")) {
+            return "https://www.unm.edu/~tbeach/terms/PDFsample.pdf";
         }
-        if (name.contains("brake") && name.contains("pad") && cat.contains("brake")) {
-            return "brakePads";
-        }
-        if ((name.contains("battery") || name.contains("12v")) && (cat.contains("battery") || cat.contains("electrical") || cat.contains("other"))) {
-            return "battery";
-        }
-        return null;
+        return "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf";
     }
 }

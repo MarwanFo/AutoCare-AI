@@ -128,6 +128,8 @@ public class VehicleCloneMapper {
         userComponent.setName(templateComponent.getName());
         userComponent.setPartNumber(templateComponent.getStandardPartNumber());
         userComponent.setSpecifications(templateComponent.getStandardSpecifications());
+        userComponent.setExpectedLifespanMileage(templateComponent.getExpectedLifespanMileage());
+        userComponent.setExpectedLifespanMonths(templateComponent.getExpectedLifespanMonths());
         userComponent.setCustom(false);
         userComponent.setModifiedFromTemplate(false);
 

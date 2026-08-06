@@ -2,19 +2,38 @@ package com.autocare.backend.auth.mapper;
 
 import com.autocare.backend.auth.dto.SessionResponse;
 import com.autocare.backend.auth.entity.UserSession;
-import org.mapstruct.Context;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.UUID;
 
-@Mapper(componentModel = "spring")
-public interface UserSessionMapper {
+@Component
+public class UserSessionMapper {
 
-    @Mapping(target = "sessionId", source = "id")
-    @Mapping(target = "isCurrent", expression = "java(session.getId() != null && session.getId().equals(currentSessionId))")
-    SessionResponse toResponse(UserSession session, @Context UUID currentSessionId);
+    public SessionResponse toResponse(UserSession session, UUID currentSessionId) {
+        if (session == null) {
+            return null;
+        }
 
-    List<SessionResponse> toResponseList(List<UserSession> sessions, @Context UUID currentSessionId);
+        boolean isCurrent = session.getId() != null && session.getId().equals(currentSessionId);
+
+        return new SessionResponse(
+                session.getId(),
+                session.getDeviceId(),
+                session.getIpAddress(),
+                session.getUserAgent(),
+                session.getLastAccessedAt(),
+                isCurrent
+        );
+    }
+
+    public List<SessionResponse> toResponseList(List<UserSession> sessions, UUID currentSessionId) {
+        if (sessions == null) {
+            return null;
+        }
+
+        return sessions.stream()
+                .map(session -> toResponse(session, currentSessionId))
+                .toList();
+    }
 }

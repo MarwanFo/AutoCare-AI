@@ -13,6 +13,10 @@ import com.autocare.backend.vehicle.dto.UpdateComponentRequest;
 import com.autocare.backend.vehicle.dto.CreateDocumentRequest;
 import com.autocare.backend.vehicle.dto.UpdateDocumentRequest;
 
+import com.autocare.backend.vehicle.dto.CreateIntervalRequest;
+import com.autocare.backend.vehicle.dto.UpdateIntervalRequest;
+import com.autocare.backend.vehicle.entity.UserInterval;
+
 public interface VehicleService {
 
     UserVehicle createVehicle(UUID userId, CreateVehicleRequest request);
@@ -40,5 +44,22 @@ public interface VehicleService {
     com.autocare.backend.vehicle.entity.UserDocument updateDocument(UUID userId, java.util.UUID vehicleId, java.util.UUID documentId, UpdateDocumentRequest request);
 
     void deleteDocument(UUID userId, java.util.UUID vehicleId, java.util.UUID documentId);
+
+    UserInterval addInterval(UUID userId, UUID vehicleId, CreateIntervalRequest request);
+
+    UserInterval updateInterval(UUID userId, UUID vehicleId, UUID intervalId, UpdateIntervalRequest request);
+
+    void deleteInterval(UUID userId, UUID vehicleId, UUID intervalId);
+
+    /**
+     * Batch-updates the last-changed dates for multiple components on a vehicle.
+     * Used during pre-owned vehicle onboarding after AI generation completes.
+     * @param componentDates map of component name → ISO date string (YYYY-MM-DD)
+     */
+    void batchUpdateComponentDates(UUID userId, UUID vehicleId, java.util.Map<String, String> componentDates);
+
+    com.autocare.backend.vehicle.dto.AiAdvisorResponse consultAiAdvisor(UUID userId, UUID vehicleId, com.autocare.backend.vehicle.dto.AiAdvisorRequest request);
+
+    com.autocare.backend.vehicle.dto.VehicleReportResponse exportVehicleReport(UUID userId, UUID vehicleId);
 }
 

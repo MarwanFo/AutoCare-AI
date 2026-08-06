@@ -1,0 +1,15 @@
+{
+  "app_name": "AutoCare AI",
+  "save": "حفظ",
+  "cancel": "إلغاء",
+  "delete": "حذف",
+  "confirm": "تأكيد",
+  "loading": "جاري التحميل...",
+  "retry": "إعادة المحاولة",
+  "success": "تم بنجاح",
+  "nav_home": "الرئيسية",
+  "nav_explore": "استكشاف",
+  "nav_profile": "الملف الشخصي",
+  "something_went_wrong": "حدث خطأ ما",
+  "error_boundary_message": "حدث خطأ غير متوقع في التطبيق. يرجى إعادة المحاولة."
+}

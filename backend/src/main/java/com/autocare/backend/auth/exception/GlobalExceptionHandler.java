@@ -217,6 +217,44 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
     }
 
+    @ExceptionHandler(com.autocare.backend.infrastructure.storage.exception.StorageException.class)
+    public ResponseEntity<ApiErrorResponse> handleStorageException(
+            com.autocare.backend.infrastructure.storage.exception.StorageException ex,
+            HttpServletRequest request
+    ) {
+        log.warn("Storage error: {} - Path: {}", ex.getMessage(), request.getRequestURI());
+
+        HttpStatus status = ex.getMessage() != null && ex.getMessage().contains("exceeds") 
+                ? HttpStatus.PAYLOAD_TOO_LARGE 
+                : HttpStatus.BAD_REQUEST;
+
+        ApiErrorResponse response = new ApiErrorResponse(
+                status.value(),
+                status.getReasonPhrase(),
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+
+        return ResponseEntity.status(status).body(response);
+    }
+
+    @ExceptionHandler(org.springframework.web.multipart.MaxUploadSizeExceededException.class)
+    public ResponseEntity<ApiErrorResponse> handleMaxUploadSizeExceededException(
+            org.springframework.web.multipart.MaxUploadSizeExceededException ex,
+            HttpServletRequest request
+    ) {
+        log.warn("Payload Too Large: File upload exceeds max size limit - Path: {}", request.getRequestURI());
+
+        ApiErrorResponse response = new ApiErrorResponse(
+                HttpStatus.PAYLOAD_TOO_LARGE.value(),
+                "Payload Too Large",
+                "Uploaded file size exceeds the maximum permitted limit of 5 MB.",
+                request.getRequestURI()
+        );
+
+        return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE).body(response);
+    }
+
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<ApiErrorResponse> handleBusinessException(
             BusinessException ex,

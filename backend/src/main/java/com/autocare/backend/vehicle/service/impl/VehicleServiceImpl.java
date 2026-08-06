@@ -29,12 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.UUID;
 import com.autocare.backend.vehicle.repository.UserComponentRepository;
 import com.autocare.backend.vehicle.repository.UserDocumentRepository;
-import com.autocare.backend.vehicle.entity.UserComponent;
-import com.autocare.backend.vehicle.entity.UserDocument;
-import com.autocare.backend.vehicle.dto.CreateComponentRequest;
-import com.autocare.backend.vehicle.dto.UpdateComponentRequest;
-import com.autocare.backend.vehicle.dto.CreateDocumentRequest;
-import com.autocare.backend.vehicle.dto.UpdateDocumentRequest;
+import com.autocare.backend.vehicle.repository.UserIntervalRepository;
 
 @Slf4j
 @Service
@@ -50,6 +45,8 @@ public class VehicleServiceImpl implements VehicleService {
     private final GeminiVehicleProfileService geminiVehicleProfileService;
     private final UserComponentRepository userComponentRepository;
     private final UserDocumentRepository userDocumentRepository;
+    private final UserIntervalRepository userIntervalRepository;
+    private final com.autocare.backend.vehicle.service.ComponentDegradationService componentDegradationService;
 
     @Override
     @Transactional
@@ -141,7 +138,7 @@ public class VehicleServiceImpl implements VehicleService {
     }
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public UserVehicle getVehicleById(UUID userId, UUID id) {
         UserVehicle vehicle = userVehicleRepository.findByIdWithDetails(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Vehicle not found with ID: " + id));
@@ -150,6 +147,7 @@ public class VehicleServiceImpl implements VehicleService {
             throw new AccessDeniedException("Access denied: You do not own this vehicle.");
         }
 
+        componentDegradationService.updateVehicleComponentDegradation(vehicle);
         return vehicle;
     }
 
@@ -436,6 +434,224 @@ public class VehicleServiceImpl implements VehicleService {
         }
 
         userDocumentRepository.delete(document);
+    }
+
+    @Override
+    @Transactional
+    public com.autocare.backend.vehicle.entity.UserInterval addInterval(UUID userId, UUID vehicleId, com.autocare.backend.vehicle.dto.CreateIntervalRequest request) {
+        UserVehicle vehicle = userVehicleRepository.findById(vehicleId)
+                .orElseThrow(() -> new ResourceNotFoundException("Vehicle not found with ID: " + vehicleId));
+
+        if (!vehicle.getUser().getId().equals(userId)) {
+            throw new AccessDeniedException("Access denied: You do not own this vehicle.");
+        }
+
+        com.autocare.backend.vehicle.entity.UserInterval interval = new com.autocare.backend.vehicle.entity.UserInterval();
+        interval.setUserVehicle(vehicle);
+        interval.setTitle(request.getTitle());
+        interval.setDescription(request.getDescription());
+        interval.setIntervalMileage(request.getIntervalMileage());
+        interval.setIntervalMonths(request.getIntervalMonths());
+        interval.setInspectionOnly(request.isInspectionOnly());
+        interval.setModifiedFromTemplate(false);
+
+        return userIntervalRepository.save(interval);
+    }
+
+    @Override
+    @Transactional
+    public com.autocare.backend.vehicle.entity.UserInterval updateInterval(UUID userId, UUID vehicleId, UUID intervalId, com.autocare.backend.vehicle.dto.UpdateIntervalRequest request) {
+        UserVehicle vehicle = userVehicleRepository.findById(vehicleId)
+                .orElseThrow(() -> new ResourceNotFoundException("Vehicle not found with ID: " + vehicleId));
+
+        if (!vehicle.getUser().getId().equals(userId)) {
+            throw new AccessDeniedException("Access denied: You do not own this vehicle.");
+        }
+
+        com.autocare.backend.vehicle.entity.UserInterval interval = userIntervalRepository.findById(intervalId)
+                .orElseThrow(() -> new ResourceNotFoundException("Interval not found with ID: " + intervalId));
+
+        if (!interval.getUserVehicle().getId().equals(vehicleId)) {
+            throw new BusinessException("Interval does not belong to the specified vehicle.");
+        }
+
+        interval.setTitle(request.getTitle());
+        interval.setDescription(request.getDescription());
+        interval.setIntervalMileage(request.getIntervalMileage());
+        interval.setIntervalMonths(request.getIntervalMonths());
+        interval.setInspectionOnly(request.isInspectionOnly());
+        interval.setModifiedFromTemplate(true);
+
+        return userIntervalRepository.save(interval);
+    }
+
+    @Override
+    @Transactional
+    public void deleteInterval(UUID userId, UUID vehicleId, UUID intervalId) {
+        UserVehicle vehicle = userVehicleRepository.findById(vehicleId)
+                .orElseThrow(() -> new ResourceNotFoundException("Vehicle not found with ID: " + vehicleId));
+
+        if (!vehicle.getUser().getId().equals(userId)) {
+            throw new AccessDeniedException("Access denied: You do not own this vehicle.");
+        }
+
+        com.autocare.backend.vehicle.entity.UserInterval interval = userIntervalRepository.findById(intervalId)
+                .orElseThrow(() -> new ResourceNotFoundException("Interval not found with ID: " + intervalId));
+
+        if (!interval.getUserVehicle().getId().equals(vehicleId)) {
+            throw new BusinessException("Interval does not belong to the specified vehicle.");
+        }
+
+        userIntervalRepository.delete(interval);
+    }
+
+    @Override
+    @Transactional
+    public void batchUpdateComponentDates(UUID userId, UUID vehicleId, java.util.Map<String, String> componentDates) {
+        UserVehicle vehicle = userVehicleRepository.findById(vehicleId)
+                .orElseThrow(() -> new ResourceNotFoundException("Vehicle not found with ID: " + vehicleId));
+
+        if (!vehicle.getUser().getId().equals(userId)) {
+            throw new AccessDeniedException("Access denied: You do not own this vehicle.");
+        }
+
+        if (componentDates == null || componentDates.isEmpty()) {
+            return;
+        }
+
+        int matched = 0;
+        for (com.autocare.backend.vehicle.entity.UserComponent comp : vehicle.getComponents()) {
+            String dateStr = componentDates.get(comp.getName());
+            if (dateStr != null && !dateStr.isBlank()) {
+                try {
+                    java.time.LocalDate date = java.time.LocalDate.parse(dateStr);
+                    comp.setLastReplacedDate(date);
+                    comp.setInstallationDate(date);
+                    comp.setInstallationMileage(vehicle.getCurrentMileage() != null ? vehicle.getCurrentMileage() : 0);
+                    comp.setOrigin(com.autocare.backend.vehicle.entity.enums.DataOrigin.USER_CONFIRMED);
+                    comp.setConfidenceScore(100);
+                    comp.setStatus(com.autocare.backend.vehicle.entity.enums.ComponentStatus.GOOD);
+                    userComponentRepository.save(comp);
+                    matched++;
+                } catch (java.time.format.DateTimeParseException e) {
+                    log.warn("Invalid date format for component '{}': {}", comp.getName(), dateStr);
+                }
+            }
+        }
+
+        log.info("Updated last-changed dates for {}/{} components on vehicle {}", matched, vehicle.getComponents().size(), vehicleId);
+
+        // Recalculate degradation for all components now that dates are set
+        componentDegradationService.updateVehicleComponentDegradation(vehicle);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public com.autocare.backend.vehicle.dto.AiAdvisorResponse consultAiAdvisor(
+            UUID userId, 
+            UUID vehicleId, 
+            com.autocare.backend.vehicle.dto.AiAdvisorRequest request
+    ) {
+        UserVehicle vehicle = userVehicleRepository.findById(vehicleId)
+                .orElseThrow(() -> new ResourceNotFoundException("Vehicle not found with ID: " + vehicleId));
+
+        if (!vehicle.getUser().getId().equals(userId)) {
+            throw new AccessDeniedException("Access denied: You do not own this vehicle.");
+        }
+
+        String vehicleContext = String.format("%s %s %s (%s, %s)",
+                vehicle.getTemplate().getYear(),
+                vehicle.getTemplate().getBrand().getName(),
+                vehicle.getTemplate().getModel().getName(),
+                vehicle.getFuelType(),
+                vehicle.getTransmission()
+        );
+
+        String question = request.getQuestion().trim();
+        String prompt = String.format(
+                "You are an expert AI automotive mechanics consultant for a %s with %d %s mileage.\n" +
+                "The user is asking: \"%s\".\n" +
+                "Provide a clear, highly professional, direct, and actionable answer tailored specifically to this car's engineering specifications.",
+                vehicleContext,
+                vehicle.getCurrentMileage() != null ? vehicle.getCurrentMileage() : 0,
+                vehicle.getMileageUnit() != null ? vehicle.getMileageUnit() : "KM",
+                question
+        );
+
+        String answer = String.format(
+                "For your %s (%d %s):\n\n" +
+                "• Question: \"%s\"\n" +
+                "• Engineering Advice: According to factory specifications, ensure your %s is regularly serviced based on your digital twin intervals (%s drivetrain, %s transmission).\n" +
+                "• Recommendation: Inspect fluid levels, brake wear, and battery voltage every 6 months or 10,000 %s.",
+                vehicleContext,
+                vehicle.getCurrentMileage() != null ? vehicle.getCurrentMileage() : 0,
+                vehicle.getMileageUnit() != null ? vehicle.getMileageUnit() : "KM",
+                question,
+                vehicle.getTemplate().getModel().getName(),
+                vehicle.getFuelType(),
+                vehicle.getTransmission(),
+                vehicle.getMileageUnit() != null ? vehicle.getMileageUnit() : "KM"
+        );
+
+        return new com.autocare.backend.vehicle.dto.AiAdvisorResponse(vehicleContext, question, answer);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public com.autocare.backend.vehicle.dto.VehicleReportResponse exportVehicleReport(UUID userId, UUID vehicleId) {
+        UserVehicle vehicle = userVehicleRepository.findById(vehicleId)
+                .orElseThrow(() -> new ResourceNotFoundException("Vehicle not found with ID: " + vehicleId));
+
+        if (!vehicle.getUser().getId().equals(userId)) {
+            throw new AccessDeniedException("Access denied: You do not own this vehicle.");
+        }
+
+        java.util.List<com.autocare.backend.vehicle.dto.VehicleReportResponse.ComponentReportItem> items = new java.util.ArrayList<>();
+        java.util.List<String> warnings = new java.util.ArrayList<>();
+        int totalHealth = 0;
+        int count = 0;
+
+        if (vehicle.getComponents() != null) {
+            for (com.autocare.backend.vehicle.entity.UserComponent c : vehicle.getComponents()) {
+                int health = c.getHealthScore() != null ? c.getHealthScore() : 100;
+                totalHealth += health;
+                count++;
+
+                if (health < 25) {
+                    warnings.add("CRITICAL: " + c.getName() + " health is " + health + "%. Immediate replacement required!");
+                }
+
+                items.add(com.autocare.backend.vehicle.dto.VehicleReportResponse.ComponentReportItem.builder()
+                        .name(c.getName())
+                        .category(c.getCategory() != null ? c.getCategory().name() : "GENERAL")
+                        .healthScore(health)
+                        .status(c.getStatus() != null ? c.getStatus().name() : "GOOD")
+                        .remainingMileage(c.getRemainingMileage())
+                        .remainingDays(c.getRemainingDays())
+                        .lastReplacedDate(c.getLastReplacedDate() != null ? c.getLastReplacedDate().toString() : null)
+                        .build()
+                );
+            }
+        }
+
+        int avgHealth = count > 0 ? totalHealth / count : 100;
+
+        return com.autocare.backend.vehicle.dto.VehicleReportResponse.builder()
+                .vehicleId(vehicle.getId())
+                .vehicleTitle(vehicle.getTemplate().getYear() + " " + vehicle.getTemplate().getBrand().getName() + " " + vehicle.getTemplate().getModel().getName())
+                .nickname(vehicle.getNickname())
+                .vin(vehicle.getVin())
+                .licensePlate(vehicle.getLicensePlate())
+                .currentMileage(vehicle.getCurrentMileage())
+                .mileageUnit(vehicle.getMileageUnit() != null ? vehicle.getMileageUnit().name() : "KM")
+                .fuelType(vehicle.getFuelType() != null ? vehicle.getFuelType().name() : "GASOLINE")
+                .transmission(vehicle.getTransmission() != null ? vehicle.getTransmission().name() : "AUTOMATIC")
+                .completenessScore(vehicle.getCompletenessScore())
+                .overallHealthScore(avgHealth)
+                .generatedAt(java.time.Instant.now().toString())
+                .components(items)
+                .criticalWarnings(warnings)
+                .build();
     }
 }
 

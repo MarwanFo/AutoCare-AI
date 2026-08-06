@@ -22,7 +22,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import java.util.Arrays;
 import java.util.List;
 
-@Configuration
+@Configuration(proxyBeanMethods = false)
 @EnableWebSecurity
 @EnableMethodSecurity
 @RequiredArgsConstructor
@@ -53,10 +53,16 @@ public class SecurityConfig {
                         // Public Mobile Authentication endpoints
                         .requestMatchers(HttpMethod.POST, "/api/v1/auth/mobile/login").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/auth/mobile/refresh").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/v1/auth/mobile/logout").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/v1/auth/logout").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/auth/forgot-password").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/auth/reset-password").permitAll()
+                        // Public Brand & Model Catalog
+                        .requestMatchers(HttpMethod.GET, "/api/v1/brands/**").permitAll()
                         // OpenAPI / Swagger UI
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
+                        // Public File Upload Static Serving
+                        .requestMatchers("/uploads/**").permitAll()
                         // Any other request must be authenticated
                         .anyRequest().authenticated()
                 );
@@ -71,18 +77,15 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        // Customize allowed origins for development / production
-        configuration.setAllowedOrigins(List.of(
-                "http://localhost:3000",
-                "http://localhost:5173",
-                "http://localhost:8080",
-                "http://localhost:8081"
-        ));
+        // Allow local dev origins and local networks dynamically
+        configuration.setAllowedOriginPatterns(List.of("*"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList(
                 "Authorization",
                 "Content-Type",
                 "Cache-Control",
+                "Accept-Language",
+                "User-Agent",
                 "X-Correlation-Id",
                 "X-Client-Request-Id",
                 "x-client-request-id"

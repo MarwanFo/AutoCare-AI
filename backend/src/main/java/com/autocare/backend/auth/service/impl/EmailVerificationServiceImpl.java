@@ -10,6 +10,7 @@ import com.autocare.backend.auth.repository.AuthTokenRepository;
 import com.autocare.backend.auth.repository.UserRepository;
 import com.autocare.backend.auth.service.EmailVerificationService;
 import com.autocare.backend.auth.service.RefreshTokenService;
+import com.autocare.backend.infrastructure.email.service.EmailSenderService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -29,15 +30,14 @@ public class EmailVerificationServiceImpl implements EmailVerificationService {
     private final UserRepository userRepository;
     private final AuthTokenRepository authTokenRepository;
     private final RefreshTokenService refreshTokenService;
+    private final EmailSenderService emailSenderService;
 
     @Override
     public void sendVerificationEmail(User user) {
-        // Invalidate previous verification tokens
         Optional<AuthToken> existingTokenOpt = authTokenRepository
                 .findByUserAndTokenTypeAndUsedAtIsNull(user, AuthTokenType.EMAIL_VERIFICATION);
         existingTokenOpt.ifPresent(token -> token.setUsedAt(Instant.now()));
 
-        // Generate raw token and hash it for DB persistence
         String rawToken = UUID.randomUUID().toString().replace("-", "");
         String tokenHash = refreshTokenService.hashToken(rawToken);
 
@@ -49,8 +49,8 @@ public class EmailVerificationServiceImpl implements EmailVerificationService {
 
         authTokenRepository.save(verificationToken);
 
-        // Simulate asynchronous email transmission
-        log.info("Verification email sent to {}. Raw verification token: {}", user.getEmail(), rawToken);
+        // Dispatch email via EmailSenderService (SMTP + Console Fallback)
+        emailSenderService.sendVerificationEmail(user.getEmail(), rawToken);
     }
 
     @Override

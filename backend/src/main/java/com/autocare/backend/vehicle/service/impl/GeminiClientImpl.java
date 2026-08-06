@@ -79,6 +79,8 @@ public class GeminiClientImpl implements GeminiClient {
             comp1.setName("Engine Timing Chain / Belt");
             comp1.setStandardPartNumber("OEM-TC-77291");
             comp1.setStandardSpecifications("Heavy Duty Steel Link Chain");
+            comp1.setExpectedLifespanMileage(100000);
+            comp1.setExpectedLifespanMonths(72);
             comps.add(comp1);
 
             GeminiVehicleProfileResponse.ComponentDto comp2 = new GeminiVehicleProfileResponse.ComponentDto();
@@ -86,6 +88,8 @@ public class GeminiClientImpl implements GeminiClient {
             comp2.setName("Spark Plugs Set");
             comp2.setStandardPartNumber("NGK-IRIDIUM-9");
             comp2.setStandardSpecifications("Laser Iridium, 0.044 inch gap");
+            comp2.setExpectedLifespanMileage(60000);
+            comp2.setExpectedLifespanMonths(48);
             comps.add(comp2);
 
             GeminiVehicleProfileResponse.ComponentDto comp3 = new GeminiVehicleProfileResponse.ComponentDto();
@@ -93,6 +97,8 @@ public class GeminiClientImpl implements GeminiClient {
             comp3.setName("Transmission Clutch / Torque Converter");
             comp3.setStandardPartNumber("OEM-TX-109");
             comp3.setStandardSpecifications("Lock-up torque converter assembly");
+            comp3.setExpectedLifespanMileage(120000);
+            comp3.setExpectedLifespanMonths(84);
             comps.add(comp3);
 
             GeminiVehicleProfileResponse.ComponentDto comp4 = new GeminiVehicleProfileResponse.ComponentDto();
@@ -100,6 +106,8 @@ public class GeminiClientImpl implements GeminiClient {
             comp4.setName("Front Brake Pads");
             comp4.setStandardPartNumber("OEM-BRK-PAD-F");
             comp4.setStandardSpecifications("Ceramic Low-Dust Formula");
+            comp4.setExpectedLifespanMileage(30000);
+            comp4.setExpectedLifespanMonths(24);
             comps.add(comp4);
 
             GeminiVehicleProfileResponse.ComponentDto comp5 = new GeminiVehicleProfileResponse.ComponentDto();
@@ -107,6 +115,8 @@ public class GeminiClientImpl implements GeminiClient {
             comp5.setName("Rear Brake Pads");
             comp5.setStandardPartNumber("OEM-BRK-PAD-R");
             comp5.setStandardSpecifications("Ceramic Low-Dust Formula");
+            comp5.setExpectedLifespanMileage(40000);
+            comp5.setExpectedLifespanMonths(30);
             comps.add(comp5);
 
             GeminiVehicleProfileResponse.ComponentDto comp6 = new GeminiVehicleProfileResponse.ComponentDto();
@@ -114,6 +124,8 @@ public class GeminiClientImpl implements GeminiClient {
             comp6.setName("Brake Rotors (Front)");
             comp6.setStandardPartNumber("OEM-ROT-F");
             comp6.setStandardSpecifications("Vented High-Carbon Cast Iron");
+            comp6.setExpectedLifespanMileage(60000);
+            comp6.setExpectedLifespanMonths(48);
             comps.add(comp6);
 
             GeminiVehicleProfileResponse.ComponentDto comp7 = new GeminiVehicleProfileResponse.ComponentDto();
@@ -121,6 +133,8 @@ public class GeminiClientImpl implements GeminiClient {
             comp7.setName("Engine Oil");
             comp7.setStandardPartNumber("CASTROL-0W20");
             comp7.setStandardSpecifications("0W-20 Full Synthetic, Capacity: 4.8 Quarts");
+            comp7.setExpectedLifespanMileage(10000);
+            comp7.setExpectedLifespanMonths(12);
             comps.add(comp7);
 
             GeminiVehicleProfileResponse.ComponentDto comp8 = new GeminiVehicleProfileResponse.ComponentDto();
@@ -128,6 +142,8 @@ public class GeminiClientImpl implements GeminiClient {
             comp8.setName("Brake Fluid");
             comp8.setStandardPartNumber("DOT-4-LV");
             comp8.setStandardSpecifications("DOT 4 Low Viscosity Synthetic");
+            comp8.setExpectedLifespanMileage(30000);
+            comp8.setExpectedLifespanMonths(24);
             comps.add(comp8);
 
             GeminiVehicleProfileResponse.ComponentDto comp9 = new GeminiVehicleProfileResponse.ComponentDto();
@@ -135,6 +151,8 @@ public class GeminiClientImpl implements GeminiClient {
             comp9.setName("Engine Coolant");
             comp9.setStandardPartNumber("PRESTONE-OAT");
             comp9.setStandardSpecifications("Organic Acid Technology (OAT) 50/50 Prediluted");
+            comp9.setExpectedLifespanMileage(60000);
+            comp9.setExpectedLifespanMonths(48);
             comps.add(comp9);
 
             GeminiVehicleProfileResponse.ComponentDto comp10 = new GeminiVehicleProfileResponse.ComponentDto();
@@ -142,6 +160,8 @@ public class GeminiClientImpl implements GeminiClient {
             comp10.setName("Engine Oil Filter");
             comp10.setStandardPartNumber("OEM-OIL-FIL");
             comp10.setStandardSpecifications("High-Efficiency Synthetic Blend Media");
+            comp10.setExpectedLifespanMileage(10000);
+            comp10.setExpectedLifespanMonths(12);
             comps.add(comp10);
 
             GeminiVehicleProfileResponse.ComponentDto comp11 = new GeminiVehicleProfileResponse.ComponentDto();
@@ -149,6 +169,8 @@ public class GeminiClientImpl implements GeminiClient {
             comp11.setName("Cabin Air Filter");
             comp11.setStandardPartNumber("OEM-CAB-FIL");
             comp11.setStandardSpecifications("Activated Carbon Odor & Allergen Shield");
+            comp11.setExpectedLifespanMileage(15000);
+            comp11.setExpectedLifespanMonths(12);
             comps.add(comp11);
 
             GeminiVehicleProfileResponse.ComponentDto comp12 = new GeminiVehicleProfileResponse.ComponentDto();
@@ -156,6 +178,8 @@ public class GeminiClientImpl implements GeminiClient {
             comp12.setName("Engine Air Filter");
             comp12.setStandardPartNumber("OEM-AIR-FIL");
             comp12.setStandardSpecifications("High-Flow Dry Element");
+            comp12.setExpectedLifespanMileage(20000);
+            comp12.setExpectedLifespanMonths(18);
             comps.add(comp12);
 
             GeminiVehicleProfileResponse.ComponentDto comp13 = new GeminiVehicleProfileResponse.ComponentDto();
@@ -163,6 +187,8 @@ public class GeminiClientImpl implements GeminiClient {
             comp13.setName("All-Season Tires Set");
             comp13.setStandardPartNumber("MICHELIN-PS4S");
             comp13.setStandardSpecifications("225/45R17 94Y, Max Press: 44 PSI");
+            comp13.setExpectedLifespanMileage(50000);
+            comp13.setExpectedLifespanMonths(36);
             comps.add(comp13);
 
             GeminiVehicleProfileResponse.ComponentDto comp14 = new GeminiVehicleProfileResponse.ComponentDto();
@@ -170,6 +196,8 @@ public class GeminiClientImpl implements GeminiClient {
             comp14.setName("12V AGM Battery");
             comp14.setStandardPartNumber("OPT-AGM-35");
             comp14.setStandardSpecifications("Group 35, 650 CCA, 12V 60Ah");
+            comp14.setExpectedLifespanMileage(60000);
+            comp14.setExpectedLifespanMonths(48);
             comps.add(comp14);
 
             GeminiVehicleProfileResponse.ComponentDto comp15 = new GeminiVehicleProfileResponse.ComponentDto();
@@ -177,6 +205,8 @@ public class GeminiClientImpl implements GeminiClient {
             comp15.setName("Wiper Blades Set");
             comp15.setStandardPartNumber("BOSCH-ICON-F22");
             comp15.setStandardSpecifications("Beam Blade, 22-inch driver / 18-inch passenger");
+            comp15.setExpectedLifespanMileage(15000);
+            comp15.setExpectedLifespanMonths(12);
             comps.add(comp15);
 
             mockResponse.setComponents(comps);
@@ -254,31 +284,37 @@ public class GeminiClientImpl implements GeminiClient {
             GeminiVehicleProfileResponse.DocumentDto doc1 = new GeminiVehicleProfileResponse.DocumentDto();
             doc1.setTitle("Owner's Manual");
             doc1.setNotes("Complete operator guide detailing controls, safety systems, instrument panel indicators, and basic operations.");
+            doc1.setFileUrl("https://raw.githubusercontent.com/mozilla/pdf.js/master/web/compressed.tracemonkey-pldi-09.pdf");
             docs.add(doc1);
 
             GeminiVehicleProfileResponse.DocumentDto doc2 = new GeminiVehicleProfileResponse.DocumentDto();
             doc2.setTitle("Manufacturer Maintenance Schedule");
             doc2.setNotes("Official manufacturer mileage and time maintenance table showing required service points.");
+            doc2.setFileUrl("https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf");
             docs.add(doc2);
 
             GeminiVehicleProfileResponse.DocumentDto doc3 = new GeminiVehicleProfileResponse.DocumentDto();
             doc3.setTitle("New Vehicle Warranty Booklet");
             doc3.setNotes("Information on the bumper-to-bumper, powertrain, and anti-corrosion factory warranty coverage limits.");
+            doc3.setFileUrl("https://www.orimi.com/pdf-test.pdf");
             docs.add(doc3);
 
             GeminiVehicleProfileResponse.DocumentDto doc4 = new GeminiVehicleProfileResponse.DocumentDto();
             doc4.setTitle("Emergency Roadside Assistance Guide");
             doc4.setNotes("Emergency contact numbers, towing instructions, jumpstart guidelines, and flat tire changing instructions.");
+            doc4.setFileUrl("https://www.unm.edu/~tbeach/terms/PDFsample.pdf");
             docs.add(doc4);
 
             GeminiVehicleProfileResponse.DocumentDto doc5 = new GeminiVehicleProfileResponse.DocumentDto();
             doc5.setTitle("Infotainment & Bluetooth Setup Guide");
             doc5.setNotes("Step-by-step instructions for pairing mobile phones, using voice commands, navigation, and system updates.");
+            doc5.setFileUrl("https://raw.githubusercontent.com/mozilla/pdf.js/master/web/compressed.tracemonkey-pldi-09.pdf");
             docs.add(doc5);
 
             GeminiVehicleProfileResponse.DocumentDto doc6 = new GeminiVehicleProfileResponse.DocumentDto();
             doc6.setTitle("Do-It-Yourself (DIY) Service Guide");
             doc6.setNotes("Simplified step-by-step procedures for owner-performed maintenance tasks like cabin filter and wiper replacements.");
+            doc6.setFileUrl("https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf");
             docs.add(doc6);
 
             mockResponse.setDocuments(docs);
@@ -301,6 +337,7 @@ public class GeminiClientImpl implements GeminiClient {
 
         GeminiApiRequest.GenerationConfig config = new GeminiApiRequest.GenerationConfig();
         config.setResponseMimeType("application/json");
+        config.setTemperature(0.1);
         requestPayload.setGenerationConfig(config);
 
         // 2. Set Http Headers
@@ -383,6 +420,7 @@ public class GeminiClientImpl implements GeminiClient {
         @Setter
         public static class GenerationConfig {
             private String responseMimeType;
+            private Double temperature;
         }
     }
 

@@ -1,0 +1,77 @@
+{
+  "dashboard": {
+    "title": "المرآب الرقمي",
+    "subtitle_active_one": "مركبة واحدة نشطة",
+    "subtitle_active_other": "{{count}} مركبات نشطة",
+    "subtitle_empty": "إدارة التوأم الرقمي للمركبات",
+    "add_vehicle": "إضافة مركبة",
+    "fleet_health_overview": "نظرة عامة على صحة الأسطول",
+    "overall_status": "حالة التوأم الرقمي العامة",
+    "optimal_state": "الحالة التشغيلية المثالية",
+    "predictive_maintenance": "الصيانة التنبؤية",
+    "gemini_engine": "محرك الذكاء الاصطناعي Gemini",
+    "telemetry_description": "نماذج تدهور المكونات نشطة. جميع مستويات السوائل وفترات التآكل تعمل ضمن المعايير."
+  },
+  "vehicle": {
+    "odometer": "عداد المسافات",
+    "plate": "اللوحة",
+    "unassigned_plate": "غير محددة",
+    "powertrain": "المحرك / ناقل الحركة",
+    "primary": "الرئيسية",
+    "view_twin": "عرض التوأم",
+    "standard_trim": "الفئة القياسية"
+  },
+  "status": {
+    "ai_twin_active": "التوأم الرقمي نشط",
+    "ai_twin_configuring": "جاري ضبط التوأم الرقمي",
+    "healthy": "بحالة جيدة"
+  },
+  "onboarding": {
+    "title": "إضافة المركبة",
+    "subtitle": "اختر الشركة المصنعة والموديل والمواصفات لإنشاء التوأم الرقمي",
+    "step_brand": "العلامة التجارية",
+    "step_model": "الموديل",
+    "step_year": "السنة",
+    "step_trim": "الفئة",
+    "step_specs": "المواصفات",
+    "step_confirm": "تأكيد",
+    "step_generating": "جاري إنشاء التوأم...",
+    "select_brand": "اختر العلامة التجارية",
+    "select_model": "اختر الموديل",
+    "select_year": "اختر السنة",
+    "select_trim": "اختر الفئة",
+    "enter_mileage": "المسافة المقطوعة الحالية",
+    "license_plate": "لوحة الترخيص",
+    "nickname": "اسم المركبة المستعار",
+    "purchase_date_label_required": "تاريخ الشراء",
+    "purchase_date_label_optional": "تاريخ الشراء (اختياري)",
+    "select_purchase_date_placeholder": "اختر تاريخ الشراء",
+    "future_date_error": "لا يمكن أن يكون تاريخ الشراء في المستقبل",
+    "date_required_error": "تاريخ الشراء مطلوب للمركبات الجديدة",
+    "select_date": "اختر التاريخ",
+    "confirm_date": "تأكيد التاريخ",
+    "clear_date": "مسح التاريخ",
+    "generate_twin_button": "بناء التوأم الرقمي",
+    "cancel": "إلغاء",
+    "back": "رجوع",
+    "next": "التالي"
+  },
+  "filters": {
+    "search_placeholder": "ابحث عن المركبات بالاسم أو اللوحة أو العلامة...",
+    "all_brands": "جميع العلامات التجارية",
+    "sort_by": "ترتيب حسب"
+  },
+  "empty": {
+    "title": "المرآب الرقمي فارغ",
+    "subtitle": "أضف مركبتك الأولى لبناء توأمها الرقمي بالذكاء الاصطناعي ومتابعة تآكل القطع واستلام تحليلات الصيانة التنبؤية.",
+    "feature_ai_profile": "الملف الرقمي ودليل الصيانة",
+    "feature_health_tracking": "تتبع مباشر لصحة المكونات",
+    "action_onboard": "إضافة مركبتك"
+  },
+  "dialogs": {
+    "delete_title": "حذف المركبة",
+    "delete_message": "هل أنت تأكد من رغبتك في إزالة {{vehicleName}} من مرآبك الرقمي؟",
+    "delete_confirm": "حذف المركبة",
+    "cancel": "إلغاء"
+  }
+}

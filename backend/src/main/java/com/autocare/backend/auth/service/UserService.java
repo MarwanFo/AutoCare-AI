@@ -2,6 +2,7 @@ package com.autocare.backend.auth.service;
 
 import com.autocare.backend.auth.dto.UserProfileResponse;
 import com.autocare.backend.auth.entity.User;
+import com.autocare.backend.user.dto.request.DeactivateAccountRequest;
 import com.autocare.backend.user.dto.request.UpdatePreferencesRequest;
 import com.autocare.backend.user.dto.request.UpdateProfileRequest;
 import com.autocare.backend.user.dto.response.AvatarUploadResponse;
@@ -14,6 +15,7 @@ public interface UserService {
     UserProfileResponse updatePreferences(UUID userId, UpdatePreferencesRequest request);
     AvatarUploadResponse uploadAvatar(UUID userId, MultipartFile file);
     void deleteAvatar(UUID userId);
+    void deactivateAccount(UUID userId, DeactivateAccountRequest request);
     User getById(UUID userId);
     User getByEmail(String email);
 }

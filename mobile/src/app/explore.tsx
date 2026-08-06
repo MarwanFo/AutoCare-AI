@@ -2,16 +2,19 @@ import React from 'react';
 import { ScrollView, StyleSheet, Text, View, StatusBar } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Svg, { Path } from 'react-native-svg';
+import { useAppTranslation } from '@/i18n/hooks/useAppTranslation';
 
 export default function ExploreScreen() {
+  const { t } = useAppTranslation('garage');
+
   return (
     <View style={styles.background}>
       <StatusBar barStyle="light-content" backgroundColor="#0e0e0e" />
       <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
         <View style={styles.header}>
-          <Text style={styles.headerTitle}>Vehicle Analytics</Text>
+          <Text style={styles.headerTitle}>{t('garage:dashboard.fleet_health_overview')}</Text>
           <Text style={styles.headerSubtitle}>
-            AI fleet insights & health telemetry
+            {t('garage:dashboard.overall_status')}
           </Text>
         </View>
 
@@ -31,14 +34,14 @@ export default function ExploreScreen() {
                 </Svg>
               </View>
               <View style={{ flex: 1 }}>
-                <Text style={styles.cardTitle}>Fleet Health Overview</Text>
-                <Text style={styles.cardSubtitle}>Overall Digital Twin status</Text>
+                <Text style={styles.cardTitle}>{t('garage:dashboard.fleet_health_overview')}</Text>
+                <Text style={styles.cardSubtitle}>{t('garage:dashboard.overall_status')}</Text>
               </View>
             </View>
 
             <View style={styles.metricBig}>
               <Text style={styles.metricNumber}>98%</Text>
-              <Text style={styles.metricLabel}>Optimal Operational State</Text>
+              <Text style={styles.metricLabel}>{t('garage:dashboard.optimal_state')}</Text>
             </View>
           </View>
 
@@ -54,13 +57,13 @@ export default function ExploreScreen() {
                 </Svg>
               </View>
               <View style={{ flex: 1 }}>
-                <Text style={styles.cardTitle}>Predictive Maintenance</Text>
-                <Text style={styles.cardSubtitle}>Gemini Intelligence Engine</Text>
+                <Text style={styles.cardTitle}>{t('garage:dashboard.predictive_maintenance')}</Text>
+                <Text style={styles.cardSubtitle}>{t('garage:dashboard.gemini_engine')}</Text>
               </View>
             </View>
 
             <Text style={styles.cardDescription}>
-              Component degradation models are active. All fluid levels and wear intervals are operating within calibrated safety parameters.
+              {t('garage:dashboard.telemetry_description')}
             </Text>
           </View>
         </ScrollView>

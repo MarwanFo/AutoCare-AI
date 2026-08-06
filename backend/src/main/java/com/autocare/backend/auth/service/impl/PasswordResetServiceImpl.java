@@ -40,6 +40,7 @@ public class PasswordResetServiceImpl implements PasswordResetService {
     private final RefreshTokenService refreshTokenService;
     private final SessionService sessionService;
     private final PasswordEncoder passwordEncoder;
+    private final com.autocare.backend.infrastructure.email.service.EmailSenderService emailSenderService;
 
     @Override
     public void initiateForgotPassword(ForgotPasswordRequest request) {
@@ -66,7 +67,7 @@ public class PasswordResetServiceImpl implements PasswordResetService {
 
         authTokenRepository.save(resetToken);
 
-        log.info("Password reset email sent to {}. Raw reset token: {}", user.getEmail(), rawToken);
+        emailSenderService.sendPasswordResetEmail(user.getEmail(), rawToken);
     }
 
     @Override

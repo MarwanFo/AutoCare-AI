@@ -1,0 +1,77 @@
+{
+  "dashboard": {
+    "title": "Digital Garage",
+    "subtitle_active_one": "1 vehicle active",
+    "subtitle_active_other": "{{count}} vehicles active",
+    "subtitle_empty": "Manage vehicle digital twins",
+    "add_vehicle": "Add Vehicle",
+    "fleet_health_overview": "Fleet Health Overview",
+    "overall_status": "Overall Digital Twin status",
+    "optimal_state": "Optimal Operational State",
+    "predictive_maintenance": "Predictive Maintenance",
+    "gemini_engine": "Gemini Intelligence Engine",
+    "telemetry_description": "Component degradation models are active. All fluid levels and wear intervals are operating within calibrated safety parameters."
+  },
+  "vehicle": {
+    "odometer": "Odometer",
+    "plate": "Plate",
+    "unassigned_plate": "Unassigned",
+    "powertrain": "Engine / Trans",
+    "primary": "PRIMARY",
+    "view_twin": "View Twin",
+    "standard_trim": "Standard Trim"
+  },
+  "status": {
+    "ai_twin_active": "AI Twin Active",
+    "ai_twin_configuring": "AI Twin Configuring",
+    "healthy": "Healthy"
+  },
+  "onboarding": {
+    "title": "Onboard Your Vehicle",
+    "subtitle": "Select manufacturer, model, and specs to build your AI digital twin",
+    "step_brand": "Brand",
+    "step_model": "Model",
+    "step_year": "Year",
+    "step_trim": "Trim",
+    "step_specs": "Specs",
+    "step_confirm": "Confirm",
+    "step_generating": "Generating Twin...",
+    "select_brand": "Select Brand",
+    "select_model": "Select Model",
+    "select_year": "Select Year",
+    "select_trim": "Select Trim",
+    "enter_mileage": "Current Mileage",
+    "license_plate": "License Plate",
+    "nickname": "Vehicle Nickname",
+    "purchase_date_label_required": "Purchase Date",
+    "purchase_date_label_optional": "Purchase Date (Optional)",
+    "select_purchase_date_placeholder": "Select acquisition date",
+    "future_date_error": "Purchase date cannot be in the future",
+    "date_required_error": "Purchase date is required for brand new vehicles",
+    "select_date": "Select Date",
+    "confirm_date": "Confirm Date",
+    "clear_date": "Clear Date",
+    "generate_twin_button": "Build Digital Twin",
+    "cancel": "Cancel",
+    "back": "Back",
+    "next": "Next"
+  },
+  "filters": {
+    "search_placeholder": "Search vehicles by name, plate, or brand...",
+    "all_brands": "All Brands",
+    "sort_by": "Sort By"
+  },
+  "empty": {
+    "title": "Your Digital Garage is Empty",
+    "subtitle": "Onboard your first vehicle to build its AI Digital Twin, track component wear, and receive predictive maintenance intelligence.",
+    "feature_ai_profile": "AI Profile & Maintenance Guide",
+    "feature_health_tracking": "Live Component Health Tracking",
+    "action_onboard": "Onboard Your Vehicle"
+  },
+  "dialogs": {
+    "delete_title": "Delete Vehicle",
+    "delete_message": "Are you sure you want to remove {{vehicleName}} from your digital garage?",
+    "delete_confirm": "Delete Vehicle",
+    "cancel": "Cancel"
+  }
+}

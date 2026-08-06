@@ -14,6 +14,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 
 import { apiClient } from '@/api/client';
+import { useAppTranslation } from '@/i18n/hooks/useAppTranslation';
 import { BrandHeader } from '../components/BrandHeader';
 import { AuthCard } from '../components/AuthCard';
 import { RegisterForm, RegisterFormData } from '../components/RegisterForm';
@@ -52,6 +53,7 @@ export function RegisterScreen({
   onSwitchToLogin,
   onRegisterSuccess,
 }: RegisterScreenProps) {
+  const { t } = useAppTranslation(['auth', 'common', 'errors', 'validation']);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -89,12 +91,12 @@ export function RegisterScreen({
         setErrorMessage(
           serverError?.message ||
             serverError?.error ||
-            'Registration failed. Please check validation requirements.'
+            t('errors:unexpected_error')
         );
       } else if (error.request) {
-        setErrorMessage('Network connection lost. Please try again.');
+        setErrorMessage(t('errors:network_error'));
       } else {
-        setErrorMessage(error.message || 'An unexpected error occurred. Please try again.');
+        setErrorMessage(error.message || t('errors:unexpected_error'));
       }
     } finally {
       setIsLoading(false);
@@ -136,15 +138,15 @@ export function RegisterScreen({
 
           {/* Sign-in Navigation Footer */}
           <View style={styles.screenFooter}>
-            <Text style={styles.footerText}>Already have an account?</Text>
+            <Text style={styles.footerText}>{t('auth:already_have_account')}</Text>
             <TouchableOpacity
               accessibilityRole="link"
-              accessibilityLabel="Sign In"
+              accessibilityLabel={t('auth:sign_in_button')}
               style={styles.footerLinkContainer}
               onPress={onSwitchToLogin}
               disabled={isLoading}
             >
-              <Text style={styles.footerLinkText}>Sign In</Text>
+              <Text style={styles.footerLinkText}>{t('auth:sign_in_button')}</Text>
             </TouchableOpacity>
           </View>
         </ScrollView>
@@ -156,7 +158,7 @@ export function RegisterScreen({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#131313', // bg-surface-dim = #131313
+    backgroundColor: '#131313',
     position: 'relative',
     overflow: 'hidden',
   },
@@ -167,7 +169,7 @@ const styles = StyleSheet.create({
   scrollContent: {
     flexGrow: 1,
     justifyContent: 'center',
-    paddingHorizontal: 20, // p-container-padding-mobile
+    paddingHorizontal: 20,
     paddingVertical: 32,
   },
   topGlow: {
@@ -177,7 +179,7 @@ const styles = StyleSheet.create({
     width: '75%',
     aspectRatio: 1,
     borderRadius: 9999,
-    backgroundColor: '#abc7ff', // bg-secondary = #abc7ff
+    backgroundColor: '#abc7ff',
     opacity: 0.05,
     zIndex: 1,
   },
@@ -188,7 +190,7 @@ const styles = StyleSheet.create({
     width: '60%',
     aspectRatio: 1,
     borderRadius: 9999,
-    backgroundColor: '#ffffff', // bg-primary = #ffffff
+    backgroundColor: '#ffffff',
     opacity: 0.05,
     zIndex: 1,
   },
@@ -201,7 +203,7 @@ const styles = StyleSheet.create({
   footerText: {
     fontFamily: 'Inter',
     fontSize: 14,
-    color: '#c4c7c8', // text-on-surface-variant = #c4c7c8
+    color: '#c4c7c8',
   },
   footerLinkContainer: {
     marginLeft: 8,
@@ -210,7 +212,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter',
     fontSize: 14,
     fontWeight: '600',
-    color: '#ffffff', // text-primary = #ffffff
+    color: '#ffffff',
     textDecorationLine: 'underline',
   },
 });

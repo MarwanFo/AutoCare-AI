@@ -33,14 +33,18 @@ function RootNavigator() {
   );
 }
 
+import { LanguageProvider } from '@/providers/LanguageProvider';
+
 export default function TabLayout() {
   return (
     <ErrorBoundary>
       <QueryProvider>
         <ThemeProvider>
-          <AuthProvider>
-            <RootNavigator />
-          </AuthProvider>
+          <LanguageProvider>
+            <AuthProvider>
+              <RootNavigator />
+            </AuthProvider>
+          </LanguageProvider>
         </ThemeProvider>
       </QueryProvider>
     </ErrorBoundary>

@@ -2,6 +2,7 @@ import React from 'react';
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 import { VehicleSummaryResponse } from '@/types/vehicle';
+import { useAppTranslation } from '@/i18n/hooks/useAppTranslation';
 
 interface GarageVehicleCardProps {
   vehicle: VehicleSummaryResponse;
@@ -9,13 +10,15 @@ interface GarageVehicleCardProps {
 }
 
 export function GarageVehicleCard({ vehicle, onPress }: GarageVehicleCardProps) {
+  const { t } = useAppTranslation('garage');
+
   const title = vehicle.nickname
     ? vehicle.nickname
     : `${vehicle.year} ${vehicle.brandName} ${vehicle.modelName}`;
 
   const subtitle = vehicle.nickname
     ? `${vehicle.year} ${vehicle.brandName} ${vehicle.modelName}`
-    : vehicle.trimConfiguration || 'Standard Trim';
+    : vehicle.trimConfiguration || t('garage:vehicle.standard_trim');
 
   const formatMileage = (val: number) => {
     return val.toLocaleString();
@@ -26,6 +29,7 @@ export function GarageVehicleCard({ vehicle, onPress }: GarageVehicleCardProps) 
       onPress={onPress}
       activeOpacity={0.88}
       style={styles.card}
+      accessible={true}
       accessibilityRole="button"
       accessibilityLabel={`View details for ${title}`}
     >
@@ -49,7 +53,7 @@ export function GarageVehicleCard({ vehicle, onPress }: GarageVehicleCardProps) 
                 fill="#abc7ff"
               />
             </Svg>
-            <Text style={styles.primaryBadgeText}>PRIMARY</Text>
+            <Text style={styles.primaryBadgeText}>{t('garage:vehicle.primary')}</Text>
           </View>
         )}
       </View>
@@ -65,7 +69,7 @@ export function GarageVehicleCard({ vehicle, onPress }: GarageVehicleCardProps) 
                 fill="#8e9192"
               />
             </Svg>
-            <Text style={styles.metricLabel}>Odometer</Text>
+            <Text style={styles.metricLabel}>{t('garage:vehicle.odometer')}</Text>
           </View>
           <Text style={styles.metricValue}>
             {formatMileage(vehicle.currentMileage)}{' '}
@@ -85,10 +89,10 @@ export function GarageVehicleCard({ vehicle, onPress }: GarageVehicleCardProps) 
                 fill="#8e9192"
               />
             </Svg>
-            <Text style={styles.metricLabel}>Plate</Text>
+            <Text style={styles.metricLabel}>{t('garage:vehicle.plate')}</Text>
           </View>
           <Text style={styles.metricValue} numberOfLines={1}>
-            {vehicle.licensePlate || 'Unassigned'}
+            {vehicle.licensePlate || t('garage:vehicle.unassigned_plate')}
           </Text>
         </View>
 
@@ -104,7 +108,7 @@ export function GarageVehicleCard({ vehicle, onPress }: GarageVehicleCardProps) 
                 fill="#8e9192"
               />
             </Svg>
-            <Text style={styles.metricLabel}>Engine / Trans</Text>
+            <Text style={styles.metricLabel}>{t('garage:vehicle.powertrain')}</Text>
           </View>
           <Text style={styles.metricValue} numberOfLines={1}>
             {vehicle.fuelType || 'GASOLINE'}
@@ -116,11 +120,11 @@ export function GarageVehicleCard({ vehicle, onPress }: GarageVehicleCardProps) 
       <View style={styles.footerRow}>
         <View style={styles.twinStatusPill}>
           <View style={styles.statusDotActive} />
-          <Text style={styles.twinStatusText}>AI Twin Active</Text>
+          <Text style={styles.twinStatusText}>{t('garage:status.ai_twin_active')}</Text>
         </View>
 
         <View style={styles.actionTrigger}>
-          <Text style={styles.actionText}>View Twin</Text>
+          <Text style={styles.actionText}>{t('garage:vehicle.view_twin')}</Text>
           <Svg width="16" height="16" viewBox="0 0 24 24" fill="none">
             <Path
               d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"

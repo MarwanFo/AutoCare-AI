@@ -1,19 +1,22 @@
 import React from 'react';
 import { EmailActionScreen } from '../components/EmailActionScreen';
+import { useAppTranslation } from '@/i18n/hooks/useAppTranslation';
 
 interface ResetPasswordSuccessScreenProps {
   onBackToLogin: () => void;
 }
 
 export function ResetPasswordSuccessScreen({ onBackToLogin }: ResetPasswordSuccessScreenProps) {
+  const { t } = useAppTranslation(['auth', 'common']);
+
   return (
     <EmailActionScreen
-      title="Password updated successfully"
-      subtitle="Your password has been updated. You can now sign in with your new password."
-      primaryButtonTitle="Go to Login"
+      title={t('auth:password_reset_success_title')}
+      subtitle={t('auth:password_reset_success_msg')}
+      primaryButtonTitle={t('auth:sign_in_button')}
       onPrimaryPress={onBackToLogin}
       onFooterPress={onBackToLogin}
-      footerLinkText="Back to Login"
+      footerLinkText={t('auth:back_to_sign_in')}
     />
   );
 }

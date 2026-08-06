@@ -14,6 +14,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 
 import { apiClient } from '@/api/client';
+import { useAppTranslation } from '@/i18n/hooks/useAppTranslation';
 import { BrandHeader } from '../components/BrandHeader';
 import { AuthCard } from '../components/AuthCard';
 import { PasswordInput } from '../components/PasswordInput';
@@ -45,6 +46,7 @@ export function ResetPasswordScreen({
   onBackToLogin,
   onResetSuccess,
 }: ResetPasswordScreenProps) {
+  const { t } = useAppTranslation(['auth', 'common', 'errors', 'validation']);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -76,12 +78,12 @@ export function ResetPasswordScreen({
         setErrorMessage(
           serverError?.message ||
             serverError?.error ||
-            'Password reset failed. The token may be invalid or expired.'
+            t('errors:unexpected_error')
         );
       } else if (error.request) {
-        setErrorMessage('Network connection lost. Please check your connectivity and try again.');
+        setErrorMessage(t('errors:network_error'));
       } else {
-        setErrorMessage(error.message || 'An unexpected error occurred. Please try again.');
+        setErrorMessage(error.message || t('errors:unexpected_error'));
       }
     } finally {
       setIsLoading(false);
@@ -112,9 +114,9 @@ export function ResetPasswordScreen({
           {/* Form Card wrapper */}
           <AuthCard>
             <View style={styles.formContainer}>
-              <Text style={styles.cardTitle}>Create a new password</Text>
+              <Text style={styles.cardTitle}>{t('auth:reset_password_title')}</Text>
               <Text style={styles.cardSubtitle}>
-                Choose a strong password for your account.
+                {t('auth:reset_password_subtitle')}
               </Text>
 
               {/* Password Input Field */}
@@ -123,7 +125,7 @@ export function ResetPasswordScreen({
                 name="password"
                 render={({ field: { onChange, onBlur, value } }) => (
                   <PasswordInput
-                    label="New Password"
+                    label={t('auth:new_password_label')}
                     value={value}
                     onChangeText={onChange}
                     onBlur={onBlur}
@@ -142,7 +144,7 @@ export function ResetPasswordScreen({
                 name="confirmPassword"
                 render={({ field: { onChange, onBlur, value } }) => (
                   <PasswordInput
-                    label="Confirm Password"
+                    label={t('auth:confirm_password_label')}
                     value={value}
                     onChangeText={onChange}
                     onBlur={onBlur}
@@ -155,7 +157,7 @@ export function ResetPasswordScreen({
               {/* Submit Button */}
               <View style={styles.actionContainer}>
                 <PrimaryButton
-                  title="Reset Password"
+                  title={t('auth:reset_password_title')}
                   isLoading={isLoading}
                   onPress={handleSubmit(onSubmit)}
                 />
@@ -167,12 +169,12 @@ export function ResetPasswordScreen({
           <View style={styles.screenFooter}>
             <TouchableOpacity
               accessibilityRole="link"
-              accessibilityLabel="Back to Login"
+              accessibilityLabel={t('auth:back_to_sign_in')}
               style={styles.footerLinkContainer}
               onPress={onBackToLogin}
               disabled={isLoading}
             >
-              <Text style={styles.footerLinkText}>Back to Login</Text>
+              <Text style={styles.footerLinkText}>{t('auth:back_to_sign_in')}</Text>
             </TouchableOpacity>
           </View>
         </ScrollView>
@@ -184,7 +186,7 @@ export function ResetPasswordScreen({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#131313', // bg-surface-dim = #131313
+    backgroundColor: '#131313',
     position: 'relative',
     overflow: 'hidden',
   },
@@ -195,7 +197,7 @@ const styles = StyleSheet.create({
   scrollContent: {
     flexGrow: 1,
     justifyContent: 'center',
-    paddingHorizontal: 20, // p-container-padding-mobile
+    paddingHorizontal: 20,
     paddingVertical: 32,
   },
   topGlow: {
@@ -205,7 +207,7 @@ const styles = StyleSheet.create({
     width: '75%',
     aspectRatio: 1,
     borderRadius: 9999,
-    backgroundColor: '#abc7ff', // bg-secondary = #abc7ff
+    backgroundColor: '#abc7ff',
     opacity: 0.05,
     zIndex: 1,
   },
@@ -216,7 +218,7 @@ const styles = StyleSheet.create({
     width: '60%',
     aspectRatio: 1,
     borderRadius: 9999,
-    backgroundColor: '#ffffff', // bg-primary = #ffffff
+    backgroundColor: '#ffffff',
     opacity: 0.05,
     zIndex: 1,
   },
@@ -234,7 +236,7 @@ const styles = StyleSheet.create({
   cardSubtitle: {
     fontSize: 14,
     fontFamily: 'Inter',
-    color: '#c4c7c8', // text-on-surface-variant = #c4c7c8
+    color: '#c4c7c8',
     lineHeight: 20,
     textAlign: 'center',
     marginBottom: 24,
@@ -256,7 +258,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter',
     fontSize: 14,
     fontWeight: '600',
-    color: '#ffffff', // text-primary = #ffffff
+    color: '#ffffff',
     textDecorationLine: 'underline',
   },
 });

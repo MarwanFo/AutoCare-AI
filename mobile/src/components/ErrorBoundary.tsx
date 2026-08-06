@@ -1,5 +1,6 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import i18n from '@/i18n';
 
 interface Props {
   children: ReactNode;
@@ -33,12 +34,19 @@ export class ErrorBoundary extends Component<Props, State> {
       return (
         <View style={styles.container}>
           <View style={styles.card}>
-            <Text style={styles.title}>Oops, something went wrong</Text>
+            <Text style={styles.title}>
+              {i18n.t('common:something_went_wrong', { defaultValue: 'Something went wrong' })}
+            </Text>
             <Text style={styles.message}>
-              {this.state.error?.message || 'An unexpected runtime error occurred.'}
+              {this.state.error?.message ||
+                i18n.t('common:error_boundary_message', {
+                  defaultValue: 'An unexpected runtime error occurred.',
+                })}
             </Text>
             <TouchableOpacity style={styles.button} onPress={this.handleReset}>
-              <Text style={styles.buttonText}>Try Again</Text>
+              <Text style={styles.buttonText}>
+                {i18n.t('common:retry', { defaultValue: 'Retry' })}
+              </Text>
             </TouchableOpacity>
           </View>
         </View>

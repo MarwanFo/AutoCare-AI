@@ -95,6 +95,8 @@ public class GeminiVehicleProfileServiceImpl implements GeminiVehicleProfileServ
             tc.setName(compDto.getName());
             tc.setStandardPartNumber(compDto.getStandardPartNumber());
             tc.setStandardSpecifications(compDto.getStandardSpecifications());
+            tc.setExpectedLifespanMileage(compDto.getExpectedLifespanMileage());
+            tc.setExpectedLifespanMonths(compDto.getExpectedLifespanMonths());
             
             template.addComponent(tc);
         }

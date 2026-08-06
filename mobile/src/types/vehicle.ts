@@ -35,6 +35,8 @@ export interface ComponentResponse {
   healthScore?: number;
   confidenceScore?: number;
   estimatedRemainingLife?: number;
+  remainingDays?: number;
+  remainingMileage?: number;
   installationMileage?: number;
   installationDate?: string;
   lastInspectionDate?: string;

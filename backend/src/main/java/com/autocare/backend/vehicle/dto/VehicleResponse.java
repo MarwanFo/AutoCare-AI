@@ -72,6 +72,10 @@ public class VehicleResponse {
         private Integer healthScore;
         private Integer confidenceScore;
         private Integer estimatedRemainingLife;
+        private Integer expectedLifespanMileage;
+        private Integer expectedLifespanMonths;
+        private Integer remainingMileage;
+        private Integer remainingDays;
         private Integer installationMileage;
         private LocalDate installationDate;
         private LocalDate lastInspectionDate;

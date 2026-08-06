@@ -1,0 +1,15 @@
+{
+  "app_name": "AutoCare AI",
+  "save": "Enregistrer",
+  "cancel": "Annuler",
+  "delete": "Supprimer",
+  "confirm": "Confirmer",
+  "loading": "Chargement...",
+  "retry": "Réessayer",
+  "success": "Succès",
+  "nav_home": "Accueil",
+  "nav_explore": "Explorer",
+  "nav_profile": "Profil",
+  "something_went_wrong": "Un problème est survenu",
+  "error_boundary_message": "Une erreur s'est produite. Veuillez réessayer."
+}
