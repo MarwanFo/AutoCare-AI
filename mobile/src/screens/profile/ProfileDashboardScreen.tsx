@@ -300,24 +300,26 @@ export default function ProfileDashboardScreen() {
         />
 
         {/* Navigation Tabs Bar */}
-        <View style={styles.tabContainer}>
-          {[
-            { id: 'personal', label: t('profile:tab_personal', { defaultValue: 'Personal' }) },
-            { id: 'preferences', label: t('profile:tab_preferences', { defaultValue: 'Preferences' }) },
-            { id: 'security', label: t('profile:tab_security', { defaultValue: 'Security & Sessions' }) },
-            { id: 'storage', label: t('profile:tab_storage', { defaultValue: 'Storage & App' }) },
-          ].map((tab) => (
-            <TouchableOpacity
-              key={tab.id}
-              style={[styles.tabItem, activeTab === tab.id && styles.tabItemActive]}
-              onPress={() => setActiveTab(tab.id as any)}
-            >
-              <Text style={[styles.tabText, activeTab === tab.id && styles.tabTextActive]}>
-                {tab.label}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </View>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 16 }}>
+          <View style={styles.tabContainer}>
+            {[
+              { id: 'personal', label: t('profile:tab_personal', { defaultValue: 'Personal' }) },
+              { id: 'preferences', label: t('profile:tab_preferences', { defaultValue: 'Preferences' }) },
+              { id: 'security', label: t('profile:tab_security', { defaultValue: 'Security & Sessions' }) },
+              { id: 'storage', label: t('profile:tab_storage', { defaultValue: 'Storage & App' }) },
+            ].map((tab) => (
+              <TouchableOpacity
+                key={tab.id}
+                style={[styles.tabItem, activeTab === tab.id && styles.tabItemActive]}
+                onPress={() => setActiveTab(tab.id as any)}
+              >
+                <Text style={[styles.tabText, activeTab === tab.id && styles.tabTextActive]}>
+                  {tab.label}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </ScrollView>
 
         {/* TAB 1: PERSONAL DETAILS */}
         {activeTab === 'personal' && (
@@ -381,16 +383,19 @@ export default function ProfileDashboardScreen() {
               <Text style={[styles.inputLabel, isRTL && styles.textRight]}>{t('profile:language')}</Text>
               <View style={styles.pillRow}>
                 {[
-                  { code: 'EN', label: 'English' },
-                  { code: 'FR', label: 'Français' },
-                  { code: 'AR', label: 'العربية' },
+                  { code: 'EN', label: 'English', target: 'en' },
+                  { code: 'FR', label: 'Français', target: 'fr' },
+                  { code: 'AR', label: 'العربية', target: 'ar' },
                 ].map((item) => (
                   <TouchableOpacity
                     key={item.code}
-                    style={[styles.pillOption, lang === item.code && styles.pillOptionActive]}
-                    onPress={() => setLang(item.code as any)}
+                    style={[styles.pillOption, (currentLanguage.toUpperCase() === item.code || lang === item.code) && styles.pillOptionActive]}
+                    onPress={() => {
+                      setLang(item.code as any);
+                      setLanguage(item.target as any);
+                    }}
                   >
-                    <Text style={[styles.pillText, lang === item.code && styles.pillTextActive]}>
+                    <Text style={[styles.pillText, (currentLanguage.toUpperCase() === item.code || lang === item.code) && styles.pillTextActive]}>
                       {item.label}
                     </Text>
                   </TouchableOpacity>
@@ -755,6 +760,9 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
+    width: '100%',
+    maxWidth: 850,
+    alignSelf: 'center',
     paddingHorizontal: 20,
     paddingBottom: 32,
   },
@@ -769,7 +777,9 @@ const styles = StyleSheet.create({
   },
   tabItem: {
     flex: 1,
+    minWidth: 85,
     paddingVertical: 10,
+    paddingHorizontal: 8,
     alignItems: 'center',
     borderRadius: 12,
   },

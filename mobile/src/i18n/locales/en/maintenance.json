@@ -5,6 +5,12 @@
     "intervals": "Intervals",
     "specs": "Specs"
   },
+  "status": {
+    "good": "Good Condition",
+    "warning": "Service Needed Soon",
+    "critical": "Critical Wear",
+    "unknown": "Insufficient Data"
+  },
   "danger": {
     "banner_title": "CRITICAL SAFETY WARNING",
     "banner_subtitle": "One or more vehicle components have reached critical wear. Inspect car immediately!"
@@ -15,7 +21,16 @@
     "add_document": "Add Custom Document",
     "add_document_short": "+ Add Document",
     "add_interval": "Add Custom Interval",
-    "add_interval_short": "+ Add Interval"
+    "add_interval_short": "+ Add Interval",
+    "set_replacement_date": "+ Set Replacement Date & Calculate Health",
+    "update_replacement_date": "Record Replacement / Edit Date",
+    "calculate_health": "Save & Calculate Health",
+    "save_dates": "Save Maintenance Dates"
+  },
+  "preowned": {
+    "title": "Component Maintenance History",
+    "subtitle": "Set the date when each component was last replaced to enable AI health & replacement predictions.",
+    "initial_health_title": "Initial Component Health Status"
   },
   "form": {
     "component_name": "Piece Name *",
@@ -26,7 +41,11 @@
     "interval_title": "Interval Title *",
     "interval_mileage": "Interval Mileage (KM / MI)",
     "interval_months": "Interval Months",
-    "inspection_only": "Inspection Only (No Replacement)"
+    "inspection_only": "Inspection Only (No Replacement)",
+    "replacement_date": "Date of Replacement / Installation",
+    "replacement_mileage": "Vehicle Mileage at Replacement",
+    "last_replaced_optional": "Last Replaced Date (Optional)",
+    "select_replacement_date": "Select replacement date"
   },
   "condition": {
     "brand_new": "Brand New",
@@ -40,7 +59,8 @@
     "FILTERS": "Filters",
     "TIRES": "Tires",
     "BATTERY": "Battery",
-    "OTHER": "Other"
+    "OTHER": "Other",
+    "GENERAL": "General"
   },
   "components_list": {
     "ENGINE_TIMING_SYSTEM": "Engine Timing Chain / Belt",
@@ -113,7 +133,9 @@
     "every_months": "Every {{months}} months",
     "remaining_mileage": "{{remainingMileage}} {{unit}} remaining",
     "days_remaining": "{{days}} days remaining",
-    "health_percentage": "{{percentage}}% Health"
+    "health_percentage": "{{percentage}}% Health",
+    "insufficient_data": "Not enough data",
+    "add_dates_hint": "Some components have missing replacement dates. Tap \"Set Replacement Date\" on any piece to calculate health."
   },
   "components": {
     "title": "Digital Twin Component Health",

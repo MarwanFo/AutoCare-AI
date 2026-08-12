@@ -2,6 +2,14 @@ import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 import { Image } from 'expo-image';
+import { useAppTranslation } from '@/i18n/hooks/useAppTranslation';
+import { useRTL } from '@/i18n/hooks/useRTL';
+import {
+  resolveFuelTypeLabel,
+  resolvePurchaseConditionLabel,
+  resolveTransmissionLabel,
+} from '../utils/enumResolver';
+import { resolveComponentName } from '../utils/componentResolver';
 
 interface ConfirmationCardProps {
   brandName: string;
@@ -53,43 +61,47 @@ export function ConfirmationCard({
   purchaseDate,
   initialComponentHealths,
 }: ConfirmationCardProps) {
+  const { t } = useAppTranslation(['garage', 'common', 'maintenance']);
+  const { isRTL } = useRTL();
+
+  const notProvidedStr = t('common:not_provided', { defaultValue: 'Not Provided' });
+
   const specRows = [
-    { label: 'Brand', value: brandName, isBrand: true },
-    { label: 'Model', value: modelName },
-    { label: 'Year', value: year.toString() },
-    { label: 'Trim', value: trim },
-    { label: 'Nickname', value: nickname && nickname.trim().length > 0 ? nickname : 'Not Provided', isItalic: !nickname },
-    { label: 'Purchase Condition', value: purchaseCondition === 'BRAND_NEW' ? 'Brand New' : 'Used' },
-    ...(purchaseCondition === 'BRAND_NEW' && purchaseDate ? [{ label: 'Purchase Date', value: purchaseDate }] : []),
-    ...(purchaseCondition === 'USED' && purchaseDate ? [{ label: 'Purchase Date', value: purchaseDate }] : []),
-    { label: 'Mileage', value: mileage ? `${mileage} ${mileageUnit}` : `0 ${mileageUnit}` },
-    { label: 'VIN', value: vin && vin.trim().length > 0 ? vin.toUpperCase() : 'Not Provided', isItalic: !vin },
-    { label: 'License Plate', value: licensePlate && licensePlate.trim().length > 0 ? licensePlate.toUpperCase() : 'Not Provided', isItalic: !licensePlate },
-    { label: 'Color', value: color && color.trim().length > 0 ? color : 'Not Provided', isItalic: !color },
+    { label: t('garage:specs.brand', { defaultValue: 'Brand' }), value: brandName, isBrand: true },
+    { label: t('garage:specs.model', { defaultValue: 'Model' }), value: modelName },
+    { label: t('garage:specs.year', { defaultValue: 'Year' }), value: year.toString() },
+    { label: t('garage:specs.trim', { defaultValue: 'Trim' }), value: trim },
+    { label: t('garage:form.nickname', { defaultValue: 'Nickname' }), value: nickname && nickname.trim().length > 0 ? nickname : notProvidedStr, isItalic: !nickname },
+    { label: t('garage:form.purchase_condition', { defaultValue: 'Purchase Condition' }), value: resolvePurchaseConditionLabel(purchaseCondition, t) },
+    ...(purchaseDate ? [{ label: t('garage:form.purchase_date', { defaultValue: 'Purchase Date' }), value: purchaseDate }] : []),
+    { label: t('garage:form.mileage', { defaultValue: 'Mileage' }), value: mileage ? `${mileage} ${mileageUnit}` : `0 ${mileageUnit}` },
+    { label: t('garage:form.vin', { defaultValue: 'VIN' }), value: vin && vin.trim().length > 0 ? vin.toUpperCase() : notProvidedStr, isItalic: !vin },
+    { label: t('garage:form.license_plate', { defaultValue: 'License Plate' }), value: licensePlate && licensePlate.trim().length > 0 ? licensePlate.toUpperCase() : notProvidedStr, isItalic: !licensePlate },
+    { label: t('garage:form.color', { defaultValue: 'Color' }), value: color && color.trim().length > 0 ? color : notProvidedStr, isItalic: !color },
   ];
 
   return (
     <View style={styles.card}>
-      <View style={styles.header}>
-        <View style={styles.badgeContainer}>
+      <View style={[styles.header, isRTL && { flexDirection: 'row-reverse' }]}>
+        <View style={[styles.badgeContainer, isRTL && { flexDirection: 'row-reverse' }]}>
           <Svg width="24" height="24" viewBox="0 0 24 24" fill="none">
             <Path
               d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM12 20C7.59 20 4 16.41 4 12C4 7.59 7.59 4 12 4C16.41 4 20 7.59 20 12C20 16.41 16.41 20 12 20ZM16.59 7.58L10 14.17L7.41 11.59L6 13L10 17L18 9L16.59 7.58Z"
               fill="#abc7ff"
             />
           </Svg>
-          <Text style={styles.badgeText}>Ready to Create</Text>
+          <Text style={styles.badgeText}>{t('garage:onboarding.ready_to_create', { defaultValue: 'Ready to Create' })}</Text>
         </View>
         
         {isPrimary && (
           <View style={styles.primaryBadge}>
-            <Text style={styles.primaryBadgeText}>PRIMARY</Text>
+            <Text style={styles.primaryBadgeText}>{t('garage:onboarding.primary_tag', { defaultValue: 'PRIMARY' })}</Text>
           </View>
         )}
       </View>
 
-      <Text style={styles.vehicleTitle}>{`${year} ${brandName} ${modelName}`}</Text>
-      <Text style={styles.vehicleSubtitle}>{trim}</Text>
+      <Text style={[styles.vehicleTitle, isRTL && { textAlign: 'right' }]}>{`${year} ${brandName} ${modelName}`}</Text>
+      <Text style={[styles.vehicleSubtitle, isRTL && { textAlign: 'right' }]}>{trim}</Text>
 
       <View style={styles.divider} />
 
@@ -99,12 +111,13 @@ export function ConfirmationCard({
             key={row.label}
             style={[
               styles.tableRow,
+              isRTL && { flexDirection: 'row-reverse' },
               index === specRows.length - 1 && styles.tableRowLast,
             ]}
           >
-            <Text style={styles.rowLabel}>{row.label}</Text>
+            <Text style={[styles.rowLabel, isRTL && { textAlign: 'right' }]}>{row.label}</Text>
             {row.isBrand ? (
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+              <View style={[{ flexDirection: 'row', alignItems: 'center', gap: 8 }, isRTL && { flexDirection: 'row-reverse' }]}>
                 {brandLogoUrl ? (
                   <Image
                     source={{ uri: brandLogoUrl }}
@@ -119,6 +132,7 @@ export function ConfirmationCard({
                   style={[
                     styles.rowValue,
                     row.isItalic && styles.italicText,
+                    isRTL && { textAlign: 'right' },
                   ]}
                   numberOfLines={1}
                 >
@@ -130,6 +144,7 @@ export function ConfirmationCard({
                 style={[
                   styles.rowValue,
                   row.isItalic && styles.italicText,
+                  isRTL && { textAlign: 'right' },
                 ]}
                 numberOfLines={1}
               >
@@ -144,24 +159,22 @@ export function ConfirmationCard({
 
       {purchaseCondition === 'USED' && initialComponentHealths && (
         <View style={{ marginBottom: 16 }}>
-          <Text style={[styles.infoTitle, { marginBottom: 8 }]}>Initial Component Health Status</Text>
+          <Text style={[styles.infoTitle, isRTL && { textAlign: 'right' }, { marginBottom: 8 }]}>
+            {t('maintenance:preowned.initial_health_title', { defaultValue: 'Initial Component Health Status' })}
+          </Text>
           <View style={{ gap: 8, backgroundColor: '#131313', padding: 12, borderRadius: 16, borderWidth: 1, borderColor: '#2f313130', marginBottom: 12 }}>
             {[
-              { key: 'engineOil', label: 'Engine Oil' },
-              { key: 'coolant', label: 'Coolant' },
-              { key: 'tires', label: 'Tires' },
-              { key: 'brakePads', label: 'Brake Pads' },
-              { key: 'battery', label: '12V Battery' },
+              { key: 'engineOil', label: resolveComponentName('Engine Oil', 'ENGINE_OIL', false, t) },
+              { key: 'brakePads', label: resolveComponentName('Front Brake Pads', 'FRONT_BRAKE_PADS', false, t) },
+              { key: 'tires', label: resolveComponentName('All-Season Tires Set', 'ALL_SEASON_TIRES', false, t) },
+              { key: 'battery', label: resolveComponentName('12V AGM Battery', 'BATTERY_12V', false, t) },
             ].map((item) => {
               const val = initialComponentHealths[item.key] || 'GOOD';
-              let color = '#4caf50';
-              if (val === 'NEEDING_ATTENTION') color = '#ff9800';
-              if (val === 'CRITICAL') color = '#f44336';
               return (
-                <View key={item.key} style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <Text style={{ fontFamily: 'Inter', fontSize: 13, color: '#c4c7c8' }}>{item.label}</Text>
-                  <Text style={{ fontFamily: 'Inter', fontSize: 13, fontWeight: '700', color }}>
-                    {val === 'NEEDING_ATTENTION' ? 'ATTENTION' : val}
+                <View key={item.key} style={[{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }, isRTL && { flexDirection: 'row-reverse' }]}>
+                  <Text style={{ fontFamily: 'Inter', fontSize: 12, color: '#c4c7c8' }}>{item.label}</Text>
+                  <Text style={{ fontFamily: 'Inter', fontSize: 12, fontWeight: '700', color: val === 'GOOD' ? '#34c759' : val === 'WARNING' ? '#ff9500' : '#ff3b30' }}>
+                    {val}
                   </Text>
                 </View>
               );
@@ -170,32 +183,16 @@ export function ConfirmationCard({
         </View>
       )}
 
-      {/* Informational Checklist Section */}
-      <View style={styles.infoSection}>
-        <Text style={styles.infoTitle}>
-          AutoCare AI will build a Digital Twin of your vehicle.
+      <View style={[styles.infoBanner, isRTL && { flexDirection: 'row-reverse' }]}>
+        <Svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+          <Path
+            d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"
+            fill="#abc7ff"
+          />
+        </Svg>
+        <Text style={[styles.infoText, isRTL && { textAlign: 'right' }]}>
+          {t('garage:onboarding.ai_digital_twin_notice', { defaultValue: 'AutoCare AI will generate custom maintenance schedules and track component health based on official manufacturer specifications.' })}
         </Text>
-        <View style={styles.checklist}>
-          {[
-            'Factory specifications',
-            'Components',
-            'Maintenance schedule',
-            'Recommended service intervals',
-            'AI insights',
-          ].map((item) => (
-            <View key={item} style={styles.checkItem}>
-              <View style={styles.checkIconWrapper}>
-                <Svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-                  <Path
-                    d="M9 16.17L4.83 12L3.41 13.41L9 19L21 7L19.59 5.59L9 16.17Z"
-                    fill="#abc7ff"
-                  />
-                </Svg>
-              </View>
-              <Text style={styles.checkItemText}>{item}</Text>
-            </View>
-          ))}
-        </View>
       </View>
     </View>
   );
@@ -205,16 +202,10 @@ const styles = StyleSheet.create({
   card: {
     backgroundColor: '#1c1c1c',
     borderRadius: 24,
-    padding: 20,
     borderWidth: 1,
     borderColor: '#2f3131',
-    alignSelf: 'stretch',
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 5,
-    marginBottom: 20,
+    padding: 24,
+    width: '100%',
   },
   header: {
     flexDirection: 'row',
@@ -225,29 +216,28 @@ const styles = StyleSheet.create({
   badgeContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
+    gap: 8,
   },
   badgeText: {
     fontFamily: 'Inter',
-    fontSize: 12,
-    fontWeight: '700',
+    fontSize: 14,
+    fontWeight: '600',
     color: '#abc7ff',
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
   },
   primaryBadge: {
-    backgroundColor: '#abc7ff20',
-    borderColor: '#abc7ff',
+    backgroundColor: 'rgba(171, 199, 255, 0.15)',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
     borderWidth: 1,
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 4,
+    borderColor: 'rgba(171, 199, 255, 0.3)',
   },
   primaryBadgeText: {
     fontFamily: 'Inter',
     fontSize: 10,
     fontWeight: '700',
     color: '#abc7ff',
+    letterSpacing: 0.5,
   },
   vehicleTitle: {
     fontFamily: 'Inter',
@@ -259,23 +249,23 @@ const styles = StyleSheet.create({
   vehicleSubtitle: {
     fontFamily: 'Inter',
     fontSize: 14,
-    color: '#c4c7c8',
-    marginBottom: 16,
+    color: '#8e9192',
   },
   divider: {
     height: 1,
-    backgroundColor: '#2f3131',
-    marginVertical: 12,
+    backgroundColor: '#2b2d2d',
+    marginVertical: 20,
   },
   table: {
-    alignSelf: 'stretch',
+    gap: 12,
   },
   tableRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingVertical: 10,
+    alignItems: 'center',
+    paddingBottom: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#2f313130',
+    borderBottomColor: '#2b2d2d30',
   },
   tableRowLast: {
     borderBottomWidth: 0,
@@ -283,62 +273,47 @@ const styles = StyleSheet.create({
   },
   rowLabel: {
     fontFamily: 'Inter',
-    fontSize: 14,
-    color: '#c4c7c8',
+    fontSize: 13,
+    color: '#8e9192',
   },
   rowValue: {
     fontFamily: 'Inter',
     fontSize: 14,
     fontWeight: '600',
     color: '#ffffff',
-    maxWidth: '65%',
+    maxWidth: '60%',
   },
   italicText: {
     fontStyle: 'italic',
-    color: '#8e9192',
+    color: '#666666',
     fontWeight: '400',
   },
   infoDivider: {
     height: 1,
-    backgroundColor: '#2f3131',
-    marginTop: 20,
-    marginBottom: 16,
-  },
-  infoSection: {
-    backgroundColor: '#131313',
-    borderRadius: 16,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: '#2f313130',
+    backgroundColor: '#2b2d2d',
+    marginVertical: 20,
   },
   infoTitle: {
     fontFamily: 'Inter',
     fontSize: 14,
-    fontWeight: '700',
-    color: '#abc7ff',
-    marginBottom: 12,
-    lineHeight: 20,
+    fontWeight: '600',
+    color: '#ffffff',
   },
-  checklist: {
-    gap: 8,
-  },
-  checkItem: {
+  infoBanner: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'flex-start',
+    gap: 12,
+    backgroundColor: 'rgba(171, 199, 255, 0.05)',
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(171, 199, 255, 0.15)',
+    padding: 16,
   },
-  checkIconWrapper: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    backgroundColor: '#1b2333',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: 10,
-  },
-  checkItemText: {
+  infoText: {
+    flex: 1,
     fontFamily: 'Inter',
-    fontSize: 13,
+    fontSize: 12,
     color: '#c4c7c8',
-    fontWeight: '500',
+    lineHeight: 18,
   },
 });

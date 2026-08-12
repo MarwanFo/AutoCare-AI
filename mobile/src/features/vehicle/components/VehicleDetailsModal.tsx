@@ -20,7 +20,9 @@ import { resolveCategoryLabel, resolveComponentName } from '../utils/componentRe
 import { AddComponentModal } from './AddComponentModal';
 import { AddDocumentModal } from './AddDocumentModal';
 import { AddIntervalModal } from './AddIntervalModal';
+import { RecordReplacementModal } from './RecordReplacementModal';
 import { useDeleteComponent, useDeleteDocument, useDeleteInterval } from '@/hooks/vehicle/useVehicleMutations';
+import { UserComponent } from '@/types/vehicle';
 
 import { AiAdvisorTab } from './AiAdvisorTab';
 import { CostBudgetCard } from './CostBudgetCard';
@@ -31,19 +33,27 @@ interface VehicleDetailsModalProps {
   vehicleId: string;
   visible: boolean;
   onClose: () => void;
+  initialTab?: TabType;
 }
 
 type TabType = 'COMPONENTS' | 'BUDGET' | 'AI_ADVISOR' | 'DOCUMENTS' | 'INTERVALS' | 'SPECS';
 
-export function VehicleDetailsModal({ vehicleId, visible, onClose }: VehicleDetailsModalProps) {
+export function VehicleDetailsModal({ vehicleId, visible, onClose, initialTab = 'COMPONENTS' }: VehicleDetailsModalProps) {
   const { t } = useAppTranslation(['maintenance', 'common']);
   const { isRTL } = useRTL();
   const { data: vehicle, isLoading, error } = useVehicle(vehicleId);
-  const [activeTab, setActiveTab] = useState<TabType>('COMPONENTS');
+  const [activeTab, setActiveTab] = useState<TabType>(initialTab);
+
+  React.useEffect(() => {
+    if (initialTab) {
+      setActiveTab(initialTab);
+    }
+  }, [initialTab]);
 
   const [showAddComponent, setShowAddComponent] = useState(false);
   const [showAddDocument, setShowAddDocument] = useState(false);
   const [showAddInterval, setShowAddInterval] = useState(false);
+  const [selectedCompForDate, setSelectedCompForDate] = useState<UserComponent | null>(null);
 
   const deleteComponentMutation = useDeleteComponent(vehicleId);
   const deleteDocumentMutation = useDeleteDocument(vehicleId);
@@ -62,8 +72,8 @@ export function VehicleDetailsModal({ vehicleId, visible, onClose }: VehicleDeta
     }
   };
 
-  const getHealthColor = (score?: number) => {
-    if (score === undefined) return '#abc7ff';
+  const getHealthColor = (score?: number | null) => {
+    if (score === undefined || score === null) return '#8e9192'; // Neutral gray for UNKNOWN
     if (score >= 80) return '#4caf50'; // Green
     if (score >= 50) return '#ff9800'; // Orange
     return '#f44336'; // Red
@@ -231,9 +241,21 @@ export function VehicleDetailsModal({ vehicleId, visible, onClose }: VehicleDeta
                       </View>
                     )}
 
+                    {vehicle.components?.some((c) => (c as any).status === 'UNKNOWN' || c.healthScore === null) && (
+                      <View style={[styles.unknownHintBanner, isRTL && { flexDirection: 'row-reverse' }]}>
+                        <Svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                          <Path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z" fill="#abc7ff" />
+                        </Svg>
+                        <Text style={[styles.unknownHintText, isRTL && { textAlign: 'right' }]}>
+                          {t('maintenance:reminders.add_dates_hint', { defaultValue: 'Some components have missing replacement dates. Tap "Set Replacement Date" on any piece to calculate health.' })}
+                        </Text>
+                      </View>
+                    )}
+
                     {vehicle.components && vehicle.components.length > 0 ? (
                       vehicle.components.map((comp) => {
                         const healthCol = getHealthColor(comp.healthScore);
+                        const isUnknown = comp.healthScore === null || (comp as any).status === 'UNKNOWN';
                         return (
                           <View key={comp.id} style={styles.componentCard}>
                             <View style={[styles.componentHeader, isRTL && { flexDirection: 'row-reverse' }]}>
@@ -248,7 +270,9 @@ export function VehicleDetailsModal({ vehicleId, visible, onClose }: VehicleDeta
                               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
                                 <View style={[styles.healthBadge, { backgroundColor: `${healthCol}20` }]}>
                                   <Text style={[styles.healthText, { color: healthCol }]}>
-                                    {t('maintenance:reminders.health_percentage', { percentage: comp.healthScore, defaultValue: `${comp.healthScore}% Health` })}
+                                    {comp.healthScore !== null && comp.healthScore !== undefined
+                                      ? t('maintenance:reminders.health_percentage', { percentage: comp.healthScore, defaultValue: `${comp.healthScore}% Health` })
+                                      : t('maintenance:reminders.insufficient_data', { defaultValue: 'Not enough data' })}
                                   </Text>
                                 </View>
                                 {(comp as any).isCustom && (
@@ -269,7 +293,7 @@ export function VehicleDetailsModal({ vehicleId, visible, onClose }: VehicleDeta
                               <View
                                 style={[
                                   styles.healthBarFill,
-                                  { width: `${comp.healthScore ?? 100}%` as const, backgroundColor: healthCol },
+                                  { width: `${comp.healthScore ?? 0}%` as const, backgroundColor: healthCol },
                                 ]}
                               />
                             </View>
@@ -312,6 +336,30 @@ export function VehicleDetailsModal({ vehicleId, visible, onClose }: VehicleDeta
                                 </View>
                               )}
                             </View>
+
+                            {/* Set Replacement Date Action Button */}
+                            <TouchableOpacity
+                              style={[
+                                styles.setReplacementDateBtn,
+                                isUnknown && styles.setReplacementDateBtnHighlight,
+                                isRTL && { flexDirection: 'row-reverse' },
+                              ]}
+                              onPress={() => setSelectedCompForDate(comp)}
+                            >
+                              <Svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                                <Path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z" fill={isUnknown ? '#131313' : '#abc7ff'} />
+                              </Svg>
+                              <Text
+                                style={[
+                                  styles.setReplacementDateBtnText,
+                                  isUnknown && styles.setReplacementDateBtnTextHighlight,
+                                ]}
+                              >
+                                {isUnknown
+                                  ? t('maintenance:actions.set_replacement_date', { defaultValue: '+ Set Replacement Date & Calculate Health' })
+                                  : t('maintenance:actions.update_replacement_date', { defaultValue: 'Record Replacement / Edit Date' })}
+                              </Text>
+                            </TouchableOpacity>
                           </View>
                         );
                       })
@@ -492,27 +540,87 @@ export function VehicleDetailsModal({ vehicleId, visible, onClose }: VehicleDeta
         visible={showAddInterval}
         onClose={() => setShowAddInterval(false)}
       />
+      <RecordReplacementModal
+        vehicleId={vehicleId}
+        component={selectedCompForDate}
+        currentVehicleMileage={vehicle?.currentMileage}
+        mileageUnit={vehicle?.mileageUnit}
+        visible={!!selectedCompForDate}
+        onClose={() => setSelectedCompForDate(null)}
+      />
     </Modal>
   );
 }
 
 const styles = StyleSheet.create({
+  unknownHintBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    backgroundColor: '#abc7ff15',
+    borderColor: '#abc7ff40',
+    borderWidth: 1,
+    borderRadius: 14,
+    padding: 12,
+    marginBottom: 16,
+  },
+  unknownHintText: {
+    flex: 1,
+    fontSize: 12,
+    color: '#abc7ff',
+    fontFamily: 'Inter',
+    fontWeight: '500',
+    lineHeight: 16,
+  },
+  setReplacementDateBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    backgroundColor: '#abc7ff15',
+    borderColor: '#abc7ff40',
+    borderWidth: 1,
+    borderRadius: 12,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    marginTop: 12,
+  },
+  setReplacementDateBtnHighlight: {
+    backgroundColor: '#abc7ff',
+    borderColor: '#abc7ff',
+  },
+  setReplacementDateBtnText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#abc7ff',
+    fontFamily: 'Inter',
+  },
+  setReplacementDateBtnTextHighlight: {
+    color: '#131313',
+    fontWeight: '700',
+  },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.75)',
+    backgroundColor: 'rgba(0, 0, 0, 0.82)',
     justifyContent: 'center',
     alignItems: 'center',
-    padding: Spacing.four,
+    paddingHorizontal: Platform.OS === 'web' ? 24 : 12,
+    paddingVertical: Platform.OS === 'web' ? 24 : 16,
   },
   modalContent: {
     backgroundColor: '#131313',
     width: '100%',
-    maxWidth: 650,
-    height: '90%',
+    maxWidth: 720,
+    maxHeight: '92%',
+    height: '92%',
     borderRadius: 24,
     borderWidth: 1,
-    borderColor: '#212225',
+    borderColor: '#27272a',
     overflow: 'hidden',
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.5,
+    shadowRadius: 24,
   },
   header: {
     flexDirection: 'row',

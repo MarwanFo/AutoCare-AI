@@ -9,6 +9,20 @@ export interface CreateComponentPayload {
   notes?: string;
 }
 
+export interface UpdateComponentPayload {
+  category: string;
+  name: string;
+  partNumber?: string;
+  specifications?: string;
+  notes?: string;
+  installationDate?: string;
+  installationMileage?: number;
+  lastReplacedDate?: string;
+  lastReplacedMileage?: number;
+  status?: string;
+  healthScore?: number | null;
+}
+
 export interface CreateDocumentPayload {
   title: string;
   url: string;
@@ -28,6 +42,19 @@ export function useAddComponent(vehicleId: string) {
   return useMutation({
     mutationFn: async (payload: CreateComponentPayload) => {
       const response = await apiClient.post(`/api/v1/vehicles/${vehicleId}/components`, payload);
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['vehicle', vehicleId] });
+    },
+  });
+}
+
+export function useUpdateComponent(vehicleId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ componentId, payload }: { componentId: string; payload: UpdateComponentPayload }) => {
+      const response = await apiClient.put(`/api/v1/vehicles/${vehicleId}/components/${componentId}`, payload);
       return response.data;
     },
     onSuccess: () => {

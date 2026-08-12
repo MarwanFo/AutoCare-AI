@@ -50,9 +50,6 @@ class UserProfileIntegrationTest {
     private RoleRepository roleRepository;
 
     @Autowired
-    private UserSessionRepository userSessionRepository;
-
-    @Autowired
     private PasswordEncoder passwordEncoder;
 
     private User testUser;
@@ -135,25 +132,25 @@ class UserProfileIntegrationTest {
     @Test
     @DisplayName("PUT /api/v1/users/me — Returns 409 Conflict when phone number belongs to another active user")
     void testUpdateProfile_DuplicatePhoneNumber_Returns409() throws Exception {
-        String existingPhone = "+12025558888";
         Role userRole = roleRepository.findByName("ROLE_USER").orElseThrow();
         User secondUser = new User();
         secondUser.setEmail("second.user." + UUID.randomUUID() + "@autocare.ai");
         secondUser.setPasswordHash(passwordEncoder.encode("Password123!"));
         secondUser.setFullName("Second User");
-        secondUser.setPhoneNumber(existingPhone);
         secondUser.setStatus(AccountStatus.ACTIVE);
         secondUser.setRoles(Set.of(userRole));
+        String duplicatePhone = "+12025559999";
+        secondUser.setPhoneNumber(duplicatePhone);
         userRepository.save(secondUser);
 
-        UpdateProfileRequest request = new UpdateProfileRequest("Profile Test User", existingPhone);
+        UpdateProfileRequest request = new UpdateProfileRequest("Profile Test User", duplicatePhone);
 
         mockMvc.perform(put("/api/v1/users/me")
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isConflict())
-                .andExpect(jsonPath("$.message").value("The phone number '" + existingPhone + "' is already in use by another active account."));
+                .andExpect(jsonPath("$.message").value("The phone number '" + duplicatePhone + "' is already in use by another active account."));
     }
 
     @Test

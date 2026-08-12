@@ -47,6 +47,7 @@ public class VehicleServiceImpl implements VehicleService {
     private final UserDocumentRepository userDocumentRepository;
     private final UserIntervalRepository userIntervalRepository;
     private final com.autocare.backend.vehicle.service.ComponentDegradationService componentDegradationService;
+    private final com.autocare.backend.notification.service.NotificationService notificationService;
 
     @Override
     @Transactional
@@ -388,7 +389,9 @@ public class VehicleServiceImpl implements VehicleService {
         document.setExpiryDate(request.getExpiryDate());
         document.setNotes(request.getNotes());
 
-        return userDocumentRepository.save(document);
+        com.autocare.backend.vehicle.entity.UserDocument saved = userDocumentRepository.save(document);
+        notificationService.evaluateDocumentNotification(userId, vehicle, saved);
+        return saved;
     }
 
     @Override
@@ -413,7 +416,9 @@ public class VehicleServiceImpl implements VehicleService {
         document.setExpiryDate(request.getExpiryDate());
         document.setNotes(request.getNotes());
 
-        return userDocumentRepository.save(document);
+        com.autocare.backend.vehicle.entity.UserDocument updated = userDocumentRepository.save(document);
+        notificationService.evaluateDocumentNotification(userId, vehicle, updated);
+        return updated;
     }
 
     @Override
@@ -433,6 +438,7 @@ public class VehicleServiceImpl implements VehicleService {
             throw new BusinessException("Document does not belong to the specified vehicle.");
         }
 
+        notificationService.resolveDocumentNotificationsBeforeDelete(userId, documentId);
         userDocumentRepository.delete(document);
     }
 
@@ -568,15 +574,6 @@ public class VehicleServiceImpl implements VehicleService {
         );
 
         String question = request.getQuestion().trim();
-        String prompt = String.format(
-                "You are an expert AI automotive mechanics consultant for a %s with %d %s mileage.\n" +
-                "The user is asking: \"%s\".\n" +
-                "Provide a clear, highly professional, direct, and actionable answer tailored specifically to this car's engineering specifications.",
-                vehicleContext,
-                vehicle.getCurrentMileage() != null ? vehicle.getCurrentMileage() : 0,
-                vehicle.getMileageUnit() != null ? vehicle.getMileageUnit() : "KM",
-                question
-        );
 
         String answer = String.format(
                 "For your %s (%d %s):\n\n" +

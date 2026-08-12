@@ -11,5 +11,13 @@
   "nav_explore": "استكشاف",
   "nav_profile": "الملف الشخصي",
   "something_went_wrong": "حدث خطأ ما",
-  "error_boundary_message": "حدث خطأ غير متوقع في التطبيق. يرجى إعادة المحاولة."
+  "error_boundary_message": "حدث خطأ غير متوقع في واجهة التطبيق. يرجى تحديث الصفحة.",
+  "not_provided": "غير متاح",
+  "continue_to_garage": "المتابعة إلى المرآب",
+  "skip_for_now": "التخطي الآن",
+  "finished": "مكتمل",
+  "failed": "فشل",
+  "cancelled": "ملغى",
+  "invalid_mileage": "يرجى إدخال قراءة عداد مسافة صحيحة",
+  "error": "خطأ"
 }

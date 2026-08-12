@@ -1,3 +1,4 @@
+import { TFunction } from 'i18next';
 import { JobStage } from '@/types/job';
 
 export interface ProgressStep {
@@ -33,6 +34,35 @@ export const UI_PROGRESS_STEPS: ProgressStep[] = [
     stages: ['CLONING_DIGITAL_TWIN', 'FINALIZING'],
   },
 ];
+
+export function getLocalizedProgressSteps(t: TFunction): ProgressStep[] {
+  return [
+    {
+      key: 'VALIDATING',
+      title: t('garage:ai.step_validating_title', { defaultValue: 'Validating Request' }),
+      sublabel: t('garage:ai.step_validating_sublabel', { defaultValue: 'Verifying user profile and registration credentials.' }),
+      stages: ['VALIDATING_REQUEST'],
+    },
+    {
+      key: 'RESOLVING_TEMPLATE',
+      title: t('garage:ai.step_template_title', { defaultValue: 'Resolving Template' }),
+      sublabel: t('garage:ai.step_template_sublabel', { defaultValue: 'Searching manufacturer database for matching configurations.' }),
+      stages: ['LOOKING_FOR_TEMPLATE'],
+    },
+    {
+      key: 'GENERATING_SPECS',
+      title: t('garage:ai.step_specs_title', { defaultValue: 'AI Specifications Compilation' }),
+      sublabel: t('garage:ai.step_specs_sublabel', { defaultValue: 'Synthesizing parts list, specifications, and service schedules.' }),
+      stages: ['GENERATING_TEMPLATE', 'SAVING_TEMPLATE'],
+    },
+    {
+      key: 'CLONING_TWIN',
+      title: t('garage:ai.step_twin_title', { defaultValue: 'Initializing Digital Twin' }),
+      sublabel: t('garage:ai.step_twin_sublabel', { defaultValue: 'Creating user vehicle instance and maintenance logs.' }),
+      stages: ['CLONING_DIGITAL_TWIN', 'FINALIZING'],
+    },
+  ];
+}
 
 export function getProgressPercentage(stage: JobStage): number {
   switch (stage) {
@@ -78,7 +108,6 @@ export function getStepStatus(
 
   const currentIdx = allStages.indexOf(currentStage);
 
-  // Find the highest index among the stages associated with this step
   const stepStageIndices = step.stages.map((s) => allStages.indexOf(s));
   const minStepIdx = Math.min(...stepStageIndices);
   const maxStepIdx = Math.max(...stepStageIndices);
@@ -88,12 +117,9 @@ export function getStepStatus(
   }
 
   if (currentStage === 'FAILED' || currentStage === 'CANCELLED') {
-    // If job failed/cancelled, steps up to the failure are completed or pending.
-    // If the failure occurred at a stage after this step, it is completed.
     if (currentIdx > maxStepIdx) {
       return 'completed';
     }
-    // If the failure occurred during this step's stages, it failed (we don't show active, just pending or custom error state).
     return 'pending';
   }
 

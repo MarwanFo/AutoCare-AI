@@ -11,5 +11,13 @@
   "nav_explore": "Explore",
   "nav_profile": "Profile",
   "something_went_wrong": "Something went wrong",
-  "error_boundary_message": "An error occurred in the component tree. Please try reloading."
+  "error_boundary_message": "An error occurred in the component tree. Please try reloading.",
+  "not_provided": "Not Provided",
+  "continue_to_garage": "Continue to Garage",
+  "skip_for_now": "Skip for Now",
+  "finished": "Finished",
+  "failed": "Failed",
+  "cancelled": "Cancelled",
+  "invalid_mileage": "Please enter a valid non-negative mileage",
+  "error": "Error"
 }

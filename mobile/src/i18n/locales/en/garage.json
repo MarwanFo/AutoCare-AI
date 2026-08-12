@@ -26,6 +26,30 @@
     "ai_twin_configuring": "AI Twin Configuring",
     "healthy": "Healthy"
   },
+  "condition": {
+    "brand_new": "Brand New (0 km)",
+    "pre_owned": "Pre-Owned / Used"
+  },
+  "fuel": {
+    "gasoline": "Gasoline",
+    "diesel": "Diesel",
+    "electric": "Electric",
+    "hybrid": "Hybrid",
+    "plug_in_hybrid": "Plug-in Hybrid",
+    "lpg": "LPG / Gas"
+  },
+  "transmission": {
+    "manual": "Manual",
+    "automatic": "Automatic",
+    "cvt": "CVT",
+    "dual_clutch": "Dual-Clutch"
+  },
+  "specs": {
+    "brand": "Brand",
+    "model": "Model",
+    "year": "Year",
+    "trim": "Trim"
+  },
   "onboarding": {
     "title": "Onboard Your Vehicle",
     "subtitle": "Select manufacturer, model, and specs to build your AI digital twin",
@@ -54,7 +78,38 @@
     "generate_twin_button": "Build Digital Twin",
     "cancel": "Cancel",
     "back": "Back",
-    "next": "Next"
+    "next": "Next",
+    "ready_to_create": "Ready to Create",
+    "primary_tag": "PRIMARY",
+    "ai_digital_twin_notice": "AutoCare AI will generate custom maintenance schedules and track component health based on official manufacturer specifications.",
+    "loading_components": "Loading AI-generated component list..."
+  },
+  "ai": {
+    "twin_ready_title": "Digital Twin Ready",
+    "twin_ready_subtitle": "Your vehicle digital twin has been successfully activated with standard factory parameters.",
+    "onboarding_cancelled_title": "Onboarding Cancelled",
+    "onboarding_cancelled_subtitle": "The background activation job was stopped. You can retry or exit to the wizard.",
+    "activation_failed_title": "Activation Failed",
+    "activation_failed_subtitle": "An error occurred during Gemini AI compilation or data validation.",
+    "building_twin_title": "Building Digital Twin",
+    "building_twin_subtitle": "AutoCare AI is parsing manufacturer databases and compiling your digital twin profile.",
+    "complete_100": "100% Complete",
+    "compiled_pct": "{{pct}}% compiled",
+    "step_indicator": "Step {{current}} of {{total}}",
+    "retry_generation": "Retry Generation",
+    "redirecting": "Redirecting to vehicle...",
+    "job_aborted": "Job Aborted",
+    "exec_error": "Background Execution Error",
+    "cancelled_msg": "This job was explicitly cancelled by the user. You can restart the onboarding process or try again.",
+    "failed_msg": "The Digital Twin generation failed. This might be due to transient network latency or invalid registration inputs.",
+    "step_validating_title": "Validating Request",
+    "step_validating_sublabel": "Verifying user profile and registration credentials.",
+    "step_template_title": "Resolving Template",
+    "step_template_sublabel": "Searching manufacturer database for matching configurations.",
+    "step_specs_title": "AI Specifications Compilation",
+    "step_specs_sublabel": "Synthesizing parts list, specifications, and service schedules.",
+    "step_twin_title": "Initializing Digital Twin",
+    "step_twin_sublabel": "Creating user vehicle instance and maintenance logs."
   },
   "filters": {
     "search_placeholder": "Search vehicles by name, plate, or brand...",

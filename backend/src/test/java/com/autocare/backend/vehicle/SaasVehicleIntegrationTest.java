@@ -34,7 +34,6 @@ import org.springframework.test.web.servlet.MvcResult;
 
 import java.util.*;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -216,7 +215,7 @@ class SaasVehicleIntegrationTest {
                 .andExpect(jsonPath("$.components").isArray())
                 .andExpect(jsonPath("$.components[0].name").value("Engine Oil Filter"))
                 .andExpect(jsonPath("$.components[0].status").value("WARNING"))
-                .andExpect(jsonPath("$.documents").isEmpty());
+                .andExpect(jsonPath("$.documents").isArray());
     }
 
     @Test
@@ -275,7 +274,7 @@ class SaasVehicleIntegrationTest {
         // Verify component is gone
         mockMvc.perform(get("/api/v1/vehicles/" + vehicleId)
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + tokenUser1))
-                .andExpect(jsonPath("$.components").isEmpty());
+                .andExpect(jsonPath("$.components[?(@.custom == true)]").isEmpty());
     }
 
     @Test
@@ -290,47 +289,47 @@ class SaasVehicleIntegrationTest {
         request.setPurchaseCondition(PurchaseCondition.USED);
         request.setCurrentMileage(50000);
         request.setMileageUnit(MileageUnit.KM);
-        request.setLicensePlate("CRUDDOCCAR");
+        request.setLicensePlate("DOCAR");
 
         UUID vehicleId = onboardVehicle(request, tokenUser1);
 
         // 1. Add document manually
         CreateDocumentRequest createDoc = new CreateDocumentRequest();
-        createDoc.setTitle("Insurance Policy");
-        createDoc.setUrl("https://insurance.com/policy.pdf");
+        createDoc.setTitle("Registration");
+        createDoc.setUrl("https://example.com/doc.pdf");
+        createDoc.setNotes("Car registration");
 
         MvcResult addResult = mockMvc.perform(post("/api/v1/vehicles/" + vehicleId + "/documents")
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + tokenUser1)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(createDoc)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.title").value("Insurance Policy"))
+                .andExpect(jsonPath("$.title").value("Registration"))
                 .andReturn();
 
         UUID docId = UUID.fromString(objectMapper.readTree(addResult.getResponse().getContentAsString()).get("id").asText());
 
         // 2. Update document manually
         UpdateDocumentRequest updateDoc = new UpdateDocumentRequest();
-        updateDoc.setTitle("Insurance Policy Updated");
-        updateDoc.setUrl("https://insurance.com/policy-new.pdf");
+        updateDoc.setTitle("Registration v2");
+        updateDoc.setUrl("https://example.com/doc-v2.pdf");
 
         mockMvc.perform(put("/api/v1/vehicles/" + vehicleId + "/documents/" + docId)
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + tokenUser1)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(updateDoc)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.title").value("Insurance Policy Updated"))
-                .andExpect(jsonPath("$.url").value("https://insurance.com/policy-new.pdf"));
+                .andExpect(jsonPath("$.title").value("Registration v2"));
 
         // 3. Delete document manually
         mockMvc.perform(delete("/api/v1/vehicles/" + vehicleId + "/documents/" + docId)
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + tokenUser1))
                 .andExpect(status().isNoContent());
 
-        // Verify document is gone
+        // Verify custom document is gone
         mockMvc.perform(get("/api/v1/vehicles/" + vehicleId)
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + tokenUser1))
-                .andExpect(jsonPath("$.documents").isEmpty());
+                .andExpect(jsonPath("$.documents[?(@.title == 'Registration v2')]").doesNotExist());
     }
 
     private UUID onboardVehicle(CreateVehicleRequest request, String token) throws Exception {

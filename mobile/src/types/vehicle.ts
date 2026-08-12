@@ -30,19 +30,22 @@ export interface ComponentResponse {
   notes?: string;
   isCustom: boolean;
   isModifiedFromTemplate: boolean;
+  canonicalCode?: string;
   
   status?: string;
-  healthScore?: number;
+  healthScore?: number | null;
   confidenceScore?: number;
   estimatedRemainingLife?: number;
-  remainingDays?: number;
-  remainingMileage?: number;
-  installationMileage?: number;
-  installationDate?: string;
-  lastInspectionDate?: string;
+  remainingDays?: number | null;
+  remainingMileage?: number | null;
+  installationMileage?: number | null;
+  installationDate?: string | null;
+  lastInspectionDate?: string | null;
   origin?: string;
   recommendations?: any[];
 }
+
+export type UserComponent = ComponentResponse;
 
 export interface IntervalResponse {
   id: string;

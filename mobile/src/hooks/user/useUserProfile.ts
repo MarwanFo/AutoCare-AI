@@ -26,11 +26,13 @@ export function useUserProfile() {
         avatarUrl: query.data.avatarUrl,
       });
 
-      // Synchronize authenticated user cloud preferredLanguage to local i18n store
+      // Synchronize cloud preferredLanguage ONLY if local preference hasn't been set by user
       if (query.data.preferredLanguage) {
         const normalizedLang = normalizeLanguageCode(query.data.preferredLanguage);
-        if (normalizedLang && useI18nStore.getState().currentLanguage !== normalizedLang) {
-          useI18nStore.getState().setLanguage(normalizedLang);
+        const storeState = useI18nStore.getState();
+        // If local language store has not been initialized or set, sync from backend
+        if (normalizedLang && !storeState.isInitialized) {
+          storeState.setLanguage(normalizedLang);
         }
       }
     }

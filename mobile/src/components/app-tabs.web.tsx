@@ -55,29 +55,34 @@ export function TabButton({ children, isFocused, ...props }: TabTriggerSlotProps
 }
 
 export function CustomTabList(props: TabListProps) {
-  const scheme = useColorScheme();
-  const colors = Colors[scheme === 'unspecified' ? 'light' : scheme];
-
   return (
     <View {...props} style={styles.tabListContainer}>
-      <ThemedView type="backgroundElement" style={styles.innerContainer}>
-        <ThemedText type="smallBold" style={styles.brandText}>
-          AutoCare AI
-        </ThemedText>
+      <View style={styles.innerContainer}>
+        <View style={styles.brandContainer}>
+          <View style={styles.logoDot} />
+          <ThemedText type="smallBold" style={styles.brandText}>
+            AutoCare AI
+          </ThemedText>
+          <View style={styles.proBadge}>
+            <ThemedText style={styles.proBadgeText}>PRO</ThemedText>
+          </View>
+        </View>
 
-        {props.children}
+        <View style={styles.navGroup}>
+          {props.children}
+        </View>
 
-        <ExternalLink href="https://docs.expo.dev" asChild>
+        <ExternalLink href="https://autocare.ai/docs" asChild>
           <Pressable style={styles.externalPressable}>
-            <ThemedText type="link">Docs</ThemedText>
+            <ThemedText type="link" style={styles.docsLink}>Docs</ThemedText>
             <SymbolView
-              tintColor={colors.text}
+              tintColor="#abc7ff"
               name={{ ios: 'arrow.up.right.square', web: 'link' }}
               size={12}
             />
           </Pressable>
         </ExternalLink>
-      </ThemedView>
+      </View>
     </View>
   );
 }
@@ -85,38 +90,88 @@ export function CustomTabList(props: TabListProps) {
 const styles = StyleSheet.create({
   tabListContainer: {
     position: 'absolute',
+    top: 0,
     width: '100%',
-    padding: Spacing.three,
+    paddingVertical: 12,
+    paddingHorizontal: 24,
     justifyContent: 'center',
     alignItems: 'center',
     flexDirection: 'row',
+    zIndex: 100,
   },
   innerContainer: {
-    paddingVertical: Spacing.two,
-    paddingHorizontal: Spacing.five,
-    borderRadius: Spacing.five,
+    backgroundColor: '#18181be6',
+    borderColor: '#27272a80',
+    borderWidth: 1,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 24,
     flexDirection: 'row',
     alignItems: 'center',
     flexGrow: 1,
-    gap: Spacing.two,
-    maxWidth: MaxContentWidth,
+    gap: Spacing.three,
+    maxWidth: 900,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.4,
+    shadowRadius: 16,
   },
-  brandText: {
+  brandContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
     marginRight: 'auto',
   },
+  logoDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#abc7ff',
+  },
+  brandText: {
+    fontFamily: 'Inter',
+    fontSize: 15,
+    fontWeight: '800',
+    color: '#ffffff',
+    letterSpacing: -0.2,
+  },
+  proBadge: {
+    backgroundColor: '#abc7ff20',
+    borderColor: '#abc7ff40',
+    borderWidth: 1,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 6,
+  },
+  proBadgeText: {
+    fontSize: 9,
+    fontWeight: '800',
+    color: '#abc7ff',
+    fontFamily: 'Inter',
+  },
+  navGroup: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
   pressed: {
-    opacity: 0.7,
+    opacity: 0.75,
   },
   tabButtonView: {
-    paddingVertical: Spacing.one,
-    paddingHorizontal: Spacing.three,
-    borderRadius: Spacing.three,
+    paddingVertical: 6,
+    paddingHorizontal: 14,
+    borderRadius: 12,
   },
   externalPressable: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    gap: Spacing.one,
-    marginLeft: Spacing.three,
+    gap: 4,
+    marginLeft: 8,
+  },
+  docsLink: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#abc7ff',
   },
 });

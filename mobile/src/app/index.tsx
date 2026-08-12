@@ -133,6 +133,9 @@ const styles = StyleSheet.create({
   },
   safeArea: {
     flex: 1,
+    width: '100%',
+    maxWidth: 850,
+    alignSelf: 'center',
     paddingHorizontal: 18,
   },
   header: {

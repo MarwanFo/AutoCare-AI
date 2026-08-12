@@ -22,10 +22,12 @@ import { useJob } from '@/hooks/job/useJob';
 import { useCancelJob } from '@/hooks/job/useCancelJob';
 import { CreateVehicleRequest } from '@/types/vehicle';
 import {
-  UI_PROGRESS_STEPS,
+  getLocalizedProgressSteps,
   getProgressPercentage,
   getStepStatus,
 } from '@/utils/jobProgress';
+import { useAppTranslation } from '@/i18n/hooks/useAppTranslation';
+import { useRTL } from '@/i18n/hooks/useRTL';
 
 function generateUuidV4(): string {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
@@ -48,10 +50,15 @@ export function AiGenerationScreen({
   onCancel,
   onCompleted,
 }: AiGenerationScreenProps) {
+  const { t } = useAppTranslation(['garage', 'common', 'errors']);
+  const { isRTL } = useRTL();
+
   const [jobId, setJobId] = useState<string | null>(null);
   const [clientRequestId, setClientRequestId] = useState(() => generateUuidV4());
   const hasTriggeredInit = useRef(false);
   const onCompletedCalled = useRef(false);
+
+  const steps = getLocalizedProgressSteps(t);
 
   // Mutations & Queries
   const createVehicleMutation = useCreateVehicle();
@@ -124,7 +131,7 @@ export function AiGenerationScreen({
   // Get active step index for UI "Step X of 4" label
   const getActiveStepIndex = () => {
     if (!job) return 0;
-    const activeIndex = UI_PROGRESS_STEPS.findIndex((step) =>
+    const activeIndex = steps.findIndex((step) =>
       step.stages.includes(job.currentStage)
     );
     return activeIndex !== -1 ? activeIndex : 0;
@@ -134,25 +141,25 @@ export function AiGenerationScreen({
   const getHeaderDetails = () => {
     if (isCompleted) {
       return {
-        title: 'Digital Twin Ready',
-        subtitle: 'Your vehicle digital twin has been successfully activated with standard factory parameters.',
+        title: t('garage:ai.twin_ready_title', { defaultValue: 'Digital Twin Ready' }),
+        subtitle: t('garage:ai.twin_ready_subtitle', { defaultValue: 'Your vehicle digital twin has been successfully activated with standard factory parameters.' }),
       };
     }
     if (isCancelled) {
       return {
-        title: 'Onboarding Cancelled',
-        subtitle: 'The background activation job was stopped. You can retry or exit to the wizard.',
+        title: t('garage:ai.onboarding_cancelled_title', { defaultValue: 'Onboarding Cancelled' }),
+        subtitle: t('garage:ai.onboarding_cancelled_subtitle', { defaultValue: 'The background activation job was stopped. You can retry or exit to the wizard.' }),
       };
     }
     if (isFailed) {
       return {
-        title: 'Activation Failed',
-        subtitle: 'An error occurred during Gemini AI compilation or data validation.',
+        title: t('garage:ai.activation_failed_title', { defaultValue: 'Activation Failed' }),
+        subtitle: t('garage:ai.activation_failed_subtitle', { defaultValue: 'An error occurred during Gemini AI compilation or data validation.' }),
       };
     }
     return {
-      title: 'Building Digital Twin',
-      subtitle: 'AutoCare AI is parsing manufacturer databases and compiling your digital twin profile.',
+      title: t('garage:ai.building_twin_title', { defaultValue: 'Building Digital Twin' }),
+      subtitle: t('garage:ai.building_twin_subtitle', { defaultValue: 'AutoCare AI is parsing manufacturer databases and compiling your digital twin profile.' }),
     };
   };
 
@@ -161,12 +168,12 @@ export function AiGenerationScreen({
   const getErrorMessage = () => {
     if (createVehicleMutation.isError) {
       const err: any = createVehicleMutation.error;
-      return err.response?.data?.message || err.message || 'Failed to submit onboarding request.';
+      return err.response?.data?.message || err.message || t('errors:generic', { defaultValue: 'Failed to submit onboarding request.' });
     }
     if (jobQueryError) {
-      return 'Failed to retrieve background job progress.';
+      return t('errors:job_progress_failed', { defaultValue: 'Failed to retrieve background job progress.' });
     }
-    return job?.errorMessage || 'An unexpected error occurred during database resolution.';
+    return job?.errorMessage || t('errors:generic', { defaultValue: 'An unexpected error occurred during database resolution.' });
   };
 
   return (
@@ -230,24 +237,24 @@ export function AiGenerationScreen({
                 ]}
               />
             </View>
-            <View style={styles.progressLabels}>
+            <View style={[styles.progressLabels, isRTL && { flexDirection: 'row-reverse' }]}>
               <Text style={styles.progressText}>
                 {isCompleted
-                  ? '100% Complete'
+                  ? t('garage:ai.complete_100', { defaultValue: '100% Complete' })
                   : isFailed
-                  ? 'Failed'
+                  ? t('common:failed', { defaultValue: 'Failed' })
                   : isCancelled
-                  ? 'Cancelled'
-                  : `${Math.round(progress)}% compiled`}
+                  ? t('common:cancelled', { defaultValue: 'Cancelled' })
+                  : t('garage:ai.compiled_pct', { pct: Math.round(progress), defaultValue: `${Math.round(progress)}% compiled` })}
               </Text>
               <Text style={styles.stepIndicatorText}>
                 {isCompleted
-                  ? 'Finished'
+                  ? t('common:finished', { defaultValue: 'Finished' })
                   : isFailed
-                  ? 'Failed'
+                  ? t('common:failed', { defaultValue: 'Failed' })
                   : isCancelled
-                  ? 'Cancelled'
-                  : `Step ${getActiveStepIndex() + 1} of 4`}
+                  ? t('common:cancelled', { defaultValue: 'Cancelled' })
+                  : t('garage:ai.step_indicator', { current: getActiveStepIndex() + 1, total: 4, defaultValue: `Step ${getActiveStepIndex() + 1} of 4` })}
               </Text>
             </View>
           </View>
@@ -257,19 +264,21 @@ export function AiGenerationScreen({
             <View style={styles.errorBannerWrapper}>
               <ErrorBanner message={getErrorMessage()} />
               <View style={styles.errorDetailsContainer}>
-                <Text style={styles.errorTitle}>
-                  {isCancelled ? 'Job Aborted' : 'Background Execution Error'}
-                </Text>
-                <Text style={styles.errorMessage}>
+                <Text style={[styles.errorTitle, isRTL && { textAlign: 'right' }]}>
                   {isCancelled
-                    ? 'This job was explicitly cancelled by the user. You can restart the onboarding process or try again.'
-                    : 'The Digital Twin generation failed. This might be due to transient network latency or invalid registration inputs.'}
+                    ? t('garage:ai.job_aborted', { defaultValue: 'Job Aborted' })
+                    : t('garage:ai.exec_error', { defaultValue: 'Background Execution Error' })}
+                </Text>
+                <Text style={[styles.errorMessage, isRTL && { textAlign: 'right' }]}>
+                  {isCancelled
+                    ? t('garage:ai.cancelled_msg', { defaultValue: 'This job was explicitly cancelled by the user. You can restart the onboarding process or try again.' })
+                    : t('garage:ai.failed_msg', { defaultValue: 'The Digital Twin generation failed. This might be due to transient network latency or invalid registration inputs.' })}
                 </Text>
               </View>
             </View>
           ) : (
             <View style={styles.stepsContainer}>
-              {UI_PROGRESS_STEPS.map((step, index) => {
+              {steps.map((step) => {
                 const currentStage = job?.currentStage || 'PENDING';
                 const status = getStepStatus(step, currentStage);
                 const isStepCompleted = status === 'completed';
@@ -284,6 +293,7 @@ export function AiGenerationScreen({
                       isStepCompleted && styles.stepRowCompleted,
                       isStepActive && styles.stepRowActive,
                       isStepPending && styles.stepRowPending,
+                      isRTL && { flexDirection: 'row-reverse' },
                     ]}
                   >
                     <View style={styles.iconColumn}>
@@ -311,6 +321,7 @@ export function AiGenerationScreen({
                           isStepCompleted && styles.stepTitleCompleted,
                           isStepActive && styles.stepTitleActive,
                           isStepPending && styles.stepTitlePending,
+                          isRTL && { textAlign: 'right' },
                         ]}
                       >
                         {step.title}
@@ -321,6 +332,7 @@ export function AiGenerationScreen({
                           isStepCompleted && styles.stepSublabelCompleted,
                           isStepActive && styles.stepSublabelActive,
                           isStepPending && styles.stepSublabelPending,
+                          isRTL && { textAlign: 'right' },
                         ]}
                       >
                         {step.sublabel}
@@ -335,13 +347,13 @@ export function AiGenerationScreen({
           {/* Navigation Controls */}
           <View style={styles.footerContainer}>
             {isFailed || isCancelled ? (
-              <View style={styles.buttonRow}>
+              <View style={[styles.buttonRow, isRTL && { flexDirection: 'row-reverse' }]}>
                 <TouchableOpacity onPress={onCancel} style={styles.cancelButton}>
-                  <Text style={styles.cancelButtonText}>Cancel</Text>
+                  <Text style={styles.cancelButtonText}>{t('common:cancel', { defaultValue: 'Cancel' })}</Text>
                 </TouchableOpacity>
                 <View style={{ flex: 1 }}>
                   <PrimaryButton
-                    title="Retry Generation"
+                    title={t('garage:ai.retry_generation', { defaultValue: 'Retry Generation' })}
                     onPress={handleRetry}
                     isLoading={createVehicleMutation.isPending}
                   />
@@ -350,21 +362,14 @@ export function AiGenerationScreen({
             ) : (
               <TouchableOpacity
                 onPress={handleCancelInProgress}
-                style={styles.cancelButtonCenter}
+                style={styles.textOnlyCancelButton}
                 disabled={isCompleted || cancelJobMutation.isPending}
               >
-                {cancelJobMutation.isPending ? (
-                  <ActivityIndicator size="small" color="#ffffff" />
-                ) : (
-                  <Text
-                    style={[
-                      styles.cancelButtonText,
-                      isCompleted && { opacity: 0.3 },
-                    ]}
-                  >
-                    Cancel Generation
-                  </Text>
-                )}
+                <Text style={styles.textOnlyCancelText}>
+                  {isCompleted
+                    ? t('garage:ai.redirecting', { defaultValue: 'Redirecting to vehicle...' })
+                    : t('common:cancel', { defaultValue: 'Cancel Onboarding' })}
+                </Text>
               </TouchableOpacity>
             )}
           </View>
@@ -379,201 +384,180 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#131313',
   },
+  topGlow: {
+    position: 'absolute',
+    top: -100,
+    right: -100,
+    width: 300,
+    height: 300,
+    borderRadius: 150,
+    backgroundColor: 'rgba(171, 199, 255, 0.08)',
+  },
+  bottomGlow: {
+    position: 'absolute',
+    bottom: -100,
+    left: -100,
+    width: 300,
+    height: 300,
+    borderRadius: 150,
+    backgroundColor: 'rgba(171, 199, 255, 0.05)',
+  },
   safeArea: {
     flex: 1,
     paddingHorizontal: 20,
-    paddingBottom: 24,
   },
   card: {
-    alignSelf: 'stretch',
-    backgroundColor: '#201f1f',
-    borderWidth: 1,
-    borderColor: '#444748',
-    borderRadius: 32,
-    paddingHorizontal: 20,
-    paddingVertical: 24,
-    position: 'relative',
-    overflow: 'hidden',
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 12 },
-    shadowOpacity: 0.3,
-    shadowRadius: 16,
-    elevation: 10,
     flex: 1,
+    backgroundColor: '#1c1c1c',
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: '#2f3131',
+    marginTop: 16,
+    marginBottom: 16,
+    padding: 24,
+    overflow: 'hidden',
   },
   topAccentBarContainer: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    height: 2,
-    alignItems: 'center',
-    justifyContent: 'center',
+    height: 4,
+    backgroundColor: '#252525',
+    marginHorizontal: -24,
+    marginTop: -24,
+    marginBottom: 24,
   },
   topAccentBar: {
-    width: '80%',
     height: '100%',
     backgroundColor: '#abc7ff',
-    opacity: 0.5,
-  },
-  topAccentBarFailed: {
-    backgroundColor: '#ffb4ab',
   },
   topAccentBarSuccess: {
     backgroundColor: '#34c759',
   },
+  topAccentBarFailed: {
+    backgroundColor: '#ffb4ab',
+  },
   visualContainer: {
-    height: 90,
-    justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 16,
+    justifyContent: 'center',
+    marginVertical: 12,
   },
   pulseContainer: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    backgroundColor: '#abc7ff15',
-    justifyContent: 'center',
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: 'rgba(171, 199, 255, 0.1)',
     alignItems: 'center',
-    borderColor: '#abc7ff30',
+    justifyContent: 'center',
     borderWidth: 1,
+    borderColor: 'rgba(171, 199, 255, 0.2)',
   },
   pulseSuccess: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    backgroundColor: '#34c75915',
-    justifyContent: 'center',
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: 'rgba(52, 199, 89, 0.1)',
     alignItems: 'center',
-    borderColor: '#34c75930',
+    justifyContent: 'center',
     borderWidth: 1,
+    borderColor: 'rgba(52, 199, 89, 0.2)',
   },
   pulseFailed: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    backgroundColor: '#ffb4ab15',
-    justifyContent: 'center',
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: 'rgba(255, 180, 171, 0.1)',
     alignItems: 'center',
-    borderColor: '#ffb4ab30',
+    justifyContent: 'center',
     borderWidth: 1,
+    borderColor: 'rgba(255, 180, 171, 0.2)',
   },
   progressBarContainer: {
-    marginBottom: 20,
+    marginVertical: 16,
   },
   progressBarBackground: {
-    height: 6,
-    backgroundColor: '#2e3132',
-    borderRadius: 3,
+    height: 8,
+    backgroundColor: '#252525',
+    borderRadius: 4,
     overflow: 'hidden',
-    marginBottom: 8,
   },
   progressBarFill: {
     height: '100%',
     backgroundColor: '#abc7ff',
-    borderRadius: 3,
-  },
-  progressBarFillFailed: {
-    backgroundColor: '#ffb4ab',
+    borderRadius: 4,
   },
   progressBarFillSuccess: {
     backgroundColor: '#34c759',
   },
+  progressBarFillFailed: {
+    backgroundColor: '#ffb4ab',
+  },
   progressLabels: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    marginTop: 8,
   },
   progressText: {
     fontFamily: 'Inter',
     fontSize: 12,
-    color: '#abc7ff',
     fontWeight: '600',
+    color: '#abc7ff',
   },
   stepIndicatorText: {
     fontFamily: 'Inter',
     fontSize: 12,
-    color: '#c4c7c8',
-  },
-  errorBannerWrapper: {
-    flex: 1,
-    gap: 16,
-    justifyContent: 'center',
-  },
-  errorDetailsContainer: {
-    backgroundColor: '#ffb4ab10',
-    borderColor: '#ffb4ab20',
-    borderWidth: 1,
-    borderRadius: 16,
-    padding: 16,
-  },
-  errorTitle: {
-    fontFamily: 'Inter',
-    fontSize: 15,
-    fontWeight: '700',
-    color: '#ffb4ab',
-    marginBottom: 6,
-  },
-  errorMessage: {
-    fontFamily: 'Inter',
-    fontSize: 13,
-    color: '#c4c7c8',
-    lineHeight: 18,
+    color: '#8e9192',
   },
   stepsContainer: {
     flex: 1,
-    gap: 14,
+    justifyContent: 'center',
+    gap: 16,
+    marginVertical: 12,
   },
   stepRow: {
     flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: 12,
-  },
-  stepRowCompleted: {
-    opacity: 1,
+    alignItems: 'center',
+    padding: 12,
+    borderRadius: 12,
+    backgroundColor: 'transparent',
   },
   stepRowActive: {
-    opacity: 1,
+    backgroundColor: '#252525',
+  },
+  stepRowCompleted: {
+    opacity: 0.8,
   },
   stepRowPending: {
-    opacity: 0.35,
+    opacity: 0.4,
   },
   iconColumn: {
-    width: 24,
-    height: 24,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: 2,
+    marginRight: 16,
   },
   completedCheck: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    backgroundColor: '#abc7ff15',
-    borderWidth: 1,
-    borderColor: '#abc7ff',
-    justifyContent: 'center',
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: 'rgba(171, 199, 255, 0.15)',
     alignItems: 'center',
+    justifyContent: 'center',
   },
   activeDotContainer: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: '#abc7ff',
-    justifyContent: 'center',
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: 'rgba(171, 199, 255, 0.2)',
     alignItems: 'center',
+    justifyContent: 'center',
   },
   activeDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
+    width: 10,
+    height: 10,
+    borderRadius: 5,
     backgroundColor: '#abc7ff',
   },
   pendingDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: '#444748',
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: '#444',
   },
   textColumn: {
     flex: 1,
@@ -583,80 +567,86 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
     color: '#ffffff',
-    marginBottom: 4,
-  },
-  stepTitleCompleted: {
-    color: '#abc7ff',
   },
   stepTitleActive: {
-    color: '#ffffff',
+    color: '#abc7ff',
+  },
+  stepTitleCompleted: {
+    color: '#e2e2e2',
   },
   stepTitlePending: {
-    color: '#c4c7c8',
+    color: '#8e9192',
   },
   stepSublabel: {
     fontFamily: 'Inter',
     fontSize: 12,
-    color: '#c4c7c8',
-    lineHeight: 16,
-  },
-  stepSublabelCompleted: {
     color: '#8e9192',
+    marginTop: 2,
   },
   stepSublabelActive: {
     color: '#c4c7c8',
   },
-  stepSublabelPending: {
+  stepSublabelCompleted: {
     color: '#8e9192',
   },
+  stepSublabelPending: {
+    color: '#666',
+  },
+  errorBannerWrapper: {
+    flex: 1,
+    justifyContent: 'center',
+    gap: 12,
+  },
+  errorDetailsContainer: {
+    backgroundColor: '#252525',
+    padding: 16,
+    borderRadius: 12,
+  },
+  errorTitle: {
+    fontFamily: 'Inter',
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#ffb4ab',
+    marginBottom: 4,
+  },
+  errorMessage: {
+    fontFamily: 'Inter',
+    fontSize: 12,
+    color: '#c4c7c8',
+    lineHeight: 18,
+  },
   footerContainer: {
-    marginTop: 20,
+    marginTop: 'auto',
+    paddingTop: 16,
   },
   buttonRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 16,
+    gap: 12,
   },
   cancelButton: {
     height: 56,
-    paddingHorizontal: 24,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderRadius: 28,
+    paddingHorizontal: 20,
+    borderRadius: 16,
     borderWidth: 1,
-    borderColor: '#444748',
-  },
-  cancelButtonCenter: {
-    height: 48,
-    justifyContent: 'center',
+    borderColor: '#444',
     alignItems: 'center',
+    justifyContent: 'center',
   },
   cancelButtonText: {
     fontFamily: 'Inter',
     fontSize: 14,
     fontWeight: '600',
-    color: '#ffffff',
+    color: '#c4c7c8',
   },
-  topGlow: {
-    position: 'absolute',
-    top: '-10%',
-    right: '-10%',
-    width: '60%',
-    aspectRatio: 1,
-    borderRadius: 9999,
-    backgroundColor: '#abc7ff',
-    opacity: 0.04,
-    zIndex: 1,
+  textOnlyCancelButton: {
+    height: 48,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  bottomGlow: {
-    position: 'absolute',
-    bottom: '-10%',
-    left: '-10%',
-    width: '50%',
-    aspectRatio: 1,
-    borderRadius: 9999,
-    backgroundColor: '#ffffff',
-    opacity: 0.04,
-    zIndex: 1,
+  textOnlyCancelText: {
+    fontFamily: 'Inter',
+    fontSize: 14,
+    color: '#8e9192',
   },
 });

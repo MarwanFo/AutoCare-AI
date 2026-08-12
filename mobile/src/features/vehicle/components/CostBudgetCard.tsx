@@ -174,10 +174,12 @@ const styles = StyleSheet.create({
   },
   forecastGrid: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     gap: 8,
   },
   forecastItem: {
     flex: 1,
+    minWidth: 100,
     backgroundColor: '#131313',
     borderRadius: 12,
     borderWidth: 1,

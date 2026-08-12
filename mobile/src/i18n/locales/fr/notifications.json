@@ -1,5 +1,24 @@
 {
+  "title": "Notifications & Alertes",
   "notifications_title": "Notifications",
   "push_notifications": "Notifications Push",
-  "email_notifications": "Notifications E-mail"
+  "email_notifications": "Notifications par E-mail",
+  "mark_all_read": "Tout marquer comme lu",
+  "empty_title": "Aucune notification",
+  "empty_subtitle": "Vous n'avez aucune alerte d'entretien active.",
+  "default_vehicle": "Véhicule",
+  "default_document": "Document",
+  "tap_to_view": "Voir les détails",
+  "types": {
+    "component_critical_title": "Attention requise : pièce en état critique",
+    "component_critical_msg": "Votre {{componentName}} sur {{vehicleTitle}} présente un état de santé très faible ({{health}}%). Faites la inspecter rapidement et remplacez la si nécessaire.",
+    "component_warning_title": "Entretien à venir",
+    "component_warning_msg": "{{componentName}} sur {{vehicleTitle}} approche de son intervalle d'entretien recommandé. Pensez à planifier une inspection ou un remplacement.",
+    "component_data_required_title": "Informations de la pièce requises",
+    "component_data_required_msg": "Des informations supplémentaires sont nécessaires pour calculer l'état de {{componentName}} sur {{vehicleTitle}}.",
+    "document_expiring_title": "Document du véhicule arrivant à échéance",
+    "document_expiring_msg": "Votre document {{documentTitle}} sur {{vehicleTitle}} expire le {{expiryDate}}. Veuillez le vérifier ou le renouveler avant échéance.",
+    "document_expired_title": "Document du véhicule expiré",
+    "document_expired_msg": "Votre document {{documentTitle}} sur {{vehicleTitle}} a dépassé sa date d'expiration ({{expiryDate}}). Veuillez le renouveler."
+  }
 }

@@ -10,6 +10,14 @@
   "nav_home": "Accueil",
   "nav_explore": "Explorer",
   "nav_profile": "Profil",
-  "something_went_wrong": "Un problème est survenu",
-  "error_boundary_message": "Une erreur s'est produite. Veuillez réessayer."
+  "something_went_wrong": "Une erreur est survenue",
+  "error_boundary_message": "Une erreur est survenue dans l'application. Veuillez rafraîchir.",
+  "not_provided": "Non renseigné",
+  "continue_to_garage": "Continuer vers le garage",
+  "skip_for_now": "Passer pour l'instant",
+  "finished": "Terminé",
+  "failed": "Échec",
+  "cancelled": "Annulé",
+  "invalid_mileage": "Veuillez saisir un kilométrage valide",
+  "error": "Erreur"
 }

@@ -1,7 +1,5 @@
 package com.autocare.backend.vehicle.service.impl;
 
-import com.autocare.backend.notification.entity.enums.NotificationSeverity;
-import com.autocare.backend.notification.repository.NotificationRepository;
 import com.autocare.backend.notification.service.NotificationService;
 import com.autocare.backend.vehicle.entity.UserComponent;
 import com.autocare.backend.vehicle.entity.UserVehicle;
@@ -24,7 +22,6 @@ public class ComponentDegradationServiceImpl implements ComponentDegradationServ
 
     private final UserComponentRepository userComponentRepository;
     private final NotificationService notificationService;
-    private final NotificationRepository notificationRepository;
 
     @Override
     @Transactional
@@ -33,99 +30,108 @@ public class ComponentDegradationServiceImpl implements ComponentDegradationServ
             return;
         }
 
-        int currentMileage = vehicle.getCurrentMileage() != null ? vehicle.getCurrentMileage() : 0;
+        Integer currentMileage = vehicle.getCurrentMileage();
         LocalDate now = LocalDate.now();
 
         List<UserComponent> components = vehicle.getComponents();
         for (UserComponent comp : components) {
-            // Determine expected piece-specific lifespans with sensible category defaults
-            int expMileage = comp.getExpectedLifespanMileage() != null ? comp.getExpectedLifespanMileage() : getDefaultMileageLifespan(comp);
-            int expMonths = comp.getExpectedLifespanMonths() != null ? comp.getExpectedLifespanMonths() : getDefaultMonthsLifespan(comp);
+            // Retrieve expected piece-specific lifespans without fabricating generic defaults
+            Integer expMileage = comp.getExpectedLifespanMileage();
+            Integer expMonths = comp.getExpectedLifespanMonths();
 
-            int instMileage = comp.getInstallationMileage() != null ? comp.getInstallationMileage() : 
-                    (comp.getLastReplacedMileage() != null ? comp.getLastReplacedMileage() : 0);
-            LocalDate instDate = comp.getInstallationDate() != null ? comp.getInstallationDate() : 
-                    (comp.getLastReplacedDate() != null ? comp.getLastReplacedDate() : vehicle.getPurchaseDate());
-            if (instDate == null) {
-                instDate = now.minusMonths(6); // Default 6 months ago baseline
+            // Determine installation/replacement mileage & date without manufactured fallbacks
+            Integer instMileage = comp.getInstallationMileage() != null ? comp.getInstallationMileage() : comp.getLastReplacedMileage();
+            LocalDate instDate = comp.getInstallationDate() != null ? comp.getInstallationDate() : comp.getLastReplacedDate();
+
+            // For BRAND_NEW vehicles only, use vehicle purchase/delivery baseline if recorded and no custom date exists
+            boolean isBrandNew = vehicle.getPurchaseCondition() == com.autocare.backend.vehicle.entity.enums.PurchaseCondition.BRAND_NEW;
+            if (isBrandNew) {
+                if (instMileage == null && vehicle.getMileageAtPurchase() != null) {
+                    instMileage = vehicle.getMileageAtPurchase();
+                }
+                if (instDate == null && vehicle.getPurchaseDate() != null) {
+                    instDate = vehicle.getPurchaseDate();
+                }
             }
 
-            int driven = Math.max(0, currentMileage - instMileage);
-            long daysElapsed = Math.max(0, ChronoUnit.DAYS.between(instDate, now));
-            long totalDaysExpected = Math.max(1, (long) expMonths * 30);
+            // 1. Evaluate Mileage Dimension Safety
+            boolean hasValidMileage = false;
+            double mileageRatio = 0.0;
+            Integer remainingMileage = null;
 
-            int remainingMileage = Math.max(0, expMileage - driven);
-            int remainingDays = Math.max(0, (int) (totalDaysExpected - daysElapsed));
+            if (expMileage != null && expMileage > 0 
+                    && instMileage != null && instMileage >= 0 
+                    && currentMileage != null && currentMileage >= 0 
+                    && currentMileage >= instMileage) {
+                
+                int driven = currentMileage - instMileage;
+                remainingMileage = Math.max(0, expMileage - driven);
+                mileageRatio = (double) driven / expMileage;
+                hasValidMileage = true;
+            }
 
-            double mileageRatio = (double) driven / expMileage;
-            double timeRatio = (double) daysElapsed / totalDaysExpected;
-            double maxRatio = Math.max(mileageRatio, timeRatio);
+            // 2. Evaluate Time Dimension Safety
+            boolean hasValidTime = false;
+            double timeRatio = 0.0;
+            Integer remainingDays = null;
 
-            int calculatedHealth = Math.max(0, Math.min(100, (int) Math.round((1.0 - maxRatio) * 100.0)));
+            if (expMonths != null && expMonths > 0 
+                    && instDate != null && !instDate.isAfter(now)) {
+                
+                long daysElapsed = ChronoUnit.DAYS.between(instDate, now);
+                long totalDaysExpected = (long) expMonths * 30;
+                remainingDays = Math.max(0, (int) (totalDaysExpected - daysElapsed));
+                timeRatio = (double) daysElapsed / totalDaysExpected;
+                hasValidTime = true;
+            }
 
-            comp.setExpectedLifespanMileage(expMileage);
-            comp.setExpectedLifespanMonths(expMonths);
-            comp.setRemainingMileage(remainingMileage);
-            comp.setRemainingDays(remainingDays);
-            comp.setHealthScore(calculatedHealth);
+            // 3. Health & Status Determination
+            if (hasValidMileage || hasValidTime) {
+                double effectiveRatio;
+                if (hasValidMileage && hasValidTime) {
+                    effectiveRatio = Math.max(mileageRatio, timeRatio);
+                } else if (hasValidMileage) {
+                    effectiveRatio = mileageRatio;
+                } else {
+                    effectiveRatio = timeRatio;
+                }
 
-            if (calculatedHealth < 25) {
-                comp.setStatus(ComponentStatus.CRITICAL);
-            } else if (calculatedHealth <= 60) {
-                comp.setStatus(ComponentStatus.WARNING);
+                int calculatedHealth = Math.max(0, Math.min(100, (int) Math.round((1.0 - effectiveRatio) * 100.0)));
+
+                comp.setRemainingMileage(remainingMileage);
+                comp.setRemainingDays(remainingDays);
+                comp.setHealthScore(calculatedHealth);
+
+                if (calculatedHealth < 25) {
+                    comp.setStatus(ComponentStatus.CRITICAL);
+                } else if (calculatedHealth <= 60) {
+                    comp.setStatus(ComponentStatus.WARNING);
+                } else {
+                    if (comp.getStatus() == ComponentStatus.NEW && calculatedHealth >= 80) {
+                        comp.setStatus(ComponentStatus.NEW);
+                    } else {
+                        comp.setStatus(ComponentStatus.GOOD);
+                    }
+                }
+            } else if (comp.getOrigin() == com.autocare.backend.vehicle.entity.enums.DataOrigin.USER_CONFIRMED && comp.getHealthScore() != null) {
+                // Preserve user-confirmed initial health input from onboarding
+                // Do not override user-confirmed health with UNKNOWN
+            } else if (isBrandNew && comp.getStatus() == ComponentStatus.NEW && comp.getHealthScore() != null) {
+                // Preserve BRAND_NEW factory baseline initialization
             } else {
-                comp.setStatus(ComponentStatus.GOOD);
+                // UNKNOWN / INSUFFICIENT_DATA State
+                comp.setRemainingMileage(null);
+                comp.setRemainingDays(null);
+                comp.setHealthScore(null);
+                comp.setStatus(ComponentStatus.UNKNOWN);
             }
 
             userComponentRepository.save(comp);
 
-            // Trigger DANGER alert notification if health score < 25% and no unread alert exists
-            if (calculatedHealth < 25) {
-                boolean hasUnreadAlert = notificationRepository.existsByUserIdAndComponentIdAndIsReadFalse(vehicle.getUser().getId(), comp.getId());
-                if (!hasUnreadAlert) {
-                    String title = "🚨 Critical Safety Alert: " + comp.getName();
-                    String message = String.format(
-                            "Danger! %s health on vehicle %s is critical (%d%% health). Estimated remaining life: %d %s / %d days. Immediate inspection required!",
-                            comp.getName(),
-                            vehicle.getNickname(),
-                            calculatedHealth,
-                            remainingMileage,
-                            vehicle.getMileageUnit(),
-                            remainingDays
-                    );
-                    notificationService.createNotification(
-                            vehicle.getUser().getId(),
-                            vehicle,
-                            comp,
-                            title,
-                            message,
-                            NotificationSeverity.DANGER
-                    );
-                }
+            // Delegate state-transition notification evaluation with pessimistic locking & clean invariants
+            if (vehicle.getUser() != null) {
+                notificationService.evaluateComponentNotification(vehicle.getUser().getId(), vehicle, comp);
             }
         }
-    }
-
-    private int getDefaultMileageLifespan(UserComponent comp) {
-        String name = comp.getName().toLowerCase();
-        if (name.contains("oil")) return 10000;
-        if (name.contains("filter")) return 15000;
-        if (name.contains("brake") && name.contains("pad")) return 30000;
-        if (name.contains("tire")) return 50000;
-        if (name.contains("spark")) return 60000;
-        if (name.contains("timing")) return 100000;
-        return 30000;
-    }
-
-    private int getDefaultMonthsLifespan(UserComponent comp) {
-        String name = comp.getName().toLowerCase();
-        if (name.contains("oil")) return 12;
-        if (name.contains("filter")) return 12;
-        if (name.contains("brake") && name.contains("pad")) return 24;
-        if (name.contains("tire")) return 36;
-        if (name.contains("spark")) return 48;
-        if (name.contains("battery")) return 48;
-        if (name.contains("timing")) return 72;
-        return 24;
     }
 }

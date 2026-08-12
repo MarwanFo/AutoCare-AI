@@ -5,45 +5,65 @@
     "intervals": "Intervalles",
     "specs": "Spécifications"
   },
+  "status": {
+    "good": "En bon état",
+    "warning": "Entretien bientôt requis",
+    "critical": "Usure critique",
+    "unknown": "Données insuffisantes"
+  },
   "danger": {
     "banner_title": "AVERTISSEMENT DE SÉCURITÉ CRITIQUE",
-    "banner_subtitle": "Une ou plusieurs pièces du véhicule ont atteint un niveau d'usure critique. Inspectez le véhicule immédiatement !"
+    "banner_subtitle": "Un ou plusieurs composants présentent une usure critique. Inspectez le véhicule immédiatement !"
   },
   "actions": {
     "add_component": "Ajouter une pièce personnalisée",
     "add_component_short": "+ Ajouter une pièce",
-    "add_document": "Ajouter un document personnalisé",
+    "add_document": "Ajouter un document",
     "add_document_short": "+ Ajouter un document",
-    "add_interval": "Ajouter un intervalle personnalisé",
-    "add_interval_short": "+ Ajouter un intervalle"
+    "add_interval": "Ajouter un intervalle",
+    "add_interval_short": "+ Ajouter un intervalle",
+    "set_replacement_date": "+ Définir la date de remplacement & calculer l'état",
+    "update_replacement_date": "Enregistrer le remplacement / Modifier la date",
+    "calculate_health": "Enregistrer et calculer l'état",
+    "save_dates": "Enregistrer les dates d'entretien"
+  },
+  "preowned": {
+    "title": "Historique d'entretien des pièces",
+    "subtitle": "Indiquez la date du dernier remplacement de chaque composant pour activer les prédictions d'usure de l'IA.",
+    "initial_health_title": "État de santé initial des composants"
   },
   "form": {
     "component_name": "Nom de la pièce *",
-    "component_name_placeholder": "ex: Échappement sport",
+    "component_name_placeholder": "ex: Ligne d'échappement inox",
     "category": "Catégorie",
     "document_title": "Titre du document *",
-    "document_url": "Lien / URL du document PDF",
+    "document_url": "Lien du document PDF",
     "interval_title": "Titre de l'intervalle *",
     "interval_mileage": "Kilométrage de l'intervalle (KM / MI)",
-    "interval_months": "Mois de l'intervalle",
-    "inspection_only": "Inspection uniquement (Pas de remplacement)"
+    "interval_months": "Intervalles en mois",
+    "inspection_only": "Inspection uniquement (sans remplacement)",
+    "replacement_date": "Date de remplacement / installation",
+    "replacement_mileage": "Kilométrage du véhicule lors du remplacement",
+    "last_replaced_optional": "Dernier remplacement (Optionnel)",
+    "select_replacement_date": "Sélectionner la date de remplacement"
   },
   "condition": {
     "brand_new": "Neuf",
-    "used": "D'occasion"
+    "used": "Occasion"
   },
   "categories": {
     "ENGINE": "Moteur",
     "TRANSMISSION": "Transmission",
-    "BRAKES": "Freins",
-    "FLUIDS": "Fluides",
+    "BRAKES": "Freinage",
+    "FLUIDS": "Fluides & Huiles",
     "FILTERS": "Filtres",
-    "TIRES": "Pneus",
+    "TIRES": "Pneumatiques",
     "BATTERY": "Batterie",
-    "OTHER": "Autre"
+    "OTHER": "Autre",
+    "GENERAL": "Général"
   },
   "components_list": {
-    "ENGINE_TIMING_SYSTEM": "Chaîne / Courroie de distribution",
+    "ENGINE_TIMING_SYSTEM": "Courroie / Chaîne de distribution",
     "SPARK_PLUGS_SET": "Jeu de bougies d'allumage",
     "TRANSMISSION_CLUTCH": "Embrayage / Convertisseur de couple",
     "FRONT_BRAKE_PADS": "Plaquettes de frein avant",
@@ -58,84 +78,86 @@
     "CABIN_AIR_FILTER": "Filtre d'habitacle",
     "ENGINE_AIR_FILTER": "Filtre à air moteur",
     "FUEL_FILTER": "Filtre à carburant",
-    "ALL_SEASON_TIRES": "Jeu de pneus 4 saisons",
+    "ALL_SEASON_TIRES": "Train de pneus 4 saisons",
     "BATTERY_12V": "Batterie 12V AGM",
     "WIPER_BLADES": "Jeu de balais d'essuie-glace"
   },
   "documents_section": {
-    "title": "Documents générés par IA",
+    "title": "Documents générés par l'IA",
     "no_documents": "Aucun document généré pour ce véhicule.",
-    "view_pdf": "Voir le document PDF"
+    "view_pdf": "Consulter le document PDF"
   },
   "specs_section": {
     "title": "Spécifications complètes du véhicule",
     "transmission": "Transmission",
-    "fuel_type": "Type de carburant",
+    "fuel_type": "Carburant",
     "color": "Couleur",
-    "vin": "N° de série (VIN)",
-    "primary": "Principale",
+    "vin": "N° de châssis (VIN)",
+    "primary": "Véhicule principal",
     "status": "Statut",
-    "completeness_score": "Taux de complétion",
+    "completeness_score": "Score de complétude",
     "estimated_annual_mileage": "Kilométrage annuel estimé",
-    "driving_profile": "Profil de conduite",
+    "driving_profile": "Style de conduite",
     "climate_assumptions": "Conditions climatiques",
     "yes": "Oui",
     "no": "Non"
   },
   "dashboard": {
-    "title": "Calendrier d'entretien",
-    "subtitle": "Suivez les intervalles d'entretien et l'usure des pièces",
-    "health_overview": "Aperçu de la santé des composants",
-    "oil_change": "Vidange d'huile",
+    "title": "Programme d'entretien",
+    "subtitle": "Suivez les échéances, l'usure des pièces et les révisions à venir",
+    "health_overview": "État de santé des composants",
+    "oil_change": "Vidange huile moteur",
     "tire_rotation": "Permutation des pneus",
-    "brake_maintenance": "Entretien des freins",
+    "brake_maintenance": "Entretien du système de freinage",
     "battery_health": "Santé de la batterie"
   },
   "service": {
-    "intervals": "Intervalles d'entretien programmés",
+    "intervals": "Intervalles du carnet d'entretien",
     "inspection": "Inspection",
     "replacement": "Remplacement",
-    "view_pdf": "Voir le document PDF",
-    "no_intervals": "Aucun intervalle programmé disponible."
+    "view_pdf": "Consulter le document PDF",
+    "no_intervals": "Aucun intervalle planifié."
   },
   "history": {
-    "title": "Historique des entretiens",
+    "title": "Historique des révisions",
     "empty": "Aucun historique d'entretien enregistré pour ce véhicule."
   },
   "reminders": {
     "upcoming_one": "1 entretien à venir",
     "upcoming_other": "{{count}} entretiens à venir",
-    "completed_one": "1 entretien terminé",
-    "completed_other": "{{count}} entretiens terminés",
-    "overdue_one": "1 élément en retard",
-    "overdue_other": "{{count}} éléments en retard",
+    "completed_one": "1 entretien effectué",
+    "completed_other": "{{count}} entretiens effectués",
+    "overdue_one": "1 entretien en retard",
+    "overdue_other": "{{count}} entretiens en retard",
     "every_distance": "Tous les {{distance}} {{unit}}",
     "every_months": "Tous les {{months}} mois",
     "remaining_mileage": "{{remainingMileage}} {{unit}} restants",
     "days_remaining": "{{days}} jours restants",
-    "health_percentage": "{{percentage}}% de santé"
+    "health_percentage": "{{percentage}}% État",
+    "insufficient_data": "Données insuffisantes",
+    "add_dates_hint": "Certains composants manquent de dates de remplacement. Appuyez sur « Définir la date » pour calculer leur état."
   },
   "components": {
     "title": "Santé des pièces du jumeau numérique",
-    "part_number": "Numéro de pièce OEM",
+    "part_number": "Référence pièce OEM",
     "specifications": "Spécifications",
     "notes": "Remarques",
     "no_components": "Aucun composant enregistré pour ce véhicule."
   },
   "dialogs": {
-    "confirm_service": "Marquer l'entretien comme terminé",
-    "confirm_message": "Voulez-vous vraiment marquer {{serviceName}} comme terminé pour {{vehicleName}} ?",
+    "confirm_service": "Valider l'entretien",
+    "confirm_message": "Voulez-vous marquer l'entretien {{serviceName}} comme effectué pour {{vehicleName}} ?",
     "cancel": "Annuler",
     "save": "Enregistrer"
   },
   "filters": {
-    "all_services": "Tous les services",
+    "all_services": "Tous les entretiens",
     "pending": "En attente",
     "overdue": "En retard",
-    "completed": "Terminés"
+    "completed": "Effectués"
   },
   "empty": {
-    "title": "Aucun enregistrement d'entretien",
-    "subtitle": "Aucun intervalle d'entretien trouvé pour {{vehicleName}}."
+    "title": "Aucun carnet d'entretien",
+    "subtitle": "Aucun entretien planifié pour {{vehicleName}}."
   }
 }

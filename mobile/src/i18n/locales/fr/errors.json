@@ -1,5 +1,8 @@
 {
   "network_error": "Erreur de connexion réseau",
-  "unexpected_error": "Une erreur inattendue s'est produite",
-  "unauthorized": "Session expirée. Veuillez vous reconnecter"
+  "unexpected_error": "Une erreur inattendue est survenue",
+  "unauthorized": "Session expirée. Veuillez vous reconnecter",
+  "generic": "Une erreur est survenue. Veuillez réessayer.",
+  "failed_to_load_vehicle": "Impossible de charger les données du véhicule.",
+  "job_progress_failed": "Impossible d'obtenir la progression de la tâche."
 }

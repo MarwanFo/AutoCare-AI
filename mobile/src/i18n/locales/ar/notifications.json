@@ -1,5 +1,24 @@
 {
+  "title": "الإشعارات والتنبيهات",
   "notifications_title": "الإشعارات",
-  "push_notifications": "إشعارات التطبيق",
-  "email_notifications": "إشعارات البريد الإلكتروني"
+  "push_notifications": "التنبيهات الفورية",
+  "email_notifications": "إشعارات البريد الإلكتروني",
+  "mark_all_read": "تحديد الكل كمقروء",
+  "empty_title": "لا توجد إشعارات",
+  "empty_subtitle": "ليس لديك أي تنبيهات صيانة قيد الانتظار حاليًا.",
+  "default_vehicle": "السيارة",
+  "default_document": "المستند",
+  "tap_to_view": "عرض التفاصيل",
+  "types": {
+    "component_critical_title": "تنبيه حرِج: القطعة تحتاج إلى فحص",
+    "component_critical_msg": "وصلت صحة قطعة {{componentName}} في سيارتك {{vehicleTitle}} إلى مستوى حرِج جداً ({{health}}%). يوصى بفحصها قريباً واستبدالها إذا لزم الأمر.",
+    "component_warning_title": "اقتراب موعد الصيانة",
+    "component_warning_msg": "تقترب قطعة {{componentName}} في {{vehicleTitle}} من موعد الصيانة الدورية. يوصى بجدولة الفحص أو التغيير.",
+    "component_data_required_title": "مطلوب بيانات الصيانة للقطعة",
+    "component_data_required_msg": "يتطلب حساب صحة قطعة {{componentName}} في {{vehicleTitle}} إضافة تاريخ آخر تغيير أو المسافة المقاطعة.",
+    "document_expiring_title": "مستند السيارة ينتهي قريباً",
+    "document_expiring_msg": "ينتهي مستند {{documentTitle}} لسيارتك {{vehicleTitle}} بتاريخ {{expiryDate}}. يرجى مراجعته وتجديده قبل موعد الانتهاء.",
+    "document_expired_title": "مستند السيارة منتهي الصلاحية",
+    "document_expired_msg": "انتهت صلاحية مستند {{documentTitle}} لسيارتك {{vehicleTitle}} بتاريخ {{expiryDate}}. يرجى تجديده."
+  }
 }

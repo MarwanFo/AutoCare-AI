@@ -1,79 +1,99 @@
 {
   "tabs": {
-    "components": "المكونات",
+    "components": "القطع والأجزاء",
     "documents": "المستندات",
-    "intervals": "الفترات",
+    "intervals": "فترات الصيانة",
     "specs": "المواصفات"
   },
+  "status": {
+    "good": "حالة جيدة",
+    "warning": "تحتاج صيانة قريبًا",
+    "critical": "تآكل حرِج",
+    "unknown": "بيانات غير كافية"
+  },
   "danger": {
-    "banner_title": "تحذير سلامة حرج",
-    "banner_subtitle": "وصلت قطعة أو أكثر في المركبة إلى مستوى تآكل حرج. يرجى فحص السيارة فوراً!"
+    "banner_title": "تحذير أمان هام",
+    "banner_subtitle": "وصلت قطعة واحدة أو أكثر إلى مرحلة التآكل الحرِج. يرجى فحص السيارة فورًا!"
   },
   "actions": {
     "add_component": "إضافة قطعة مخصصة",
     "add_component_short": "+ إضافة قطعة",
     "add_document": "إضافة مستند مخصص",
     "add_document_short": "+ إضافة مستند",
-    "add_interval": "إضافة فترة مخصصة",
-    "add_interval_short": "+ إضافة فترة"
+    "add_interval": "إضافة فترة صيانة",
+    "add_interval_short": "+ إضافة فترة",
+    "set_replacement_date": "+ تحديد تاريخ الاستبدال وحساب حالة القطعة",
+    "update_replacement_date": "تسجيل الاستبدال / تعديل التاريخ",
+    "calculate_health": "حفظ وحساب حالة القطعة",
+    "save_dates": "حفظ تواريخ الصيانة"
+  },
+  "preowned": {
+    "title": "سجل صيانة القطع والأجزاء",
+    "subtitle": "حدد تاريخ آخر تغيير لكل قطعة لتفعيل التنبؤ الذكي بالتآكل ومواعيد الصيانة.",
+    "initial_health_title": "الحالة الأولية لصحة القطع"
   },
   "form": {
     "component_name": "اسم القطعة *",
-    "component_name_placeholder": "مثال: نظام عادم رياضي",
+    "component_name_placeholder": "مثال: نظام العادم الرياضي",
     "category": "الفئة",
     "document_title": "عنوان المستند *",
-    "document_url": "رابط المستند / URL",
-    "interval_title": "عنوان الفترة *",
+    "document_url": "رابط مستند PDF",
+    "interval_title": "عنوان فترة الصيانة *",
     "interval_mileage": "مسافة الفترة (كم / ميل)",
-    "interval_months": "أشهر الفترة",
-    "inspection_only": "فحص فقط (بدون استبدال)"
+    "interval_months": "الفترة بالشهور",
+    "inspection_only": "فحص فقط (بدون تغيير)",
+    "replacement_date": "تاريخ التغيير / التركيب",
+    "replacement_mileage": "عداد مسافة السيارة عند التغيير",
+    "last_replaced_optional": "تاريخ آخر تغيير (اختياري)",
+    "select_replacement_date": "اختر تاريخ التغيير"
   },
   "condition": {
-    "brand_new": "جديدة كلياً",
+    "brand_new": "جديدة",
     "used": "مستعملة"
   },
   "categories": {
     "ENGINE": "المحرك",
     "TRANSMISSION": "ناقل الحركة",
-    "BRAKES": "الفرامل",
-    "FLUIDS": "السوائل",
-    "FILTERS": "الفلاتر",
-    "TIRES": "الإطارات",
-    "BATTERY": "البطارية",
-    "OTHER": "أخرى"
+    "BRAKES": "الفرامل والفرملة",
+    "FLUIDS": "السوائل والزيوت",
+    "FILTERS": "الفلاتر والمرشحات",
+    "TIRES": "الإطارات والمنظومة",
+    "BATTERY": "البطارية والكهرباء",
+    "OTHER": "أخرى",
+    "GENERAL": "عام"
   },
   "components_list": {
-    "ENGINE_TIMING_SYSTEM": "سلسلة / حزام توقيت المحرك",
-    "SPARK_PLUGS_SET": "طقم شمعات الاحتراق",
-    "TRANSMISSION_CLUTCH": "قابض ناقل الحركة / محول العزم",
-    "FRONT_BRAKE_PADS": "فحمات الفرامل الأمامية",
-    "REAR_BRAKE_PADS": "فحمات الفرامل الخلفية",
-    "FRONT_BRAKE_ROTORS": "أقراص الفرامل الأمامية",
-    "REAR_BRAKE_ROTORS": "أقراص الفرامل الخلفية",
+    "ENGINE_TIMING_SYSTEM": "حزام / سير التوقيت (الكاتينة)",
+    "SPARK_PLUGS_SET": "طقم شمعات الاحتراق (البواجي)",
+    "TRANSMISSION_CLUTCH": "الديسك والأسطوانة / محول العزم",
+    "FRONT_BRAKE_PADS": "تيل الفرامل الأمامي",
+    "REAR_BRAKE_PADS": "تيل الفرامل الخلفي",
+    "FRONT_BRAKE_ROTORS": "أقراص الفرامل الأمامية (الطنابير)",
+    "REAR_BRAKE_ROTORS": "أقراص الفرامل الخلفية (الطنابير)",
     "ENGINE_OIL": "زيت المحرك",
-    "BRAKE_FLUID": "سائل الفرامل",
-    "ENGINE_COOLANT": "سائل تبريد المحرك",
-    "TRANSMISSION_FLUID": "سائل ناقل الحركة",
+    "BRAKE_FLUID": "زيت الفرامل",
+    "ENGINE_COOLANT": "سائل تبريد المحرك (الرادياتير)",
+    "TRANSMISSION_FLUID": "زيت ناقل الحركة (الفتيس)",
     "ENGINE_OIL_FILTER": "فلتر زيت المحرك",
-    "CABIN_AIR_FILTER": "فلتر هواء المقصورة",
+    "CABIN_AIR_FILTER": "فلتر تكييف السيارة",
     "ENGINE_AIR_FILTER": "فلتر هواء المحرك",
-    "FUEL_FILTER": "فلتر الوقود",
-    "ALL_SEASON_TIRES": "طقم إطارات لجميع الفصول",
-    "BATTERY_12V": "بطارية 12 فولت AGM",
-    "WIPER_BLADES": "طقم شفرات المساحات"
+    "FUEL_FILTER": "فلتر البنزين / الوقود",
+    "ALL_SEASON_TIRES": "طقم الإطارات",
+    "BATTERY_12V": "بطارية السيارة 12 فولت",
+    "WIPER_BLADES": "طقم مساحات الزجاج"
   },
   "documents_section": {
-    "title": "مستندات المنشأة بالذكاء الاصطناعي",
-    "no_documents": "لا توجد مستندات منشأة لهذه المركبة.",
+    "title": "المستندات المنشأة بالذكاء الاصطناعي",
+    "no_documents": "لا توجد مستندات مسجلة لهذه السيارة.",
     "view_pdf": "عرض مستند PDF"
   },
   "specs_section": {
-    "title": "مواصفات المركبة الكاملة",
+    "title": "المواصفات الفنية الكاملة",
     "transmission": "ناقل الحركة",
     "fuel_type": "نوع الوقود",
     "color": "اللون",
     "vin": "رقم الهيكل (VIN)",
-    "primary": "المركبة الرئيسية",
+    "primary": "سيارة رئيسية",
     "status": "الحالة",
     "completeness_score": "نسبة اكتمال البيانات",
     "estimated_annual_mileage": "المسافة السنوية المقدرة",
@@ -83,71 +103,73 @@
     "no": "لا"
   },
   "dashboard": {
-    "title": "جدول الصيانة",
-    "subtitle": "تتبع فترات الخدمة وتآكل المكونات والمهام القادمة",
-    "health_overview": "نظرة عامة على صحة المكونات",
-    "oil_change": "تغيير الزيت",
+    "title": "جدول الصيانة الدورية",
+    "subtitle": "تتبع مواعيد الصيانات، تآكل القطع، والمهام القادمة",
+    "health_overview": "نظرة عامة على صحة القطع",
+    "oil_change": "تغيير زيت المحرك",
     "tire_rotation": "تدوير الإطارات",
-    "brake_maintenance": "صيانة نظام الفرامل",
-    "battery_health": "صيانة نظام البطارية"
+    "brake_maintenance": "صيانة منظومة الفرامل",
+    "battery_health": "حالة البطارية والكهرباء"
   },
   "service": {
     "intervals": "فترات جدول الصيانة",
     "inspection": "فحص",
-    "replacement": "استبدال",
+    "replacement": "تغيير واستبدال",
     "view_pdf": "عرض مستند PDF",
-    "no_intervals": "لا توجد فترات صيانة مجدولة متاحة."
+    "no_intervals": "لا توجد فترات صيانة مجدولة."
   },
   "history": {
-    "title": "سجل الصيانة",
-    "empty": "لا يوجد سجل صيانة مسجل لهذه المركبة."
+    "title": "سجل الصيانة السابق",
+    "empty": "لا يوجد سجل صيانة سابق لهذه السيارة."
   },
   "reminders": {
-    "upcoming_zero": "لا توجد خدمات قادمة",
-    "upcoming_one": "خدمة واحدة قادمة",
-    "upcoming_two": "خدمتان قادمتان",
-    "upcoming_few": "{{count}} خدمات قادمة",
-    "upcoming_many": "{{count}} خدمة قادمة",
-    "upcoming_other": "{{count}} خدمة قادمة",
-    "completed_zero": "لا توجد خدمات مكتملة",
-    "completed_one": "خدمة واحدة مكتملة",
-    "completed_two": "خدمتان مكتملتان",
-    "completed_few": "{{count}} خدمات مكتملة",
-    "completed_many": "{{count}} خدمة مكتملة",
-    "completed_other": "{{count}} خدمة مكتملة",
-    "overdue_zero": "لا توجد عناصر متأخرة",
-    "overdue_one": "عنصر واحد متأخر",
-    "overdue_two": "عنصران متأخران",
-    "overdue_few": "{{count}} عناصر متأخرة",
-    "overdue_many": "{{count}} عنصراً متأخراً",
-    "overdue_other": "{{count}} عنصر متأخر",
+    "upcoming_zero": "لا توجد صيانات قادمة",
+    "upcoming_one": "صيانة واحدة قادمة",
+    "upcoming_two": "صيانتان قادمتان",
+    "upcoming_few": "{{count}} صيانات قادمة",
+    "upcoming_many": "{{count}} صيانة قادمة",
+    "upcoming_other": "{{count}} صيانة قادمة",
+    "completed_zero": "لا توجد صيانات مكتملة",
+    "completed_one": "صيانة واحدة مكتملة",
+    "completed_two": "صيانتان مكتملتان",
+    "completed_few": "{{count}} صيانات مكتملة",
+    "completed_many": "{{count}} صيانة مكتملة",
+    "completed_other": "{{count}} صيانة مكتملة",
+    "overdue_zero": "لا توجد صيانات متأخرة",
+    "overdue_one": "صيانة واحدة متأخرة",
+    "overdue_two": "صيانتان متأخرتان",
+    "overdue_few": "{{count}} صيانات متأخرة",
+    "overdue_many": "{{count}} صيانة متأخرة",
+    "overdue_other": "{{count}} صيانة متأخرة",
     "every_distance": "كل {{distance}} {{unit}}",
-    "every_months": "كل {{months}} أشهر",
-    "remaining_mileage": "المتبقي {{remainingMileage}} {{unit}}",
-    "days_remaining": "المتبقي {{days}} أيام",
-    "health_percentage": "صحة المكون {{percentage}}%"
+    "every_months": "كل {{months}} شهور",
+    "remaining_mileage": "متبقي {{remainingMileage}} {{unit}}",
+    "days_remaining": "متبقي {{days}} يومًا",
+    "health_percentage": "حالة القطعة {{percentage}}%",
+    "insufficient_data": "بيانات غير كافية",
+    "add_dates_hint": "بعض القطع تفتقر إلى تاريخ التغيير. اضغط \"تحديد التاريخ\" لحساب حالة القطعة."
   },
   "components": {
-    "title": "صحة مكونات التوأم الرقمي",
-    "part_number": "رقم قطعة OEM",
+    "title": "صحة قطع التوأم الرقمي",
+    "part_number": "رقم القطعة الأصلي OEM",
     "specifications": "المواصفات",
     "notes": "ملاحظات",
-    "no_components": "لا توجد مكونات مسجلة لهذه المركبة."
+    "no_components": "لا توجد قطع مسجلة لهذه السيارة."
   },
   "dialogs": {
-    "confirm_service": "تأكيد إكمال الخدمة",
-    "confirm_message": "هل أنت تأكد من رغبتك في تحديد {{serviceName}} كمكتمل لـ {{vehicleName}}؟",
+    "confirm_service": "تأكيد إتمام الصيانة",
+    "confirm_message": "هل أنت تأكد من تسجيل صيانة {{serviceName}} كصيانة مكتملة لسيارتك {{vehicleName}}؟",
     "cancel": "إلغاء",
     "save": "حفظ"
   },
   "filters": {
-    "all_services": "جميع الخدمات",
-    "pending": "معلقة",
+    "all_services": "جميع الصيانات",
+    "pending": "قيد الانتظار",
     "overdue": "متأخرة",
     "completed": "مكتملة"
   },
   "empty": {
     "title": "لا توجد سجلات صيانة",
-    "subtitle": "لم يتم العثور على فترات صيانة مجدولة لـ {{vehicleName}}."
+    "subtitle": "لا توجد فترات صيانة مجدولة لسيارتك {{vehicleName}}."
   }
 }

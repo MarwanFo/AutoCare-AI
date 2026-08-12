@@ -3,7 +3,9 @@ package com.autocare.backend.notification.entity;
 import com.autocare.backend.auth.entity.User;
 import com.autocare.backend.common.entity.BaseEntity;
 import com.autocare.backend.notification.entity.enums.NotificationSeverity;
+import com.autocare.backend.notification.entity.enums.NotificationType;
 import com.autocare.backend.vehicle.entity.UserComponent;
+import com.autocare.backend.vehicle.entity.UserDocument;
 import com.autocare.backend.vehicle.entity.UserVehicle;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
@@ -12,6 +14,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.Instant;
 import java.util.UUID;
 
 @Entity
@@ -39,6 +42,14 @@ public class Notification extends BaseEntity {
     @JoinColumn(name = "user_component_id")
     private UserComponent component;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_document_id")
+    private UserDocument document;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "notification_type", length = 50)
+    private NotificationType type;
+
     @NotBlank
     @Column(name = "title", nullable = false)
     private String title;
@@ -54,4 +65,7 @@ public class Notification extends BaseEntity {
 
     @Column(name = "is_read", nullable = false)
     private boolean isRead = false;
+
+    @Column(name = "resolved_at")
+    private Instant resolvedAt;
 }

@@ -1,5 +1,8 @@
 {
   "network_error": "Network connection error",
   "unexpected_error": "An unexpected error occurred",
-  "unauthorized": "Session expired. Please log in again"
+  "unauthorized": "Session expired. Please log in again",
+  "generic": "Something went wrong. Please try again.",
+  "failed_to_load_vehicle": "Failed to load generated vehicle component data.",
+  "job_progress_failed": "Failed to retrieve background job progress."
 }

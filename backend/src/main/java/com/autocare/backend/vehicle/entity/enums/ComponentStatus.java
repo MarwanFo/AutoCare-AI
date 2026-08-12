@@ -5,5 +5,6 @@ public enum ComponentStatus {
     NEEDS_VERIFICATION,
     GOOD,
     WARNING,
-    CRITICAL
+    CRITICAL,
+    UNKNOWN
 }

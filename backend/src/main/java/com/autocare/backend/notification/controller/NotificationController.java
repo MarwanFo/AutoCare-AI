@@ -57,4 +57,14 @@ public class NotificationController {
         notificationService.markAsRead(userDetails.getUser().getId(), id);
         return ResponseEntity.noContent().build();
     }
+
+    @PatchMapping("/read-all")
+    @Operation(summary = "Mark all notifications as read", description = "Marks all unread notifications for the user as read.")
+    public ResponseEntity<Void> markAllAsRead(
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        log.info("Marking all notifications as read for user: {}", userDetails.getUser().getId());
+        notificationService.markAllAsRead(userDetails.getUser().getId());
+        return ResponseEntity.noContent().build();
+    }
 }
