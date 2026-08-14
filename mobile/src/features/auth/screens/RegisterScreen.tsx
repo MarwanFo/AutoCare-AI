@@ -15,11 +15,14 @@ import * as z from 'zod';
 
 import { apiClient } from '@/api/client';
 import { useAppTranslation } from '@/i18n/hooks/useAppTranslation';
+import { useAuthStore } from '@/stores/authStore';
 import { BrandHeader } from '../components/BrandHeader';
 import { AuthCard } from '../components/AuthCard';
 import { RegisterForm, RegisterFormData } from '../components/RegisterForm';
+import { GoogleButton } from '../components/GoogleButton';
 import { ErrorBanner } from '../components/ErrorBanner';
 import { passwordSchema } from '../validation';
+import { performGoogleSignIn } from '../services/googleAuth';
 
 // Registration schema matches backend DTO restrictions
 const registerSchema = z
@@ -54,6 +57,7 @@ export function RegisterScreen({
   onRegisterSuccess,
 }: RegisterScreenProps) {
   const { t } = useAppTranslation(['auth', 'common', 'errors', 'validation']);
+  const { setSession } = useAuthStore();
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -103,6 +107,38 @@ export function RegisterScreen({
     }
   };
 
+  const handleGoogleSignIn = async () => {
+    if (isLoading) return;
+    setIsLoading(true);
+    setErrorMessage(null);
+    try {
+      const result = await performGoogleSignIn();
+
+      if (result.type === 'CANCELLED') {
+        setIsLoading(false);
+        return;
+      }
+
+      if (result.type === 'VERIFICATION_REQUIRED') {
+        onRegisterSuccess(result.email);
+        setIsLoading(false);
+        return;
+      }
+
+      setSession(result.accessToken, result.user);
+    } catch (error: any) {
+      console.error('Google register failed:', error);
+      if (error.response) {
+        const serverError = error.response.data;
+        setErrorMessage(serverError?.message || serverError?.error || t('errors:unexpected_error'));
+      } else {
+        setErrorMessage(error.message || t('errors:unexpected_error'));
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       {/* Abstract Background Glows */}
@@ -133,6 +169,11 @@ export function RegisterScreen({
               handleSubmit={handleSubmit}
               onSubmit={onSubmit}
               watchedPassword={watchedPassword}
+            />
+            <GoogleButton
+              title={t('auth:continue_with_google')}
+              onPress={handleGoogleSignIn}
+              isLoading={isLoading}
             />
           </AuthCard>
 

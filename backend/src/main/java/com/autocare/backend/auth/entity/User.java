@@ -28,7 +28,7 @@ public class User extends BaseEntity {
     @Column(name = "email", nullable = false, unique = true, columnDefinition = "citext")
     private String email;
 
-    @Column(name = "password_hash", nullable = false, length = 60)
+    @Column(name = "password_hash", length = 60)
     private String passwordHash;
 
     @Column(name = "full_name", nullable = false, length = 100)
@@ -92,6 +92,9 @@ public class User extends BaseEntity {
 
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
     private List<AuditLog> auditLogs = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<UserIdentity> identities = new ArrayList<>();
 
     @Override
     public boolean equals(Object o) {

@@ -44,20 +44,20 @@ export function NotificationModal({ visible, onClose, onSelectNotification }: No
     const vehicleName = item.vehicleTitle || t('notifications:default_vehicle');
 
     if (type === 'COMPONENT_CRITICAL') {
-      const compName = resolveComponentName(item.componentCode, t);
+      const compName = resolveComponentName(item.componentCode, item.componentCode, false, t);
       const health = item.healthScore ?? 0;
       return {
         title: item.title || t('notifications:types.component_critical_title'),
         message: item.message || t('notifications:types.component_critical_msg', { componentName: compName, vehicleTitle: vehicleName, health }),
       };
     } else if (type === 'COMPONENT_WARNING') {
-      const compName = resolveComponentName(item.componentCode, t);
+      const compName = resolveComponentName(item.componentCode, item.componentCode, false, t);
       return {
         title: item.title || t('notifications:types.component_warning_title'),
         message: item.message || t('notifications:types.component_warning_msg', { componentName: compName, vehicleTitle: vehicleName }),
       };
     } else if (type === 'COMPONENT_DATA_REQUIRED') {
-      const compName = resolveComponentName(item.componentCode, t);
+      const compName = resolveComponentName(item.componentCode, item.componentCode, false, t);
       return {
         title: item.title || t('notifications:types.component_data_required_title'),
         message: item.message || t('notifications:types.component_data_required_msg', { componentName: compName, vehicleTitle: vehicleName }),

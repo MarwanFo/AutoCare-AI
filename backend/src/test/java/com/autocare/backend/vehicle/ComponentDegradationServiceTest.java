@@ -202,7 +202,7 @@ class ComponentDegradationServiceTest {
     }
 
     @Test
-    @DisplayName("J. UNKNOWN status: no critical safety notification dispatched")
+    @DisplayName("J. UNKNOWN status: evaluates component notification state machine")
     void testUnknownStatusNoNotification() {
         component.setExpectedLifespanMileage(null);
         component.setExpectedLifespanMonths(null);
@@ -210,22 +210,20 @@ class ComponentDegradationServiceTest {
         degradationService.updateVehicleComponentDegradation(vehicle);
 
         assertThat(component.getStatus()).isEqualTo(ComponentStatus.UNKNOWN);
-        verifyNoInteractions(notificationService);
+        verify(notificationService, times(1)).evaluateComponentNotification(eq(vehicle.getUser().getId()), eq(vehicle), eq(component));
     }
 
     @Test
-    @DisplayName("K. Valid health < 25%: CRITICAL notification dispatched")
+    @DisplayName("K. Valid health < 25%: CRITICAL health evaluates notification state machine")
     void testCriticalHealthTriggersNotification() {
         component.setExpectedLifespanMileage(10000);
         component.setInstallationMileage(41000); // 9,000 km driven out of 10,000 -> 10% health
-
-        when(notificationRepository.existsByUserIdAndComponentIdAndIsReadFalse(any(), any())).thenReturn(false);
 
         degradationService.updateVehicleComponentDegradation(vehicle);
 
         assertThat(component.getHealthScore()).isEqualTo(10);
         assertThat(component.getStatus()).isEqualTo(ComponentStatus.CRITICAL);
-        verify(notificationService, times(1)).createNotification(any(), any(), eq(component), any(), any(), any());
+        verify(notificationService, times(1)).evaluateComponentNotification(eq(vehicle.getUser().getId()), eq(vehicle), eq(component));
     }
 
     @Test

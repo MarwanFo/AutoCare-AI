@@ -52,6 +52,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/v1/auth/refresh").permitAll()
                         // Public Mobile Authentication endpoints
                         .requestMatchers(HttpMethod.POST, "/api/v1/auth/mobile/login").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/v1/auth/mobile/google").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/auth/mobile/refresh").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/auth/mobile/logout").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/auth/logout").permitAll()

@@ -21,7 +21,9 @@ import { useAppTranslation } from '@/i18n/hooks/useAppTranslation';
 import { BrandHeader } from '../components/BrandHeader';
 import { AuthCard } from '../components/AuthCard';
 import { LoginForm } from '../components/LoginForm';
+import { GoogleButton } from '../components/GoogleButton';
 import { ErrorBanner } from '../components/ErrorBanner';
+import { performGoogleSignIn } from '../services/googleAuth';
 
 import { RegisterScreen } from './RegisterScreen';
 import { EmailVerificationScreen } from './EmailVerificationScreen';
@@ -104,6 +106,39 @@ export default function LoginScreen() {
         setErrorMessage(serverError?.message || serverError?.error || t('errors:unexpected_error'));
       } else if (error.request) {
         setErrorMessage(t('errors:network_error'));
+      } else {
+        setErrorMessage(error.message || t('errors:unexpected_error'));
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleGoogleSignIn = async () => {
+    if (isLoading) return;
+    setIsLoading(true);
+    setErrorMessage(null);
+    try {
+      const result = await performGoogleSignIn();
+
+      if (result.type === 'CANCELLED') {
+        setIsLoading(false);
+        return;
+      }
+
+      if (result.type === 'VERIFICATION_REQUIRED') {
+        setRegisteredEmail(result.email);
+        setCurrentScreen(AuthScreen.VERIFY_EMAIL);
+        setIsLoading(false);
+        return;
+      }
+
+      setSession(result.accessToken, result.user);
+    } catch (error: any) {
+      console.error('Google login failed:', error);
+      if (error.response) {
+        const serverError = error.response.data;
+        setErrorMessage(serverError?.message || serverError?.error || t('errors:unexpected_error'));
       } else {
         setErrorMessage(error.message || t('errors:unexpected_error'));
       }
@@ -218,6 +253,11 @@ export default function LoginScreen() {
                 setErrorMessage(null);
                 setCurrentScreen(AuthScreen.FORGOT_PASSWORD);
               }}
+            />
+            <GoogleButton
+              title={t('auth:continue_with_google')}
+              onPress={handleGoogleSignIn}
+              isLoading={isLoading}
             />
           </AuthCard>
 

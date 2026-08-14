@@ -106,4 +106,26 @@ public class MobileAuthenticationController {
         }
         return ResponseEntity.noContent().build();
     }
+
+    @PostMapping("/google")
+    @Operation(summary = "Authenticate mobile user with Google ID token", description = "Verifies Google ID token server-side and returns tokens or verification required status.")
+    public ResponseEntity<?> googleLogin(
+            @Valid @RequestBody GoogleAuthRequest request,
+            HttpServletRequest httpServletRequest
+    ) {
+        String ipAddress = httpServletRequest.getRemoteAddr();
+        String userAgent = httpServletRequest.getHeader(HttpHeaders.USER_AGENT);
+
+        MobileAuthResult result = authenticationService.loginWithGoogle(request, ipAddress, userAgent);
+
+        if (result.verificationRequired()) {
+            return ResponseEntity.status(org.springframework.http.HttpStatus.ACCEPTED).body(java.util.Map.of(
+                    "status", "VERIFICATION_REQUIRED",
+                    "email", result.email(),
+                    "message", "Google account created. Please check your email to complete AutoCare verification."
+            ));
+        }
+
+        return ResponseEntity.ok(result.authResponse());
+    }
 }

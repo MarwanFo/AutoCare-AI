@@ -51,6 +51,9 @@ public class PasswordResetServiceImpl implements PasswordResetService {
         }
 
         User user = userOpt.get();
+        if (user.getStatus() == com.autocare.backend.auth.entity.AccountStatus.UNVERIFIED) {
+            throw new AuthException("Email address is unverified. Please verify your email before resetting your password.");
+        }
 
         Optional<AuthToken> existingOpt = authTokenRepository
                 .findByUserAndTokenTypeAndUsedAtIsNull(user, AuthTokenType.PASSWORD_RESET);
@@ -113,7 +116,7 @@ public class PasswordResetServiceImpl implements PasswordResetService {
 
     @Override
     public void changePassword(User user, ChangePasswordRequest request, UUID currentSessionId) {
-        if (!passwordEncoder.matches(request.oldPassword(), user.getPasswordHash())) {
+        if (user.getPasswordHash() == null || !passwordEncoder.matches(request.oldPassword(), user.getPasswordHash())) {
             throw new InvalidCredentialsException("Current password is incorrect");
         }
 
