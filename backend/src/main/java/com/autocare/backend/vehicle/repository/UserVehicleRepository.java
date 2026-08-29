@@ -26,6 +26,38 @@ public interface UserVehicleRepository extends JpaRepository<UserVehicle, UUID> 
 
     boolean existsByLicensePlateIgnoreCaseAndStatus(String licensePlate, VehicleStatus status);
 
+    long countByStatus(VehicleStatus status);
+
+    long countByUserIdAndStatus(UUID userId, VehicleStatus status);
+
+    long countByUserId(UUID userId);
+
+    @Query(
+        value = "SELECT uv FROM UserVehicle uv " +
+               "JOIN FETCH uv.user u " +
+               "JOIN FETCH uv.template t " +
+               "JOIN FETCH t.brand b " +
+               "JOIN FETCH t.model m " +
+               "WHERE (:query IS NULL OR :query = '' " +
+               "OR LOWER(u.email) LIKE LOWER(CONCAT('%', :query, '%')) " +
+               "OR LOWER(uv.licensePlate) LIKE LOWER(CONCAT('%', :query, '%')) " +
+               "OR LOWER(uv.vin) LIKE LOWER(CONCAT('%', :query, '%')) " +
+               "OR LOWER(b.name) LIKE LOWER(CONCAT('%', :query, '%')) " +
+               "OR LOWER(m.name) LIKE LOWER(CONCAT('%', :query, '%')))",
+        countQuery = "SELECT COUNT(uv) FROM UserVehicle uv " +
+               "JOIN uv.user u " +
+               "JOIN uv.template t " +
+               "JOIN t.brand b " +
+               "JOIN t.model m " +
+               "WHERE (:query IS NULL OR :query = '' " +
+               "OR LOWER(u.email) LIKE LOWER(CONCAT('%', :query, '%')) " +
+               "OR LOWER(uv.licensePlate) LIKE LOWER(CONCAT('%', :query, '%')) " +
+               "OR LOWER(uv.vin) LIKE LOWER(CONCAT('%', :query, '%')) " +
+               "OR LOWER(b.name) LIKE LOWER(CONCAT('%', :query, '%')) " +
+               "OR LOWER(m.name) LIKE LOWER(CONCAT('%', :query, '%')))"
+    )
+    Page<UserVehicle> findAllWithDetails(@Param("query") String query, Pageable pageable);
+
     @Query("SELECT uv FROM UserVehicle uv " +
            "JOIN FETCH uv.user " +
            "JOIN FETCH uv.template t " +

@@ -8,12 +8,6 @@ import com.autocare.backend.auth.repository.*;
 import com.autocare.backend.auth.service.AuthenticationService;
 import com.autocare.backend.auth.service.GoogleIdentityVerifier;
 import com.autocare.backend.auth.service.PasswordResetService;
-import com.autocare.backend.vehicle.entity.Brand;
-import com.autocare.backend.vehicle.entity.Model;
-import com.autocare.backend.vehicle.entity.VehicleTemplate;
-import com.autocare.backend.vehicle.repository.BrandRepository;
-import com.autocare.backend.vehicle.repository.ModelRepository;
-import com.autocare.backend.vehicle.repository.VehicleTemplateRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -45,19 +39,7 @@ public class GoogleAuthenticationTest {
     private UserIdentityRepository userIdentityRepository;
 
     @Autowired
-    private UserSessionRepository userSessionRepository;
-
-    @Autowired
     private RoleRepository roleRepository;
-
-    @Autowired
-    private BrandRepository brandRepository;
-
-    @Autowired
-    private ModelRepository modelRepository;
-
-    @Autowired
-    private VehicleTemplateRepository vehicleTemplateRepository;
 
     @MockitoBean
     private GoogleIdentityVerifier googleIdentityVerifier;

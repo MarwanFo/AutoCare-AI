@@ -64,6 +64,8 @@ public class SecurityConfig {
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                         // Public File Upload Static Serving
                         .requestMatchers("/uploads/**").permitAll()
+                        // Admin Management Endpoints
+                        .requestMatchers("/api/v1/admin/**").hasAnyRole("ADMIN", "SUPER_ADMIN")
                         // Any other request must be authenticated
                         .anyRequest().authenticated()
                 );

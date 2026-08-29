@@ -4,4 +4,5 @@ import com.autocare.backend.vehicle.dto.GeminiVehicleProfileResponse;
 
 public interface GeminiClient {
     GeminiVehicleProfileResponse fetchProfile(String prompt);
+    String askAdvisor(String prompt);
 }

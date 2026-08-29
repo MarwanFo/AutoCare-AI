@@ -3,7 +3,6 @@ package com.autocare.backend.notification.service;
 import com.autocare.backend.notification.dto.NotificationResponse;
 import com.autocare.backend.notification.entity.Notification;
 import com.autocare.backend.notification.entity.enums.NotificationSeverity;
-import com.autocare.backend.notification.entity.enums.NotificationType;
 import com.autocare.backend.vehicle.entity.UserComponent;
 import com.autocare.backend.vehicle.entity.UserDocument;
 import com.autocare.backend.vehicle.entity.UserVehicle;

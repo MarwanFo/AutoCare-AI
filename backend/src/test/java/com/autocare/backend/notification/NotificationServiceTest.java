@@ -2,7 +2,6 @@ package com.autocare.backend.notification;
 
 import com.autocare.backend.auth.entity.User;
 import com.autocare.backend.auth.repository.UserRepository;
-import com.autocare.backend.notification.dto.NotificationResponse;
 import com.autocare.backend.notification.entity.Notification;
 import com.autocare.backend.notification.entity.enums.NotificationSeverity;
 import com.autocare.backend.notification.entity.enums.NotificationType;
@@ -33,7 +32,6 @@ import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 

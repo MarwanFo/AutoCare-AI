@@ -19,6 +19,12 @@ public interface JobRepository extends JpaRepository<Job, UUID> {
     
     List<Job> findByStatusAndLastHeartbeatAtBefore(JobStatus status, Instant threshold);
     
+    long countByStatus(JobStatus status);
+
+    org.springframework.data.domain.Page<Job> findAllByOrderByCreatedAtDesc(org.springframework.data.domain.Pageable pageable);
+
+    org.springframework.data.domain.Page<Job> findByStatusOrderByCreatedAtDesc(JobStatus status, org.springframework.data.domain.Pageable pageable);
+
     @Modifying
     @Query("DELETE FROM Job j WHERE j.expiresAt < :now")
     int deleteExpiredJobs(Instant now);

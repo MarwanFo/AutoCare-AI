@@ -4,13 +4,14 @@ import { useAuthStore } from '../features/auth/stores/authStore';
 import { useLogout } from '../features/auth/hooks/useAuthMutations';
 import { 
   LayoutDashboard, 
+  Users, 
+  Car, 
+  Cpu, 
   User, 
-  Settings, 
+  KeyRound, 
   LogOut, 
-  ShieldAlert, 
   Menu, 
-  Bell, 
-  KeyRound
+  Bell 
 } from 'lucide-react';
 
 const AdminLayout = () => {
@@ -24,8 +25,11 @@ const AdminLayout = () => {
 
   const navItems = [
     { name: 'Dashboard', path: '/', icon: LayoutDashboard },
-    { name: 'Profile', path: '/profile', icon: User },
+    { name: 'Users', path: '/users', icon: Users },
+    { name: 'Vehicles Fleet', path: '/vehicles', icon: Car },
+    { name: 'AI Jobs Queue', path: '/jobs', icon: Cpu },
     { name: 'Active Sessions', path: '/sessions', icon: KeyRound },
+    { name: 'Profile', path: '/profile', icon: User },
   ];
 
   return (

@@ -48,6 +48,7 @@ public class VehicleServiceImpl implements VehicleService {
     private final UserIntervalRepository userIntervalRepository;
     private final com.autocare.backend.vehicle.service.ComponentDegradationService componentDegradationService;
     private final com.autocare.backend.notification.service.NotificationService notificationService;
+    private final com.autocare.backend.vehicle.service.GeminiClient geminiClient;
 
     @Override
     @Transactional
@@ -218,7 +219,10 @@ public class VehicleServiceImpl implements VehicleService {
             vehicle.setStatus(request.getStatus());
         }
 
-        return userVehicleRepository.save(vehicle);
+        UserVehicle savedVehicle = userVehicleRepository.save(vehicle);
+        // Automatically recalculate degradation scores and alerts when vehicle details or mileage change
+        componentDegradationService.updateVehicleComponentDegradation(savedVehicle);
+        return savedVehicle;
     }
 
     @Override
@@ -575,21 +579,52 @@ public class VehicleServiceImpl implements VehicleService {
 
         String question = request.getQuestion().trim();
 
-        String answer = String.format(
-                "For your %s (%d %s):\n\n" +
-                "• Question: \"%s\"\n" +
-                "• Engineering Advice: According to factory specifications, ensure your %s is regularly serviced based on your digital twin intervals (%s drivetrain, %s transmission).\n" +
-                "• Recommendation: Inspect fluid levels, brake wear, and battery voltage every 6 months or 10,000 %s.",
-                vehicleContext,
-                vehicle.getCurrentMileage() != null ? vehicle.getCurrentMileage() : 0,
-                vehicle.getMileageUnit() != null ? vehicle.getMileageUnit() : "KM",
-                question,
+        // Build rich mechanical digital twin prompt for AI Advisor
+        StringBuilder componentsSummary = new StringBuilder();
+        if (vehicle.getComponents() != null && !vehicle.getComponents().isEmpty()) {
+            for (com.autocare.backend.vehicle.entity.UserComponent c : vehicle.getComponents()) {
+                componentsSummary.append(String.format("- %s (Category: %s, Health: %d%%, Status: %s, Remaining: %s km / %s days)\n",
+                        c.getName(),
+                        c.getCategory() != null ? c.getCategory().name() : "GENERAL",
+                        c.getHealthScore() != null ? c.getHealthScore() : 100,
+                        c.getStatus() != null ? c.getStatus().name() : "GOOD",
+                        c.getRemainingMileage() != null ? c.getRemainingMileage() : "N/A",
+                        c.getRemainingDays() != null ? c.getRemainingDays() : "N/A"
+                ));
+            }
+        } else {
+            componentsSummary.append("Standard factory specifications.\n");
+        }
+
+        String prompt = String.format(
+                "You are the AutoCare Expert Automotive Master Technician & AI Advisor.\n" +
+                "The user is asking a question regarding their vehicle:\n\n" +
+                "Vehicle Specifications:\n" +
+                "- Make & Model: %s %s %s\n" +
+                "- Trim Configuration: %s\n" +
+                "- Fuel: %s, Transmission: %s\n" +
+                "- Current Odometer Mileage: %d %s\n\n" +
+                "Installed Digital Twin Components Status:\n" +
+                "%s\n" +
+                "User's Question: \"%s\"\n\n" +
+                "Instructions:\n" +
+                "1. Provide precise, actionable, factory-grade mechanical advice tailored to this vehicle.\n" +
+                "2. Directly address the user's question, including OEM fluid specifications, part numbers, maintenance intervals, or diagnosis tips if relevant.\n" +
+                "3. Keep the tone helpful, professional, and clear with clean Markdown bullet points.\n" +
+                "4. Answer concisely (150-250 words max).",
+                vehicle.getTemplate().getYear(),
+                vehicle.getTemplate().getBrand().getName(),
                 vehicle.getTemplate().getModel().getName(),
+                vehicle.getTemplate().getTrimConfiguration() != null ? vehicle.getTemplate().getTrimConfiguration() : "Standard",
                 vehicle.getFuelType(),
                 vehicle.getTransmission(),
-                vehicle.getMileageUnit() != null ? vehicle.getMileageUnit() : "KM"
+                vehicle.getCurrentMileage() != null ? vehicle.getCurrentMileage() : 0,
+                vehicle.getMileageUnit() != null ? vehicle.getMileageUnit() : "KM",
+                componentsSummary.toString(),
+                question
         );
 
+        String answer = geminiClient.askAdvisor(prompt);
         return new com.autocare.backend.vehicle.dto.AiAdvisorResponse(vehicleContext, question, answer);
     }
 

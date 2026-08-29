@@ -8,7 +8,6 @@ import com.autocare.backend.auth.entity.Role;
 import com.autocare.backend.auth.entity.User;
 import com.autocare.backend.auth.repository.RoleRepository;
 import com.autocare.backend.auth.repository.UserRepository;
-import com.autocare.backend.auth.repository.UserSessionRepository;
 import com.autocare.backend.user.dto.request.DeactivateAccountRequest;
 import com.autocare.backend.user.dto.request.UpdatePreferencesRequest;
 import com.autocare.backend.user.dto.request.UpdateProfileRequest;
