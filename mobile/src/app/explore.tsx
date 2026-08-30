@@ -24,14 +24,14 @@ export default function ExploreScreen() {
     : 100;
 
   const getHealthBadgeColor = (score: number) => {
-    if (score >= 80) return '#4caf50';
-    if (score >= 50) return '#ff9800';
-    return '#f44336';
+    if (score >= 80) return '#10B981';
+    if (score >= 50) return '#F59E0B';
+    return '#EF4444';
   };
 
   return (
     <View style={styles.background}>
-      <StatusBar barStyle="light-content" backgroundColor="#0e0e0e" />
+      <StatusBar barStyle="light-content" backgroundColor="#0B0D11" />
       <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
         <View style={[styles.header, isRTL && styles.headerRtl]}>
           <Text style={[styles.headerTitle, isRTL && styles.textRtl]}>
@@ -49,14 +49,14 @@ export default function ExploreScreen() {
             <RefreshControl
               refreshing={isRefetching}
               onRefresh={refetch}
-              tintColor="#abc7ff"
-              colors={['#abc7ff']}
+              tintColor="#3B82F6"
+              colors={['#3B82F6']}
             />
           }
         >
           {isLoading ? (
             <View style={styles.loadingContainer}>
-              <ActivityIndicator size="large" color="#abc7ff" />
+              <ActivityIndicator size="large" color="#3B82F6" />
               <Text style={styles.loadingText}>{t('common:status.loading')}</Text>
             </View>
           ) : (
@@ -65,10 +65,10 @@ export default function ExploreScreen() {
               <View style={styles.card}>
                 <View style={[styles.cardHeader, isRTL && styles.rowRtl]}>
                   <View style={styles.iconWrapper}>
-                    <Svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                    <Svg width="18" height="18" viewBox="0 0 24 24" fill="none">
                       <Path
                         d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"
-                        fill="#abc7ff"
+                        fill="#3B82F6"
                       />
                     </Svg>
                   </View>
@@ -98,10 +98,10 @@ export default function ExploreScreen() {
               <View style={styles.card}>
                 <View style={[styles.cardHeader, isRTL && styles.rowRtl]}>
                   <View style={styles.iconWrapper}>
-                    <Svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                    <Svg width="18" height="18" viewBox="0 0 24 24" fill="none">
                       <Path
                         d="M12 2L14.85 8.15L21.5 9.12L16.7 13.8L17.83 20.42L12 17.27L6.17 20.42L7.3 13.8L2.5 9.12L9.15 8.15L12 2Z"
-                        fill="#abc7ff"
+                        fill="#3B82F6"
                       />
                     </Svg>
                   </View>
@@ -137,11 +137,11 @@ export default function ExploreScreen() {
                               {v.year} {v.brandName} {v.modelName}
                             </Text>
                             <Text style={[styles.vehicleSub, isRTL && styles.textRtl]}>
-                              {v.currentMileage ? `${v.currentMileage.toLocaleString()} ${v.mileageUnit}` : '0 KM'}
+                              {v.currentMileage ? `${v.currentMileage.toLocaleString()} ${v.mileageUnit || 'KM'}` : '0 KM'}
                               {v.nickname ? ` • "${v.nickname}"` : ''}
                             </Text>
                           </View>
-                          <View style={styles.scorePill}>
+                          <View style={[styles.scorePill, { backgroundColor: `${getHealthBadgeColor(score)}15` }]}>
                             <Text style={[styles.scoreText, { color: getHealthBadgeColor(score) }]}>
                               {score}%
                             </Text>
@@ -163,29 +163,30 @@ export default function ExploreScreen() {
 const styles = StyleSheet.create({
   background: {
     flex: 1,
-    backgroundColor: '#0e0e0e',
+    backgroundColor: '#0B0D11',
   },
   safeArea: {
     flex: 1,
-    paddingHorizontal: 18,
+    paddingHorizontal: 16,
   },
   header: {
-    paddingVertical: 16,
-    marginBottom: 8,
+    paddingVertical: 14,
+    marginBottom: 6,
   },
   headerRtl: {
     alignItems: 'flex-end',
   },
   headerTitle: {
-    fontSize: 22,
+    fontSize: 20,
     fontWeight: '700',
-    color: '#ffffff',
+    color: '#F8FAFC',
     letterSpacing: -0.3,
   },
   headerSubtitle: {
-    fontSize: 13,
-    color: '#8e9192',
+    fontSize: 12,
+    color: '#94A3B8',
     marginTop: 2,
+    fontWeight: '500',
   },
   textRtl: {
     textAlign: 'right',
@@ -195,7 +196,7 @@ const styles = StyleSheet.create({
   },
   content: {
     paddingBottom: 40,
-    gap: 14,
+    gap: 12,
   },
   loadingContainer: {
     paddingVertical: 60,
@@ -205,65 +206,68 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     fontSize: 13,
-    color: '#8e9192',
+    color: '#94A3B8',
+    fontWeight: '500',
   },
   card: {
-    backgroundColor: '#18181b',
-    borderRadius: 20,
-    padding: 20,
+    backgroundColor: '#131722',
+    borderRadius: 16,
+    padding: 16,
     borderWidth: 1,
-    borderColor: '#27272a',
+    borderColor: 'rgba(255, 255, 255, 0.08)',
   },
   cardHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
-    marginBottom: 16,
+    gap: 10,
+    marginBottom: 14,
   },
   iconWrapper: {
-    width: 38,
-    height: 38,
-    borderRadius: 12,
-    backgroundColor: '#abc7ff15',
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    backgroundColor: 'rgba(59, 130, 246, 0.12)',
     borderWidth: 1,
-    borderColor: '#abc7ff35',
+    borderColor: 'rgba(59, 130, 246, 0.25)',
     justifyContent: 'center',
     alignItems: 'center',
   },
   cardTitle: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '700',
-    color: '#ffffff',
+    color: '#F8FAFC',
   },
   cardSubtitle: {
     fontSize: 12,
-    color: '#8e9192',
+    color: '#94A3B8',
   },
   metricBig: {
     alignItems: 'flex-start',
   },
   metricNumber: {
-    fontSize: 36,
+    fontSize: 34,
     fontWeight: '800',
+    letterSpacing: -0.5,
   },
   metricLabel: {
-    fontSize: 13,
-    color: '#a1a1aa',
+    fontSize: 12,
+    color: '#94A3B8',
     marginTop: 2,
+    fontWeight: '500',
   },
   cardDescription: {
     fontSize: 13,
-    color: '#a1a1aa',
-    lineHeight: 19,
+    color: '#94A3B8',
+    lineHeight: 18,
   },
   sectionTitle: {
-    fontSize: 15,
+    fontSize: 14,
     fontWeight: '700',
-    color: '#ffffff',
-    marginBottom: 14,
+    color: '#F8FAFC',
+    marginBottom: 12,
   },
   vehiclesList: {
-    gap: 10,
+    gap: 8,
   },
   vehicleItem: {
     flexDirection: 'row',
@@ -271,29 +275,28 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingVertical: 10,
     paddingHorizontal: 12,
-    backgroundColor: '#09090b',
-    borderRadius: 12,
+    backgroundColor: '#181D2A',
+    borderRadius: 10,
     borderWidth: 1,
-    borderColor: '#27272a',
+    borderColor: 'rgba(255, 255, 255, 0.04)',
   },
   vehicleName: {
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: '600',
-    color: '#ffffff',
+    color: '#F8FAFC',
   },
   vehicleSub: {
-    fontSize: 12,
-    color: '#71717a',
+    fontSize: 11,
+    color: '#64748B',
     marginTop: 2,
   },
   scorePill: {
     paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 8,
-    backgroundColor: '#18181b',
+    paddingVertical: 3,
+    borderRadius: 6,
   },
   scoreText: {
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: '700',
   },
 });

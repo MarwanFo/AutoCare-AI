@@ -79,11 +79,11 @@ export function PrimaryButton({
       accessibilityState={{ disabled: isBtnDisabled }}
     >
       {isLoading ? (
-        <ActivityIndicator color="#2f3131" />
+        <ActivityIndicator color="#FFFFFF" />
       ) : (
         <Animated.View style={styles.contentContainer}>
           <Text style={styles.buttonText}>{title}</Text>
-          <ArrowForwardIcon color="#2f3131" />
+          <ArrowForwardIcon color="#FFFFFF" />
         </Animated.View>
       )}
     </AnimatedPressable>
@@ -92,17 +92,16 @@ export function PrimaryButton({
 
 const styles = StyleSheet.create({
   button: {
-    height: 56, // py-4 px-6 = ~56px height
-    borderRadius: 9999, // rounded-full
-    backgroundColor: '#ffffff', // bg-primary = #ffffff
+    height: 50,
+    borderRadius: 12,
+    backgroundColor: '#2563EB',
     justifyContent: 'center',
     alignItems: 'center',
     alignSelf: 'stretch',
-    // shadow-[0_0_20px_rgba(255,255,255,0.1)]
-    shadowColor: '#ffffff',
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.1,
-    shadowRadius: 20,
+    shadowColor: '#2563EB',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
     elevation: 4,
   },
   contentContainer: {
@@ -111,11 +110,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   buttonText: {
-    fontSize: 14, // text-button = 14px
-    fontFamily: 'Inter',
-    fontWeight: '600', // font-button = 600
-    letterSpacing: 0.14, // letterSpacing = 0.01em
-    color: '#2f3131', // text-on-primary = #2f3131
-    marginRight: 8, // ml-2 spacing equivalent (placed on-right of buttonText)
+    fontSize: 14,
+    fontWeight: '700',
+    letterSpacing: 0.2,
+    color: '#FFFFFF',
+    marginRight: 8,
   },
 });

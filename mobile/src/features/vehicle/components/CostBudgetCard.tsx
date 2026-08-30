@@ -64,17 +64,19 @@ export function CostBudgetCard({ components = [], currency = 'EUR' }: CostBudget
   return (
     <View style={styles.card}>
       <View style={styles.cardHeader}>
-        <Svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-          <Path
-            d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z"
-            fill="#abc7ff"
-          />
-        </Svg>
+        <View style={styles.iconBox}>
+          <Svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+            <Path
+              d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z"
+              fill="#3B82F6"
+            />
+          </Svg>
+        </View>
         <Text style={styles.cardTitle}>Predictive Maintenance Budget</Text>
       </View>
 
       <Text style={styles.cardSubtitle}>
-        Calculated parts & labor budget based on component health & replacement timelines.
+        Estimated parts & labor investment forecast based on component wear timelines.
       </Text>
 
       {/* Main Total Highlight */}
@@ -82,7 +84,7 @@ export function CostBudgetCard({ components = [], currency = 'EUR' }: CostBudget
         <Text style={styles.totalLabel}>Total Estimated Fleet Maintenance</Text>
         <Text style={styles.totalAmount}>
           {symbol}
-          {totalEstimatedBudget} <Text style={styles.currCode}>{currency}</Text>
+          {totalEstimatedBudget.toLocaleString()} <Text style={styles.currCode}>{currency}</Text>
         </Text>
       </View>
 
@@ -91,7 +93,7 @@ export function CostBudgetCard({ components = [], currency = 'EUR' }: CostBudget
         <View style={styles.forecastItem}>
           <Text style={styles.forecastPeriod}>0 - 3 Months</Text>
           <Text style={[styles.forecastAmount, budget3M > 0 && styles.urgentAmount]}>
-            {symbol}{budget3M}
+            {symbol}{budget3M.toLocaleString()}
           </Text>
           <Text style={styles.forecastSub}>High Urgency</Text>
         </View>
@@ -99,7 +101,7 @@ export function CostBudgetCard({ components = [], currency = 'EUR' }: CostBudget
         <View style={styles.forecastItem}>
           <Text style={styles.forecastPeriod}>3 - 6 Months</Text>
           <Text style={styles.forecastAmount}>
-            {symbol}{budget6M}
+            {symbol}{budget6M.toLocaleString()}
           </Text>
           <Text style={styles.forecastSub}>Medium Urgency</Text>
         </View>
@@ -107,7 +109,7 @@ export function CostBudgetCard({ components = [], currency = 'EUR' }: CostBudget
         <View style={styles.forecastItem}>
           <Text style={styles.forecastPeriod}>6 - 12 Months</Text>
           <Text style={styles.forecastAmount}>
-            {symbol}{budget12M}
+            {symbol}{budget12M.toLocaleString()}
           </Text>
           <Text style={styles.forecastSub}>Scheduled</Text>
         </View>
@@ -118,12 +120,12 @@ export function CostBudgetCard({ components = [], currency = 'EUR' }: CostBudget
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: '#1c1c1c',
-    borderRadius: 20,
+    backgroundColor: '#131722',
+    borderRadius: 16,
     borderWidth: 1,
-    borderColor: '#2f3131',
+    borderColor: 'rgba(255, 255, 255, 0.08)',
     padding: 16,
-    marginBottom: 16,
+    marginBottom: 14,
   },
   cardHeader: {
     flexDirection: 'row',
@@ -131,45 +133,52 @@ const styles = StyleSheet.create({
     gap: 8,
     marginBottom: 4,
   },
+  iconBox: {
+    width: 28,
+    height: 28,
+    borderRadius: 7,
+    backgroundColor: 'rgba(59, 130, 246, 0.12)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   cardTitle: {
-    fontFamily: 'Inter',
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '700',
-    color: '#ffffff',
+    color: '#F8FAFC',
+    letterSpacing: -0.2,
   },
   cardSubtitle: {
-    fontFamily: 'Inter',
     fontSize: 12,
-    color: '#8e9192',
-    lineHeight: 16,
-    marginBottom: 16,
+    color: '#94A3B8',
+    lineHeight: 17,
+    marginBottom: 14,
   },
   totalBox: {
-    backgroundColor: '#131313',
-    borderRadius: 14,
-    borderColor: '#27272a',
+    backgroundColor: '#181D2A',
+    borderRadius: 12,
+    borderColor: 'rgba(255, 255, 255, 0.06)',
     borderWidth: 1,
-    padding: 16,
+    padding: 14,
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: 12,
   },
   totalLabel: {
-    fontFamily: 'Inter',
     fontSize: 11,
     fontWeight: '600',
-    color: '#8e9192',
+    color: '#64748B',
     textTransform: 'uppercase',
     marginBottom: 4,
+    letterSpacing: 0.3,
   },
   totalAmount: {
-    fontFamily: 'Inter',
-    fontSize: 28,
+    fontSize: 26,
     fontWeight: '800',
-    color: '#abc7ff',
+    color: '#3B82F6',
+    letterSpacing: -0.5,
   },
   currCode: {
-    fontSize: 14,
-    color: '#8e9192',
+    fontSize: 13,
+    color: '#94A3B8',
     fontWeight: '600',
   },
   forecastGrid: {
@@ -179,34 +188,32 @@ const styles = StyleSheet.create({
   },
   forecastItem: {
     flex: 1,
-    minWidth: 100,
-    backgroundColor: '#131313',
-    borderRadius: 12,
+    minWidth: 95,
+    backgroundColor: '#181D2A',
+    borderRadius: 10,
     borderWidth: 1,
-    borderColor: '#27272a',
-    padding: 12,
+    borderColor: 'rgba(255, 255, 255, 0.04)',
+    padding: 10,
     alignItems: 'center',
   },
   forecastPeriod: {
-    fontFamily: 'Inter',
     fontSize: 10,
     fontWeight: '700',
-    color: '#8e9192',
+    color: '#64748B',
     marginBottom: 4,
   },
   forecastAmount: {
-    fontFamily: 'Inter',
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '700',
-    color: '#ffffff',
+    color: '#F8FAFC',
   },
   urgentAmount: {
-    color: '#ffb4ab',
+    color: '#EF4444',
   },
   forecastSub: {
-    fontFamily: 'Inter',
-    fontSize: 9,
-    color: '#8e9192',
+    fontSize: 10,
+    color: '#94A3B8',
     marginTop: 2,
+    fontWeight: '500',
   },
 });

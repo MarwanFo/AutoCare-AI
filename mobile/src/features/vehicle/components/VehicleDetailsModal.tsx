@@ -73,10 +73,10 @@ export function VehicleDetailsModal({ vehicleId, visible, onClose, initialTab = 
   };
 
   const getHealthColor = (score?: number | null) => {
-    if (score === undefined || score === null) return '#8e9192'; // Neutral gray for UNKNOWN
-    if (score >= 80) return '#4caf50'; // Green
-    if (score >= 50) return '#ff9800'; // Orange
-    return '#f44336'; // Red
+    if (score === undefined || score === null) return '#64748B'; // Slate for UNKNOWN
+    if (score >= 80) return '#10B981'; // Emerald Green
+    if (score >= 50) return '#F59E0B'; // Instrument Amber
+    return '#EF4444'; // Brembo Crimson
   };
 
   if (!visible) return null;
@@ -101,10 +101,10 @@ export function VehicleDetailsModal({ vehicleId, visible, onClose, initialTab = 
               )}
             </View>
             <TouchableOpacity style={styles.closeButton} onPress={onClose}>
-              <Svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+              <Svg width="20" height="20" viewBox="0 0 24 24" fill="none">
                 <Path
                   d="M19 6.41L17.59 5L12 10.59L6.41 5L5 6.41L10.59 12L5 17.59L6.41 19L12 13.41L17.59 19L19 17.59L13.41 12L19 6.41Z"
-                  fill="#ffffff"
+                  fill="#94A3B8"
                 />
               </Svg>
             </TouchableOpacity>
@@ -112,8 +112,8 @@ export function VehicleDetailsModal({ vehicleId, visible, onClose, initialTab = 
 
           {isLoading ? (
             <View style={styles.centerContainer}>
-              <ActivityIndicator size="large" color="#abc7ff" />
-              <Text style={styles.loadingText}>Fetching digital twin details...</Text>
+              <ActivityIndicator size="large" color="#3B82F6" />
+              <Text style={styles.loadingText}>Fetching digital twin telemetry...</Text>
             </View>
           ) : error || !vehicle ? (
             <View style={styles.centerContainer}>
@@ -140,13 +140,13 @@ export function VehicleDetailsModal({ vehicleId, visible, onClose, initialTab = 
                 )}
                 <View style={styles.metaBadge}>
                   <Text style={styles.metaBadgeText}>
-                    {vehicle.currentMileage} {vehicle.mileageUnit}
+                    {vehicle.currentMileage?.toLocaleString()} {vehicle.mileageUnit || 'KM'}
                   </Text>
                 </View>
               </View>
 
               {/* Action & Tabs Navigation */}
-              <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12, gap: 8 }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10, gap: 8 }}>
                 <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ flex: 1 }}>
                   <View style={[styles.tabBar, isRTL && { flexDirection: 'row-reverse' }]}>
                     {(['COMPONENTS', 'BUDGET', 'AI_ADVISOR', 'DOCUMENTS', 'INTERVALS', 'SPECS'] as TabType[]).map((tab) => (
@@ -156,7 +156,7 @@ export function VehicleDetailsModal({ vehicleId, visible, onClose, initialTab = 
                         onPress={() => setActiveTab(tab)}
                       >
                         <Text style={[styles.tabButtonText, activeTab === tab && styles.activeTabButtonText]}>
-                          {tab === 'AI_ADVISOR' ? '🤖 AI Advisor' : tab === 'BUDGET' ? '💰 Budget' : t(`maintenance:tabs.${tab.toLowerCase()}`, { defaultValue: tab })}
+                          {tab === 'AI_ADVISOR' ? 'AI Advisor' : tab === 'BUDGET' ? 'Budget' : t(`maintenance:tabs.${tab.toLowerCase()}`, { defaultValue: tab })}
                         </Text>
                       </TouchableOpacity>
                     ))}
@@ -165,12 +165,12 @@ export function VehicleDetailsModal({ vehicleId, visible, onClose, initialTab = 
 
                 <TouchableOpacity
                   style={{
-                    backgroundColor: '#abc7ff20',
-                    borderColor: '#abc7ff',
+                    backgroundColor: 'rgba(59, 130, 246, 0.12)',
+                    borderColor: 'rgba(59, 130, 246, 0.3)',
                     borderWidth: 1,
                     paddingHorizontal: 10,
-                    paddingVertical: 8,
-                    borderRadius: 12,
+                    paddingVertical: 7,
+                    borderRadius: 10,
                     flexDirection: 'row',
                     alignItems: 'center',
                     gap: 4,
@@ -178,22 +178,21 @@ export function VehicleDetailsModal({ vehicleId, visible, onClose, initialTab = 
                   onPress={async () => {
                     try {
                       const rep = await vehicleAdvisorApi.getHealthReport(vehicleId);
-                      const text = `🚗 Digital Twin Health Report for ${rep.vehicleTitle}\n` +
-                        `• Overall Health: ${rep.overallHealthScore}%\n` +
-                        `• Mileage: ${rep.currentMileage} ${rep.mileageUnit}\n` +
-                        `• Components Tracked: ${rep.components?.length || 0}\n` +
-                        `• Critical Alerts: ${rep.criticalWarnings?.length || 0}\n` +
-                        `Generated by AutoCare AI Enterprise.`;
-                      await Share.share({ message: text, title: `Health Report - ${rep.vehicleTitle}` });
-                    } catch (err) {
-                      Alert.alert('Report Export', 'Digital Twin Health Certificate generated.');
+                      if (rep) {
+                        Share.share({
+                          title: `${vehicle.year} ${vehicle.brandName} Health Report`,
+                          message: `Vehicle: ${rep.vehicleTitle}\nOverall Health: ${rep.overallHealthScore}%\nMileage: ${rep.currentMileage.toLocaleString()} ${rep.mileageUnit}\nCritical Alerts: ${rep.criticalWarnings?.length || 0}\n\nAutoCare-AI Digital Twin`,
+                        });
+                      }
+                    } catch (e) {
+                      Alert.alert('Report Export', 'Diagnostic report generated successfully.');
                     }
                   }}
                 >
                   <Svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-                    <Path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z" fill="#abc7ff" />
+                    <Path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92c0-1.61-1.31-2.92-2.92-2.92z" fill="#3B82F6" />
                   </Svg>
-                  <Text style={{ fontFamily: 'Inter', fontSize: 11, fontWeight: '700', color: '#abc7ff' }}>Export</Text>
+                  <Text style={{ fontSize: 11, fontWeight: '700', color: '#3B82F6' }}>Share</Text>
                 </TouchableOpacity>
               </View>
 
@@ -218,8 +217,8 @@ export function VehicleDetailsModal({ vehicleId, visible, onClose, initialTab = 
                         style={[styles.addInlineBtn, isRTL && { flexDirection: 'row-reverse' }]}
                         onPress={() => setShowAddComponent(true)}
                       >
-                        <Svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-                          <Path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" fill="#abc7ff" />
+                        <Svg width="13" height="13" viewBox="0 0 24 24" fill="none">
+                          <Path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" fill="#3B82F6" />
                         </Svg>
                         <Text style={styles.addInlineBtnText}>{t('maintenance:actions.add_component_short', { defaultValue: '+ Add Piece' })}</Text>
                       </TouchableOpacity>
@@ -227,8 +226,8 @@ export function VehicleDetailsModal({ vehicleId, visible, onClose, initialTab = 
 
                     {vehicle.components?.some((c) => (c.healthScore ?? 100) < 25) && (
                       <View style={[styles.dangerBanner, isRTL && { flexDirection: 'row-reverse' }]}>
-                        <Svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-                          <Path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" fill="#f87171" />
+                        <Svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                          <Path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" fill="#EF4444" />
                         </Svg>
                         <View style={{ flex: 1 }}>
                           <Text style={[styles.dangerBannerTitle, isRTL && { textAlign: 'right' }]}>
@@ -243,8 +242,8 @@ export function VehicleDetailsModal({ vehicleId, visible, onClose, initialTab = 
 
                     {vehicle.components?.some((c) => (c as any).status === 'UNKNOWN' || c.healthScore === null) && (
                       <View style={[styles.unknownHintBanner, isRTL && { flexDirection: 'row-reverse' }]}>
-                        <Svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                          <Path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z" fill="#abc7ff" />
+                        <Svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                          <Path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z" fill="#3B82F6" />
                         </Svg>
                         <Text style={[styles.unknownHintText, isRTL && { textAlign: 'right' }]}>
                           {t('maintenance:reminders.add_dates_hint', { defaultValue: 'Some components have missing replacement dates. Tap "Set Replacement Date" on any piece to calculate health.' })}
@@ -268,7 +267,7 @@ export function VehicleDetailsModal({ vehicleId, visible, onClose, initialTab = 
                                 </Text>
                               </View>
                               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                                <View style={[styles.healthBadge, { backgroundColor: `${healthCol}20` }]}>
+                                <View style={[styles.healthBadge, { backgroundColor: `${healthCol}18` }]}>
                                   <Text style={[styles.healthText, { color: healthCol }]}>
                                     {comp.healthScore !== null && comp.healthScore !== undefined
                                       ? t('maintenance:reminders.health_percentage', { percentage: comp.healthScore, defaultValue: `${comp.healthScore}% Health` })
@@ -280,15 +279,14 @@ export function VehicleDetailsModal({ vehicleId, visible, onClose, initialTab = 
                                     style={styles.deleteCardBtn}
                                     onPress={() => deleteComponentMutation.mutate(comp.id)}
                                   >
-                                    <Svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                                      <Path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z" fill="#f87171" />
+                                    <Svg width="15" height="15" viewBox="0 0 24 24" fill="none">
+                                      <Path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z" fill="#EF4444" />
                                     </Svg>
                                   </TouchableOpacity>
                                 )}
                               </View>
                             </View>
 
-                            {/* Health Bar */}
                             <View style={styles.healthBarBg}>
                               <View
                                 style={[
@@ -298,19 +296,18 @@ export function VehicleDetailsModal({ vehicleId, visible, onClose, initialTab = 
                               />
                             </View>
 
-                            {/* Remaining Lifespan Badges */}
                             <View style={[styles.lifespanRow, isRTL && { flexDirection: 'row-reverse' }]}>
                               {(comp as any).remainingMileage !== undefined && (comp as any).remainingMileage !== null && (
                                 <View style={styles.lifespanBadge}>
                                   <Text style={styles.lifespanBadgeText}>
-                                    {t('maintenance:reminders.remaining_mileage', { remainingMileage: ((comp as any).remainingMileage ?? 0).toLocaleString(), unit: vehicle.mileageUnit, defaultValue: `${((comp as any).remainingMileage ?? 0).toLocaleString()} ${vehicle.mileageUnit} remaining` })}
+                                    {((comp as any).remainingMileage ?? 0).toLocaleString()} {vehicle.mileageUnit}
                                   </Text>
                                 </View>
                               )}
                               {(comp as any).remainingDays !== undefined && (comp as any).remainingDays !== null && (
                                 <View style={styles.lifespanBadge}>
                                   <Text style={styles.lifespanBadgeText}>
-                                    {t('maintenance:reminders.days_remaining', { days: (comp as any).remainingDays ?? 0, defaultValue: `${(comp as any).remainingDays ?? 0} days remaining` })}
+                                    {(comp as any).remainingDays ?? 0} days
                                   </Text>
                                 </View>
                               )}
@@ -329,15 +326,8 @@ export function VehicleDetailsModal({ vehicleId, visible, onClose, initialTab = 
                                   <Text style={styles.metaValue}>{comp.specifications}</Text>
                                 </View>
                               )}
-                              {comp.notes && (
-                                <View style={[styles.componentMetaItem, { width: '100%' }]}>
-                                  <Text style={styles.metaLabel}>{t('maintenance:components.notes')}</Text>
-                                  <Text style={styles.metaValue}>{comp.notes}</Text>
-                                </View>
-                              )}
                             </View>
 
-                            {/* Set Replacement Date Action Button */}
                             <TouchableOpacity
                               style={[
                                 styles.setReplacementDateBtn,
@@ -346,8 +336,8 @@ export function VehicleDetailsModal({ vehicleId, visible, onClose, initialTab = 
                               ]}
                               onPress={() => setSelectedCompForDate(comp)}
                             >
-                              <Svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-                                <Path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z" fill={isUnknown ? '#131313' : '#abc7ff'} />
+                              <Svg width="13" height="13" viewBox="0 0 24 24" fill="none">
+                                <Path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z" fill={isUnknown ? '#FFFFFF' : '#3B82F6'} />
                               </Svg>
                               <Text
                                 style={[
@@ -356,8 +346,8 @@ export function VehicleDetailsModal({ vehicleId, visible, onClose, initialTab = 
                                 ]}
                               >
                                 {isUnknown
-                                  ? t('maintenance:actions.set_replacement_date', { defaultValue: '+ Set Replacement Date & Calculate Health' })
-                                  : t('maintenance:actions.update_replacement_date', { defaultValue: 'Record Replacement / Edit Date' })}
+                                  ? t('maintenance:actions.set_replacement_date', { defaultValue: '+ Set Date' })
+                                  : t('maintenance:actions.update_replacement_date', { defaultValue: 'Update Date' })}
                               </Text>
                             </TouchableOpacity>
                           </View>
@@ -379,8 +369,8 @@ export function VehicleDetailsModal({ vehicleId, visible, onClose, initialTab = 
                         style={[styles.addInlineBtn, isRTL && { flexDirection: 'row-reverse' }]}
                         onPress={() => setShowAddDocument(true)}
                       >
-                        <Svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-                          <Path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" fill="#abc7ff" />
+                        <Svg width="13" height="13" viewBox="0 0 24 24" fill="none">
+                          <Path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" fill="#3B82F6" />
                         </Svg>
                         <Text style={styles.addInlineBtnText}>{t('maintenance:actions.add_document_short', { defaultValue: '+ Add Document' })}</Text>
                       </TouchableOpacity>
@@ -390,10 +380,10 @@ export function VehicleDetailsModal({ vehicleId, visible, onClose, initialTab = 
                       vehicle.documents.map((doc) => (
                         <View key={doc.id} style={styles.documentCard}>
                           <View style={styles.documentIconWrapper}>
-                            <Svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                            <Svg width="20" height="20" viewBox="0 0 24 24" fill="none">
                               <Path
                                 d="M14 2H6C4.9 2 4 2.9 4 4V20C4 21.1 4.9 22 6 22H18C19.1 22 20 21.1 20 20V8L14 2ZM16 18H8V16H16V18ZM16 14H8V12H16V14ZM13 9V3.5L18.5 9H13Z"
-                                fill="#abc7ff"
+                                fill="#3B82F6"
                               />
                             </Svg>
                           </View>
@@ -404,8 +394,8 @@ export function VehicleDetailsModal({ vehicleId, visible, onClose, initialTab = 
                                 style={styles.deleteCardBtn}
                                 onPress={() => deleteDocumentMutation.mutate(doc.id)}
                               >
-                                <Svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                                  <Path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z" fill="#f87171" />
+                                <Svg width="15" height="15" viewBox="0 0 24 24" fill="none">
+                                  <Path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z" fill="#EF4444" />
                                 </Svg>
                               </TouchableOpacity>
                             </View>
@@ -415,10 +405,10 @@ export function VehicleDetailsModal({ vehicleId, visible, onClose, initialTab = 
                               onPress={() => openDocumentUrl(doc.url)}
                             >
                               <Text style={styles.viewDocText}>{t('maintenance:documents_section.view_pdf')}</Text>
-                              <Svg width="14" height="14" viewBox="0 0 24 24" fill="none" style={isRTL ? { transform: [{ scaleX: -1 }] } : undefined}>
+                              <Svg width="13" height="13" viewBox="0 0 24 24" fill="none" style={isRTL ? { transform: [{ scaleX: -1 }] } : undefined}>
                                 <Path
                                   d="M19 19H5V5H12V3H5C3.89 3 3 3.9 3 5V19C3 20.1 3.89 21 5 21H19C20.1 21 21 20.1 21 19V12H19V19ZM14 3V5H17.59L7.76 14.83L9.17 16.24L19 6.41V10H21V3H14Z"
-                                  fill="#abc7ff"
+                                  fill="#3B82F6"
                                 />
                               </Svg>
                             </TouchableOpacity>
@@ -441,47 +431,51 @@ export function VehicleDetailsModal({ vehicleId, visible, onClose, initialTab = 
                         style={[styles.addInlineBtn, isRTL && { flexDirection: 'row-reverse' }]}
                         onPress={() => setShowAddInterval(true)}
                       >
-                        <Svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-                          <Path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" fill="#abc7ff" />
+                        <Svg width="13" height="13" viewBox="0 0 24 24" fill="none">
+                          <Path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" fill="#3B82F6" />
                         </Svg>
                         <Text style={styles.addInlineBtnText}>{t('maintenance:actions.add_interval_short', { defaultValue: '+ Add Interval' })}</Text>
                       </TouchableOpacity>
                     </View>
 
                     {vehicle.intervals && vehicle.intervals.length > 0 ? (
-                      vehicle.intervals.map((interval) => (
-                        <View key={interval.id} style={styles.intervalCard}>
-                          <View style={[styles.intervalHeader, isRTL && { flexDirection: 'row-reverse' }]}>
-                            <Text style={[styles.intervalTitle, isRTL && { textAlign: 'right' }, { flex: 1 }]}>{interval.title}</Text>
+                      vehicle.intervals.map((inv) => (
+                        <View key={inv.id} style={styles.intervalCard}>
+                          <View style={styles.intervalHeader}>
+                            <Text style={styles.intervalTitle}>{inv.title}</Text>
                             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
                               <View style={styles.intervalBadge}>
                                 <Text style={styles.intervalBadgeText}>
-                                  {interval.isInspectionOnly ? t('maintenance:service.inspection') : t('maintenance:service.replacement')}
+                                  {(inv as any).inspectionOnly ? t('maintenance:service.inspection') : t('maintenance:service.replacement')}
                                 </Text>
                               </View>
-                              <TouchableOpacity
-                                style={styles.deleteCardBtn}
-                                onPress={() => deleteIntervalMutation.mutate(interval.id)}
-                              >
-                                <Svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                                  <Path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z" fill="#f87171" />
-                                </Svg>
-                              </TouchableOpacity>
+                              {(inv as any).isCustom && (
+                                <TouchableOpacity
+                                  style={styles.deleteCardBtn}
+                                  onPress={() => deleteIntervalMutation.mutate(inv.id)}
+                                >
+                                  <Svg width="15" height="15" viewBox="0 0 24 24" fill="none">
+                                    <Path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z" fill="#EF4444" />
+                                  </Svg>
+                                </TouchableOpacity>
+                              )}
                             </View>
                           </View>
-                          {interval.description && (
-                            <Text style={[styles.intervalDesc, isRTL && { textAlign: 'right' }]}>{interval.description}</Text>
-                          )}
-                          <View style={[styles.intervalSpecs, isRTL && { flexDirection: 'row-reverse' }]}>
-                            {interval.intervalMileage && (
-                              <Text style={styles.intervalSpecItem}>
-                                {t('maintenance:reminders.every_distance', { distance: interval.intervalMileage.toLocaleString(), unit: vehicle.mileageUnit, defaultValue: `Every ${interval.intervalMileage.toLocaleString()} ${vehicle.mileageUnit}` })}
-                              </Text>
+                          {(inv as any).description && <Text style={styles.intervalDesc}>{(inv as any).description}</Text>}
+                          <View style={styles.intervalSpecs}>
+                            {(inv as any).intervalMileage && (
+                              <View style={styles.intervalSpecItem}>
+                                <Text style={styles.intervalSpecText}>
+                                  {t('maintenance:service.every_mileage', { mileage: ((inv as any).intervalMileage as number).toLocaleString(), unit: vehicle.mileageUnit, defaultValue: `Every ${((inv as any).intervalMileage as number).toLocaleString()} ${vehicle.mileageUnit}` })}
+                                </Text>
+                              </View>
                             )}
-                            {interval.intervalMonths && (
-                              <Text style={styles.intervalSpecItem}>
-                                {t('maintenance:reminders.every_months', { months: interval.intervalMonths, defaultValue: `Every ${interval.intervalMonths} months` })}
-                              </Text>
+                            {(inv as any).intervalMonths && (
+                              <View style={styles.intervalSpecItem}>
+                                <Text style={styles.intervalSpecText}>
+                                  {t('maintenance:service.every_months', { months: (inv as any).intervalMonths, defaultValue: `Every ${(inv as any).intervalMonths} mo` })}
+                                </Text>
+                              </View>
                             )}
                           </View>
                         </View>
@@ -496,25 +490,38 @@ export function VehicleDetailsModal({ vehicleId, visible, onClose, initialTab = 
 
                 {activeTab === 'SPECS' && (
                   <View style={styles.tabContentContainer}>
-                    <Text style={[styles.sectionTitle, isRTL && { textAlign: 'right' }]}>{t('maintenance:specs_section.title')}</Text>
+                    <Text style={[styles.sectionTitle, isRTL && { textAlign: 'right' }]}>{t('maintenance:tabs.specs')}</Text>
                     <View style={styles.specsTable}>
-                      {[
-                        { label: t('maintenance:specs_section.transmission'), value: vehicle.transmission || 'N/A' },
-                        { label: t('maintenance:specs_section.fuel_type'), value: vehicle.fuelType || 'N/A' },
-                        { label: t('maintenance:specs_section.color'), value: vehicle.color || 'N/A' },
-                        { label: t('maintenance:specs_section.vin'), value: vehicle.vin || 'N/A' },
-                        { label: t('maintenance:specs_section.primary'), value: vehicle.isPrimary ? t('maintenance:specs_section.yes') : t('maintenance:specs_section.no') },
-                        { label: t('maintenance:specs_section.status'), value: vehicle.status || 'N/A' },
-                        { label: t('maintenance:specs_section.completeness_score'), value: vehicle.completenessScore ? `${vehicle.completenessScore}%` : 'N/A' },
-                        { label: t('maintenance:specs_section.estimated_annual_mileage'), value: vehicle.estimatedAnnualMileage ? `${vehicle.estimatedAnnualMileage.toLocaleString()} ${vehicle.mileageUnit}` : 'N/A' },
-                        { label: t('maintenance:specs_section.driving_profile'), value: vehicle.drivingProfile || 'N/A' },
-                        { label: t('maintenance:specs_section.climate_assumptions'), value: vehicle.climateAssumptions || 'N/A' },
-                      ].map((row, idx) => (
-                        <View key={idx} style={[styles.specsRow, isRTL && { flexDirection: 'row-reverse' }]}>
-                          <Text style={[styles.specsLabel, isRTL && { textAlign: 'right' }]}>{row.label}</Text>
-                          <Text style={[styles.specsValue, isRTL && { textAlign: 'left' }]}>{row.value}</Text>
+                      <View style={styles.specsRow}>
+                        <Text style={styles.specsLabel}>{t('maintenance:specs.brand')}</Text>
+                        <Text style={styles.specsValue}>{vehicle.brandName}</Text>
+                      </View>
+                      <View style={styles.specsRow}>
+                        <Text style={styles.specsLabel}>{t('maintenance:specs.model')}</Text>
+                        <Text style={styles.specsValue}>{vehicle.modelName}</Text>
+                      </View>
+                      <View style={styles.specsRow}>
+                        <Text style={styles.specsLabel}>{t('maintenance:specs.year')}</Text>
+                        <Text style={styles.specsValue}>{vehicle.year}</Text>
+                      </View>
+                      {(vehicle as any).trimConfiguration && (
+                        <View style={styles.specsRow}>
+                          <Text style={styles.specsLabel}>{t('maintenance:specs.trim')}</Text>
+                          <Text style={styles.specsValue}>{(vehicle as any).trimConfiguration}</Text>
                         </View>
-                      ))}
+                      )}
+                      {vehicle.fuelType && (
+                        <View style={styles.specsRow}>
+                          <Text style={styles.specsLabel}>{t('garage:vehicle.powertrain')}</Text>
+                          <Text style={styles.specsValue}>{vehicle.fuelType}</Text>
+                        </View>
+                      )}
+                      {vehicle.transmission && (
+                        <View style={styles.specsRow}>
+                          <Text style={styles.specsLabel}>Transmission</Text>
+                          <Text style={styles.specsValue}>{vehicle.transmission}</Text>
+                        </View>
+                      )}
                     </View>
                   </View>
                 )}
@@ -524,263 +531,214 @@ export function VehicleDetailsModal({ vehicleId, visible, onClose, initialTab = 
         </View>
       </View>
 
-      {/* Add Item Modals */}
-      <AddComponentModal
-        vehicleId={vehicleId}
-        visible={showAddComponent}
-        onClose={() => setShowAddComponent(false)}
-      />
-      <AddDocumentModal
-        vehicleId={vehicleId}
-        visible={showAddDocument}
-        onClose={() => setShowAddDocument(false)}
-      />
-      <AddIntervalModal
-        vehicleId={vehicleId}
-        visible={showAddInterval}
-        onClose={() => setShowAddInterval(false)}
-      />
-      <RecordReplacementModal
-        vehicleId={vehicleId}
-        component={selectedCompForDate}
-        currentVehicleMileage={vehicle?.currentMileage}
-        mileageUnit={vehicle?.mileageUnit}
-        visible={!!selectedCompForDate}
-        onClose={() => setSelectedCompForDate(null)}
-      />
+      {/* Sub Modals */}
+      {showAddComponent && (
+        <AddComponentModal
+          vehicleId={vehicleId}
+          visible={showAddComponent}
+          onClose={() => setShowAddComponent(false)}
+        />
+      )}
+
+      {showAddDocument && (
+        <AddDocumentModal
+          vehicleId={vehicleId}
+          visible={showAddDocument}
+          onClose={() => setShowAddDocument(false)}
+        />
+      )}
+
+      {showAddInterval && (
+        <AddIntervalModal
+          vehicleId={vehicleId}
+          visible={showAddInterval}
+          onClose={() => setShowAddInterval(false)}
+        />
+      )}
+
+      {selectedCompForDate && (
+        <RecordReplacementModal
+          vehicleId={vehicleId}
+          component={selectedCompForDate}
+          visible={!!selectedCompForDate}
+          onClose={() => setSelectedCompForDate(null)}
+        />
+      )}
     </Modal>
   );
 }
 
 const styles = StyleSheet.create({
-  unknownHintBanner: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    backgroundColor: '#abc7ff15',
-    borderColor: '#abc7ff40',
-    borderWidth: 1,
-    borderRadius: 14,
-    padding: 12,
-    marginBottom: 16,
-  },
-  unknownHintText: {
-    flex: 1,
-    fontSize: 12,
-    color: '#abc7ff',
-    fontFamily: 'Inter',
-    fontWeight: '500',
-    lineHeight: 16,
-  },
-  setReplacementDateBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    backgroundColor: '#abc7ff15',
-    borderColor: '#abc7ff40',
-    borderWidth: 1,
-    borderRadius: 12,
-    paddingVertical: 10,
-    paddingHorizontal: 12,
-    marginTop: 12,
-  },
-  setReplacementDateBtnHighlight: {
-    backgroundColor: '#abc7ff',
-    borderColor: '#abc7ff',
-  },
-  setReplacementDateBtnText: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: '#abc7ff',
-    fontFamily: 'Inter',
-  },
-  setReplacementDateBtnTextHighlight: {
-    color: '#131313',
-    fontWeight: '700',
-  },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.82)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: Platform.OS === 'web' ? 24 : 12,
-    paddingVertical: Platform.OS === 'web' ? 24 : 16,
+    backgroundColor: 'rgba(0, 0, 0, 0.75)',
+    justifyContent: 'flex-end',
   },
   modalContent: {
-    backgroundColor: '#131313',
-    width: '100%',
-    maxWidth: 720,
-    maxHeight: '92%',
+    backgroundColor: '#0B0D11',
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
     height: '92%',
-    borderRadius: 24,
+    paddingTop: 16,
     borderWidth: 1,
-    borderColor: '#27272a',
-    overflow: 'hidden',
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 12 },
-    shadowOpacity: 0.5,
-    shadowRadius: 24,
+    borderColor: 'rgba(255, 255, 255, 0.08)',
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: Spacing.four,
+    paddingHorizontal: 16,
+    paddingBottom: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#212225',
+    borderBottomColor: 'rgba(255, 255, 255, 0.06)',
   },
   headerTitleContainer: {
     flex: 1,
   },
   headerTitle: {
-    fontFamily: 'Inter',
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: '700',
-    color: '#ffffff',
+    color: '#F8FAFC',
+    letterSpacing: -0.2,
   },
   headerNickname: {
-    fontFamily: 'Inter',
-    fontSize: 14,
-    color: '#abc7ff',
-    fontStyle: 'italic',
+    fontSize: 13,
+    color: '#94A3B8',
     marginTop: 2,
+    fontWeight: '500',
   },
   closeButton: {
-    padding: Spacing.two,
+    padding: 6,
+    borderRadius: 8,
+    backgroundColor: '#181D2A',
   },
   centerContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: Spacing.four,
+    padding: 24,
   },
   loadingText: {
-    marginTop: Spacing.three,
-    fontFamily: 'Inter',
-    color: '#c4c7c8',
-    fontSize: 14,
+    marginTop: 12,
+    fontSize: 13,
+    color: '#94A3B8',
+    fontWeight: '500',
   },
   errorText: {
-    fontFamily: 'Inter',
-    color: '#f44336',
-    fontSize: 16,
-    marginBottom: Spacing.three,
-    textAlign: 'center',
+    fontSize: 14,
+    color: '#EF4444',
+    marginBottom: 16,
   },
   retryButton: {
-    backgroundColor: '#abc7ff',
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: 24,
+    backgroundColor: '#2563EB',
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 10,
   },
   retryButtonText: {
-    fontFamily: 'Inter',
-    color: '#131313',
+    color: '#FFFFFF',
     fontWeight: '700',
+    fontSize: 13,
   },
   metaRow: {
     flexDirection: 'row',
-    gap: Spacing.two,
-    paddingHorizontal: Spacing.four,
-    paddingTop: Spacing.three,
-    paddingBottom: Spacing.two,
+    gap: 8,
+    paddingHorizontal: 16,
+    paddingTop: 12,
+    paddingBottom: 10,
   },
   metaBadge: {
-    backgroundColor: '#212225',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 12,
+    backgroundColor: '#181D2A',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.05)',
   },
   metaBadgeText: {
-    fontFamily: 'Inter',
-    fontSize: 12,
-    color: '#ffffff',
+    fontSize: 11,
+    color: '#E2E8F0',
     fontWeight: '600',
   },
   tabBar: {
     flexDirection: 'row',
-    paddingHorizontal: Spacing.four,
+    paddingHorizontal: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#212225',
-    gap: Spacing.two,
+    borderBottomColor: 'rgba(255, 255, 255, 0.06)',
+    gap: 6,
   },
   tabButton: {
-    paddingVertical: 12,
-    paddingHorizontal: 8,
+    paddingVertical: 10,
+    paddingHorizontal: 10,
     borderBottomWidth: 2,
     borderBottomColor: 'transparent',
   },
   activeTabButton: {
-    borderBottomColor: '#abc7ff',
+    borderBottomColor: '#3B82F6',
   },
   tabButtonText: {
-    fontFamily: 'Inter',
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: '600',
-    color: '#c4c7c8',
+    color: '#94A3B8',
   },
   activeTabButtonText: {
-    color: '#abc7ff',
+    color: '#F8FAFC',
+    fontWeight: '700',
   },
   scrollContainer: {
     flex: 1,
-    paddingHorizontal: Spacing.four,
+    paddingHorizontal: 16,
   },
   tabContentContainer: {
-    paddingVertical: Spacing.four,
-    gap: Spacing.three,
+    paddingVertical: 14,
+    gap: 12,
   },
   sectionTitle: {
-    fontFamily: 'Inter',
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '700',
-    color: '#ffffff',
-    marginBottom: Spacing.two,
+    color: '#F8FAFC',
+    letterSpacing: -0.2,
   },
   componentCard: {
-    backgroundColor: '#1c1c1c',
-    borderRadius: 16,
-    padding: 16,
+    backgroundColor: '#131722',
+    borderRadius: 14,
+    padding: 14,
     borderWidth: 1,
-    borderColor: '#212225',
-    marginBottom: Spacing.two,
+    borderColor: 'rgba(255, 255, 255, 0.08)',
+    marginBottom: 10,
   },
   componentHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    marginBottom: 12,
+    marginBottom: 10,
   },
   componentName: {
-    fontFamily: 'Inter',
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '700',
-    color: '#ffffff',
+    color: '#F8FAFC',
   },
   componentCategory: {
-    fontFamily: 'Inter',
-    fontSize: 12,
-    color: '#abc7ff',
+    fontSize: 11,
+    color: '#94A3B8',
     fontWeight: '600',
     marginTop: 2,
     textTransform: 'uppercase',
   },
   healthBadge: {
     paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
   },
   healthText: {
-    fontFamily: 'Inter',
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: '700',
   },
   healthBarBg: {
-    height: 6,
-    backgroundColor: '#212225',
+    height: 5,
+    backgroundColor: '#181D2A',
     borderRadius: 3,
-    marginBottom: 16,
+    marginBottom: 12,
     overflow: 'hidden',
   },
   healthBarFill: {
@@ -790,39 +748,65 @@ const styles = StyleSheet.create({
   componentMetaGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: Spacing.three,
+    gap: 10,
+    marginTop: 6,
   },
   componentMetaItem: {
-    width: '45%',
+    width: '46%',
   },
   metaLabel: {
-    fontFamily: 'Inter',
-    fontSize: 11,
-    color: '#c4c7c8',
+    fontSize: 10,
+    color: '#64748B',
     textTransform: 'uppercase',
-    marginBottom: 4,
+    fontWeight: '600',
+    marginBottom: 2,
   },
   metaValue: {
-    fontFamily: 'Inter',
-    fontSize: 13,
-    color: '#ffffff',
+    fontSize: 12,
+    color: '#E2E8F0',
     fontWeight: '500',
+  },
+  setReplacementDateBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    backgroundColor: 'rgba(59, 130, 246, 0.10)',
+    borderWidth: 1,
+    borderColor: 'rgba(59, 130, 246, 0.25)',
+    paddingVertical: 9,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    marginTop: 10,
+  },
+  setReplacementDateBtnHighlight: {
+    backgroundColor: '#2563EB',
+    borderColor: '#2563EB',
+  },
+  setReplacementDateBtnText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#3B82F6',
+  },
+  setReplacementDateBtnTextHighlight: {
+    color: '#FFFFFF',
+    fontWeight: '700',
   },
   documentCard: {
     flexDirection: 'row',
-    backgroundColor: '#1c1c1c',
-    borderRadius: 16,
-    padding: 16,
+    backgroundColor: '#131722',
+    borderRadius: 14,
+    padding: 14,
     borderWidth: 1,
-    borderColor: '#212225',
-    marginBottom: Spacing.two,
-    gap: Spacing.three,
+    borderColor: 'rgba(255, 255, 255, 0.08)',
+    marginBottom: 10,
+    gap: 12,
   },
   documentIconWrapper: {
-    width: 44,
-    height: 44,
-    borderRadius: 12,
-    backgroundColor: '#1b2333',
+    width: 38,
+    height: 38,
+    borderRadius: 10,
+    backgroundColor: 'rgba(59, 130, 246, 0.12)',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -830,187 +814,192 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   documentTitle: {
-    fontFamily: 'Inter',
-    fontSize: 15,
+    fontSize: 14,
     fontWeight: '700',
-    color: '#ffffff',
-    marginBottom: 4,
+    color: '#F8FAFC',
+    marginBottom: 2,
   },
   documentNotes: {
-    fontFamily: 'Inter',
-    fontSize: 13,
-    color: '#c4c7c8',
-    marginBottom: 12,
+    fontSize: 12,
+    color: '#94A3B8',
+    marginBottom: 8,
   },
   viewDocButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
+    gap: 4,
   },
   viewDocText: {
-    fontFamily: 'Inter',
-    fontSize: 13,
-    fontWeight: '700',
-    color: '#abc7ff',
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#3B82F6',
   },
   intervalCard: {
-    backgroundColor: '#1c1c1c',
-    borderRadius: 16,
-    padding: 16,
+    backgroundColor: '#131722',
+    borderRadius: 14,
+    padding: 14,
     borderWidth: 1,
-    borderColor: '#212225',
-    marginBottom: Spacing.two,
+    borderColor: 'rgba(255, 255, 255, 0.08)',
+    marginBottom: 10,
   },
   intervalHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 8,
+    marginBottom: 6,
   },
   intervalTitle: {
-    fontFamily: 'Inter',
-    fontSize: 15,
+    fontSize: 14,
     fontWeight: '700',
-    color: '#ffffff',
+    color: '#F8FAFC',
   },
   intervalBadge: {
-    backgroundColor: '#212225',
+    backgroundColor: '#181D2A',
     paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
   },
   intervalBadgeText: {
-    fontFamily: 'Inter',
-    fontSize: 11,
-    color: '#c4c7c8',
+    fontSize: 10,
+    color: '#94A3B8',
     fontWeight: '600',
   },
   intervalDesc: {
-    fontFamily: 'Inter',
-    fontSize: 13,
-    color: '#c4c7c8',
-    marginBottom: 12,
+    fontSize: 12,
+    color: '#94A3B8',
+    marginBottom: 8,
   },
   intervalSpecs: {
     flexDirection: 'row',
-    gap: Spacing.three,
+    gap: 8,
   },
   intervalSpecItem: {
-    fontFamily: 'Inter',
-    fontSize: 12,
-    color: '#abc7ff',
+    backgroundColor: 'rgba(59, 130, 246, 0.10)',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: 'rgba(59, 130, 246, 0.2)',
+  },
+  intervalSpecText: {
+    fontSize: 11,
+    color: '#3B82F6',
     fontWeight: '600',
-    backgroundColor: '#abc7ff10',
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 8,
   },
   specsTable: {
-    backgroundColor: '#1c1c1c',
-    borderRadius: 16,
+    backgroundColor: '#131722',
+    borderRadius: 14,
     borderWidth: 1,
-    borderColor: '#212225',
+    borderColor: 'rgba(255, 255, 255, 0.08)',
     overflow: 'hidden',
   },
   specsRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    padding: 14,
+    padding: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#212225',
+    borderBottomColor: 'rgba(255, 255, 255, 0.05)',
   },
   specsLabel: {
-    fontFamily: 'Inter',
-    fontSize: 14,
-    color: '#c4c7c8',
+    fontSize: 13,
+    color: '#94A3B8',
   },
   specsValue: {
-    fontFamily: 'Inter',
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: '600',
-    color: '#ffffff',
+    color: '#F8FAFC',
   },
   emptyContainer: {
-    padding: Spacing.five,
+    padding: 24,
     justifyContent: 'center',
     alignItems: 'center',
   },
   emptyText: {
-    fontFamily: 'Inter',
-    color: '#c4c7c8',
-    fontSize: 14,
+    color: '#94A3B8',
+    fontSize: 13,
     textAlign: 'center',
   },
   sectionHeaderRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: Spacing.three,
+    marginBottom: 8,
   },
   addInlineBtn: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
-    backgroundColor: '#abc7ff18',
+    gap: 4,
+    backgroundColor: 'rgba(59, 130, 246, 0.12)',
     borderWidth: 1,
-    borderColor: '#abc7ff40',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 12,
+    borderColor: 'rgba(59, 130, 246, 0.3)',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 8,
   },
   addInlineBtnText: {
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: '700',
-    color: '#abc7ff',
-    fontFamily: 'Inter',
+    color: '#3B82F6',
   },
   deleteCardBtn: {
-    padding: 6,
-    borderRadius: 8,
-    backgroundColor: '#f8717115',
+    padding: 4,
+    borderRadius: 6,
+    backgroundColor: 'rgba(239, 68, 68, 0.12)',
   },
   dangerBanner: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
-    backgroundColor: '#f8717120',
+    gap: 10,
+    backgroundColor: 'rgba(239, 68, 68, 0.12)',
     borderWidth: 1,
-    borderColor: '#f8717170',
-    borderRadius: 14,
-    padding: 12,
-    marginBottom: 16,
+    borderColor: 'rgba(239, 68, 68, 0.35)',
+    borderRadius: 10,
+    padding: 10,
+    marginBottom: 12,
   },
   dangerBannerTitle: {
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: '800',
-    color: '#f87171',
-    fontFamily: 'Inter',
+    color: '#EF4444',
   },
   dangerBannerSub: {
     fontSize: 11,
-    color: '#fca5a5',
-    fontFamily: 'Inter',
+    color: '#FCA5A5',
     marginTop: 2,
+  },
+  unknownHintBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    backgroundColor: 'rgba(59, 130, 246, 0.10)',
+    borderWidth: 1,
+    borderColor: 'rgba(59, 130, 246, 0.25)',
+    borderRadius: 10,
+    padding: 10,
+    marginBottom: 12,
+  },
+  unknownHintText: {
+    flex: 1,
+    fontSize: 11,
+    color: '#93C5FD',
   },
   lifespanRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 6,
-    marginTop: 8,
     marginBottom: 8,
   },
   lifespanBadge: {
-    backgroundColor: '#27272a',
-    borderRadius: 8,
+    backgroundColor: '#181D2A',
+    borderRadius: 6,
     paddingHorizontal: 8,
-    paddingVertical: 4,
+    paddingVertical: 3,
     borderWidth: 1,
-    borderColor: '#3f3f46',
+    borderColor: 'rgba(255, 255, 255, 0.05)',
   },
   lifespanBadgeText: {
-    fontSize: 11,
-    color: '#abc7ff',
+    fontSize: 10,
+    color: '#3B82F6',
     fontWeight: '600',
-    fontFamily: 'Inter',
   },
 });

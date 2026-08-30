@@ -26,19 +26,19 @@ export function AuthCard({ children, style }: AuthCardProps) {
 const styles = StyleSheet.create({
   card: {
     alignSelf: 'stretch',
-    backgroundColor: '#201f1f', // bg-surface-container
+    backgroundColor: '#131722',
     borderWidth: 1,
-    borderColor: '#444748', // border-outline-variant
-    borderRadius: 32, // rounded-lg = 2rem = 32px
-    paddingHorizontal: 24, // p-container-padding-mobile / desktop padding
-    paddingVertical: 32,
+    borderColor: 'rgba(255, 255, 255, 0.08)',
+    borderRadius: 24,
+    paddingHorizontal: 20,
+    paddingVertical: 28,
     position: 'relative',
     overflow: 'hidden',
     shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 12 },
-    shadowOpacity: 0.3,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.35,
     shadowRadius: 16,
-    elevation: 10,
+    elevation: 8,
   },
   topAccentBarContainer: {
     position: 'absolute',
@@ -50,9 +50,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   topAccentBar: {
-    width: '80%',
+    width: '60%',
     height: '100%',
-    backgroundColor: '#abc7ff', // secondary
-    opacity: 0.5, // opacity-50
+    backgroundColor: '#3B82F6',
+    opacity: 0.6,
   },
 });

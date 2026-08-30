@@ -77,17 +77,17 @@ export function AiAdvisorTab({ vehicleId, vehicleName }: AiAdvisorTabProps) {
       {/* Header Banner */}
       <View style={styles.banner}>
         <View style={styles.sparkleIcon}>
-          <Svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+          <Svg width="16" height="16" viewBox="0 0 24 24" fill="none">
             <Path
               d="M12 2L14.39 8.26L21 9.27L16 13.87L17.47 20.27L12 17L6.53 20.27L8 13.87L3 9.27L9.61 8.26L12 2Z"
-              fill="#abc7ff"
+              fill="#3B82F6"
             />
           </Svg>
         </View>
         <View style={{ flex: 1 }}>
-          <Text style={styles.bannerTitle}>AutoCare AI Advisor</Text>
+          <Text style={styles.bannerTitle}>AutoCare Diagnostics Terminal</Text>
           <Text style={styles.bannerSub}>
-            Trained on factory repair manuals for {vehicleName}
+            OEM technical database & workshop telemetry for {vehicleName}
           </Text>
         </View>
       </View>
@@ -99,44 +99,54 @@ export function AiAdvisorTab({ vehicleId, vehicleName }: AiAdvisorTabProps) {
         style={styles.presetsScroll}
         contentContainerStyle={styles.presetsContent}
       >
-        {PRESET_QUESTIONS.map((pq, idx) => (
+        {PRESET_QUESTIONS.map((q, idx) => (
           <TouchableOpacity
             key={idx}
             style={styles.presetChip}
-            onPress={() => handleAsk(pq)}
+            onPress={() => handleAsk(q)}
             disabled={loading}
           >
-            <Text style={styles.presetChipText}>{pq}</Text>
+            <Text style={styles.presetChipText}>{q}</Text>
           </TouchableOpacity>
         ))}
       </ScrollView>
 
-      {/* Chat Messages */}
-      <ScrollView style={styles.chatScroll} contentContainerStyle={styles.chatContent}>
-        {messages.map((msg) => (
+      {/* Chat History */}
+      <ScrollView
+        style={styles.chatScroll}
+        contentContainerStyle={styles.chatContent}
+        showsVerticalScrollIndicator={false}
+      >
+        {messages.map((m) => (
           <View
-            key={msg.id}
+            key={m.id}
             style={[
               styles.msgBubble,
-              msg.sender === 'user' ? styles.userBubble : styles.aiBubble,
-              isRTL && (msg.sender === 'user' ? styles.userBubbleRTL : styles.aiBubbleRTL),
+              m.sender === 'user'
+                ? isRTL
+                  ? styles.userBubbleRTL
+                  : styles.userBubble
+                : isRTL
+                ? styles.aiBubbleRTL
+                : styles.aiBubble,
             ]}
           >
             <Text
               style={[
                 styles.msgText,
-                msg.sender === 'user' ? styles.userMsgText : styles.aiMsgText,
+                m.sender === 'user' ? styles.userMsgText : styles.aiMsgText,
+                isRTL && styles.textRight,
               ]}
             >
-              {msg.text}
+              {m.text}
             </Text>
           </View>
         ))}
 
         {loading && (
-          <View style={[styles.msgBubble, styles.aiBubble, styles.typingRow]}>
-            <ActivityIndicator size="small" color="#abc7ff" />
-            <Text style={styles.typingText}>Consulting factory digital twin specs...</Text>
+          <View style={styles.typingRow}>
+            <ActivityIndicator size="small" color="#3B82F6" />
+            <Text style={styles.typingText}>Consulting workshop manual...</Text>
           </View>
         )}
       </ScrollView>
@@ -145,20 +155,24 @@ export function AiAdvisorTab({ vehicleId, vehicleName }: AiAdvisorTabProps) {
       <View style={[styles.inputRow, isRTL && styles.rowReverse]}>
         <TextInput
           style={[styles.chatInput, isRTL && styles.textRight]}
+          placeholder="Ask a technical or maintenance question..."
+          placeholderTextColor="#64748B"
           value={inputQuestion}
           onChangeText={setInputQuestion}
-          placeholder="Ask AI about your car specs..."
-          placeholderTextColor="#8e9192"
-          onSubmitEditing={() => handleAsk()}
           editable={!loading}
+          onSubmitEditing={() => handleAsk()}
+          returnKeyType="send"
         />
         <TouchableOpacity
-          style={[styles.sendBtn, !inputQuestion.trim() && styles.sendBtnDisabled]}
+          style={[
+            styles.sendBtn,
+            (!inputQuestion.trim() || loading) && styles.sendBtnDisabled,
+          ]}
           onPress={() => handleAsk()}
           disabled={!inputQuestion.trim() || loading}
         >
-          <Svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-            <Path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" fill="#131313" />
+          <Svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+            <Path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" fill="#FFFFFF" />
           </Svg>
         </TouchableOpacity>
       </View>
@@ -168,112 +182,111 @@ export function AiAdvisorTab({ vehicleId, vehicleName }: AiAdvisorTabProps) {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    paddingTop: 8,
+    backgroundColor: '#131722',
+    borderRadius: 16,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.08)',
   },
   banner: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#abc7ff15',
-    borderColor: '#abc7ff30',
-    borderWidth: 1,
-    borderRadius: 16,
-    padding: 12,
     gap: 10,
+    backgroundColor: '#181D2A',
+    borderRadius: 12,
+    padding: 12,
     marginBottom: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.04)',
   },
   sparkleIcon: {
-    width: 36,
-    height: 36,
-    borderRadius: 10,
-    backgroundColor: '#abc7ff25',
+    width: 34,
+    height: 34,
+    borderRadius: 8,
+    backgroundColor: 'rgba(59, 130, 246, 0.12)',
     justifyContent: 'center',
     alignItems: 'center',
   },
   bannerTitle: {
-    fontFamily: 'Inter',
     fontSize: 14,
     fontWeight: '700',
-    color: '#abc7ff',
+    color: '#F8FAFC',
   },
   bannerSub: {
-    fontFamily: 'Inter',
     fontSize: 11,
-    color: '#c4c7c8',
+    color: '#94A3B8',
+    marginTop: 1,
   },
   presetsScroll: {
-    maxHeight: 38,
-    marginBottom: 12,
+    maxHeight: 36,
+    marginBottom: 10,
   },
   presetsContent: {
-    gap: 8,
+    gap: 6,
   },
   presetChip: {
-    backgroundColor: '#1c1c1c',
-    borderColor: '#2f3131',
+    backgroundColor: '#181D2A',
+    borderColor: 'rgba(255, 255, 255, 0.06)',
     borderWidth: 1,
-    borderRadius: 20,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
   },
   presetChipText: {
-    fontFamily: 'Inter',
     fontSize: 11,
-    color: '#abc7ff',
-    fontWeight: '500',
+    color: '#3B82F6',
+    fontWeight: '600',
   },
   chatScroll: {
     flex: 1,
     maxHeight: 280,
   },
   chatContent: {
-    gap: 10,
-    paddingBottom: 12,
+    gap: 8,
+    paddingBottom: 10,
   },
   msgBubble: {
     maxWidth: '85%',
-    borderRadius: 16,
-    padding: 12,
+    borderRadius: 12,
+    padding: 10,
   },
   userBubble: {
     alignSelf: 'flex-end',
-    backgroundColor: '#abc7ff',
-    borderBottomRightRadius: 4,
+    backgroundColor: '#2563EB',
+    borderBottomRightRadius: 2,
   },
   userBubbleRTL: {
     alignSelf: 'flex-start',
   },
   aiBubble: {
     alignSelf: 'flex-start',
-    backgroundColor: '#1c1c1c',
-    borderColor: '#2f3131',
+    backgroundColor: '#181D2A',
+    borderColor: 'rgba(255, 255, 255, 0.06)',
     borderWidth: 1,
-    borderBottomLeftRadius: 4,
+    borderBottomLeftRadius: 2,
   },
   aiBubbleRTL: {
     alignSelf: 'flex-end',
   },
   msgText: {
-    fontFamily: 'Inter',
-    fontSize: 13,
-    lineHeight: 18,
+    fontSize: 12,
+    lineHeight: 17,
   },
   userMsgText: {
-    color: '#131313',
+    color: '#FFFFFF',
     fontWeight: '600',
   },
   aiMsgText: {
-    color: '#e4e4e7',
+    color: '#E2E8F0',
   },
   typingRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: 6,
   },
   typingText: {
-    fontFamily: 'Inter',
-    fontSize: 12,
-    color: '#8e9192',
+    fontSize: 11,
+    color: '#64748B',
   },
   inputRow: {
     flexDirection: 'row',
@@ -289,25 +302,24 @@ const styles = StyleSheet.create({
   },
   chatInput: {
     flex: 1,
-    backgroundColor: '#1c1c1c',
-    borderColor: '#2f3131',
+    backgroundColor: '#181D2A',
+    borderColor: 'rgba(255, 255, 255, 0.06)',
     borderWidth: 1,
-    borderRadius: 14,
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-    fontFamily: 'Inter',
-    fontSize: 13,
-    color: '#ffffff',
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    fontSize: 12,
+    color: '#F8FAFC',
   },
   sendBtn: {
-    width: 42,
-    height: 42,
-    borderRadius: 14,
-    backgroundColor: '#abc7ff',
+    width: 38,
+    height: 38,
+    borderRadius: 10,
+    backgroundColor: '#2563EB',
     justifyContent: 'center',
     alignItems: 'center',
   },
   sendBtnDisabled: {
-    opacity: 0.4,
+    opacity: 0.35,
   },
 });

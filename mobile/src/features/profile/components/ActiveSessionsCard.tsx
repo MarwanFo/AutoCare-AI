@@ -78,7 +78,7 @@ export function ActiveSessionsCard() {
             disabled={logoutAllMutation.isPending}
           >
             {logoutAllMutation.isPending ? (
-              <ActivityIndicator size="small" color="#ffb4ab" />
+              <ActivityIndicator size="small" color="#EF4444" />
             ) : (
               <Text style={styles.logoutAllText}>Revoke Others</Text>
             )}
@@ -94,16 +94,16 @@ export function ActiveSessionsCard() {
           return (
             <View key={sessionKey} style={[styles.sessionRow, isRTL && styles.rowReverse]}>
               <View style={styles.deviceIconBox}>
-                <Svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                <Svg width="18" height="18" viewBox="0 0 24 24" fill="none">
                   {isWeb ? (
                     <Path
                       d="M20 18c1.1 0 1.99-.9 1.99-2L22 6c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2H0v2h24v-2h-4zM4 6h16v10H4V6z"
-                      fill="#abc7ff"
+                      fill="#3B82F6"
                     />
                   ) : (
                     <Path
                       d="M17 1.01L7 1c-1.1 0-2 .9-2 2v18c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V3c0-1.1-.9-1.99-2-1.99zM17 19H7V5h10v14z"
-                      fill="#abc7ff"
+                      fill="#3B82F6"
                     />
                   )}
                 </Svg>
@@ -149,12 +149,12 @@ export function ActiveSessionsCard() {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#1c1c1c',
-    borderRadius: 20,
+    backgroundColor: '#131722',
+    borderRadius: 16,
     borderWidth: 1,
-    borderColor: '#2f3131',
+    borderColor: 'rgba(255, 255, 255, 0.08)',
     padding: 16,
-    marginBottom: 16,
+    marginBottom: 14,
   },
   loadingContainer: {
     padding: 24,
@@ -163,15 +163,14 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     marginTop: 8,
-    color: '#8e9192',
-    fontFamily: 'Inter',
+    color: '#94A3B8',
     fontSize: 13,
   },
   headerRow: {
     flexDirection: 'row',
     alignItems: 'flex-start',
     gap: 12,
-    marginBottom: 16,
+    marginBottom: 14,
   },
   rowReverse: {
     flexDirection: 'row-reverse',
@@ -183,50 +182,47 @@ const styles = StyleSheet.create({
     textAlign: 'right',
   },
   title: {
-    fontFamily: 'Inter',
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '700',
-    color: '#ffffff',
-    marginBottom: 4,
+    color: '#F8FAFC',
+    marginBottom: 2,
   },
   subtitle: {
-    fontFamily: 'Inter',
     fontSize: 12,
-    color: '#8e9192',
+    color: '#94A3B8',
     lineHeight: 16,
   },
   logoutAllBtn: {
-    backgroundColor: '#ffb4ab15',
-    borderColor: '#ffb4ab30',
+    backgroundColor: 'rgba(239, 68, 68, 0.12)',
+    borderColor: 'rgba(239, 68, 68, 0.3)',
     borderWidth: 1,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 12,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 8,
   },
   logoutAllText: {
-    fontFamily: 'Inter',
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: '600',
-    color: '#ffb4ab',
+    color: '#EF4444',
   },
   sessionList: {
-    gap: 12,
+    gap: 10,
   },
   sessionRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#131313',
+    backgroundColor: '#181D2A',
     padding: 12,
-    borderRadius: 14,
+    borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#27272a',
-    gap: 12,
+    borderColor: 'rgba(255, 255, 255, 0.04)',
+    gap: 10,
   },
   deviceIconBox: {
-    width: 40,
-    height: 40,
-    borderRadius: 10,
-    backgroundColor: '#abc7ff15',
+    width: 36,
+    height: 36,
+    borderRadius: 8,
+    backgroundColor: 'rgba(59, 130, 246, 0.12)',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -236,44 +232,40 @@ const styles = StyleSheet.create({
   deviceTitleRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: 6,
   },
   deviceType: {
-    fontFamily: 'Inter',
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: '600',
-    color: '#ffffff',
+    color: '#F8FAFC',
   },
   thisDeviceBadge: {
-    backgroundColor: '#34c75920',
-    borderColor: '#34c75940',
+    backgroundColor: 'rgba(16, 185, 129, 0.15)',
+    borderColor: 'rgba(16, 185, 129, 0.3)',
     borderWidth: 1,
     borderRadius: 6,
     paddingHorizontal: 6,
     paddingVertical: 1,
   },
   thisDeviceText: {
-    fontFamily: 'Inter',
     fontSize: 10,
     fontWeight: '700',
-    color: '#34c759',
+    color: '#10B981',
   },
   sessionMeta: {
-    fontFamily: 'Inter',
     fontSize: 11,
-    color: '#8e9192',
+    color: '#64748B',
     marginTop: 2,
   },
   revokeBtn: {
-    backgroundColor: '#27272a',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 8,
+    backgroundColor: '#1C2232',
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 6,
   },
   revokeBtnText: {
-    fontFamily: 'Inter',
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: '600',
-    color: '#ffb4ab',
+    color: '#EF4444',
   },
 });
