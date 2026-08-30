@@ -61,5 +61,7 @@ public interface VehicleService {
     com.autocare.backend.vehicle.dto.AiAdvisorResponse consultAiAdvisor(UUID userId, UUID vehicleId, com.autocare.backend.vehicle.dto.AiAdvisorRequest request);
 
     com.autocare.backend.vehicle.dto.VehicleReportResponse exportVehicleReport(UUID userId, UUID vehicleId);
+
+    com.autocare.backend.vehicle.dto.VehicleBudgetForecastResponse getVehicleBudgetForecast(UUID userId, UUID vehicleId, String currency);
 }
 

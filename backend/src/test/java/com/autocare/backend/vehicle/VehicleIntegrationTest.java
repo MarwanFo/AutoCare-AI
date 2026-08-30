@@ -381,6 +381,33 @@ class VehicleIntegrationTest {
                 .andExpect(jsonPath("$.status").value("ARCHIVED"));
     }
 
+    @Test
+    void shouldGetVehicleBudgetForecastSuccessfully() throws Exception {
+        CreateVehicleRequest request = new CreateVehicleRequest();
+        request.setBrandId(brand.getId());
+        request.setModelId(model.getId());
+        request.setYear(2025);
+        request.setTransmission(Transmission.AUTOMATIC);
+        request.setFuelType(FuelType.GASOLINE);
+        request.setLicensePlate("BUDGET-25");
+        request.setVin("1YJ1E1EB8FF999888");
+        request.setCurrentMileage(12000);
+        request.setMileageUnit(MileageUnit.KM);
+        request.setPurchaseCondition(PurchaseCondition.BRAND_NEW);
+
+        UUID vehicleId = onboardVehicle(request, tokenUser1);
+
+        mockMvc.perform(get("/api/v1/vehicles/" + vehicleId + "/budget-forecast?currency=EUR")
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + tokenUser1))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.vehicleId").value(vehicleId.toString()))
+                .andExpect(jsonPath("$.currency").value("EUR"))
+                .andExpect(jsonPath("$.totalEstimatedBudget").isNumber())
+                .andExpect(jsonPath("$.brandTier").isString())
+                .andExpect(jsonPath("$.aiSummary").isString())
+                .andExpect(jsonPath("$.items").isArray());
+    }
+
     private UUID onboardVehicle(CreateVehicleRequest request, String token) throws Exception {
         MvcResult postResult = mockMvc.perform(post("/api/v1/vehicles")
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)

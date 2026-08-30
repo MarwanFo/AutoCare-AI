@@ -199,7 +199,10 @@ export function VehicleDetailsModal({ vehicleId, visible, onClose, initialTab = 
               {/* Tab Content */}
               <ScrollView style={styles.scrollContainer} showsVerticalScrollIndicator={false}>
                 {activeTab === 'BUDGET' && (
-                  <CostBudgetCard components={vehicle.components} />
+                  <CostBudgetCard
+                    vehicleId={vehicle.id}
+                    vehicle={vehicle}
+                  />
                 )}
 
                 {activeTab === 'AI_ADVISOR' && (

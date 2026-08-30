@@ -326,4 +326,16 @@ public class VehicleController {
         com.autocare.backend.vehicle.dto.VehicleReportResponse report = vehicleService.exportVehicleReport(userDetails.getUser().getId(), vehicleId);
         return ResponseEntity.ok(report);
     }
+
+    @GetMapping("/{vehicleId}/budget-forecast")
+    @Operation(summary = "Get AI predictive maintenance budget forecast", description = "Calculates vehicle-specific maintenance costs based on brand tier, engine type, mileage, and component health scores.")
+    public ResponseEntity<com.autocare.backend.vehicle.dto.VehicleBudgetForecastResponse> getVehicleBudgetForecast(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PathVariable UUID vehicleId,
+            @RequestParam(required = false, defaultValue = "EUR") String currency
+    ) {
+        log.info("Generating AI budget forecast for vehicle ID: {} with currency: {} for user: {}", vehicleId, currency, userDetails.getUser().getId());
+        com.autocare.backend.vehicle.dto.VehicleBudgetForecastResponse forecast = vehicleService.getVehicleBudgetForecast(userDetails.getUser().getId(), vehicleId, currency);
+        return ResponseEntity.ok(forecast);
+    }
 }

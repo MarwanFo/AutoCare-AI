@@ -31,6 +31,33 @@ export interface VehicleReportResponse {
   criticalWarnings: string[];
 }
 
+export interface VehicleBudgetItem {
+  componentName: string;
+  category: string;
+  healthScore: number;
+  urgency: 'URGENT' | 'UPCOMING' | 'SCHEDULED';
+  estimatedPartCost: number;
+  estimatedLaborCost: number;
+  totalCost: number;
+  timeframe: '0-3M' | '3-6M' | '6-12M';
+  aiRecommendation: string;
+}
+
+export interface VehicleBudgetForecastResponse {
+  vehicleId: string;
+  vehicleTitle: string;
+  brandTier: 'ECONOMY' | 'STANDARD' | 'PREMIUM' | 'LUXURY' | 'EXOTIC';
+  currency: string;
+  totalEstimatedBudget: number;
+  budget0To3Months: number;
+  budget3To6Months: number;
+  budget6To12Months: number;
+  estimatedLaborRatePerHour: number;
+  totalLaborHours: number;
+  aiSummary: string;
+  items: VehicleBudgetItem[];
+}
+
 export const vehicleAdvisorApi = {
   askAdvisor: async (vehicleId: string, question: string): Promise<AiAdvisorResponse> => {
     const response = await apiClient.post<AiAdvisorResponse>(
@@ -46,4 +73,13 @@ export const vehicleAdvisorApi = {
     );
     return response.data;
   },
+
+  getBudgetForecast: async (vehicleId: string, currency: string = 'EUR'): Promise<VehicleBudgetForecastResponse> => {
+    const response = await apiClient.get<VehicleBudgetForecastResponse>(
+      `/api/v1/vehicles/${vehicleId}/budget-forecast`,
+      { params: { currency } }
+    );
+    return response.data;
+  },
 };
+

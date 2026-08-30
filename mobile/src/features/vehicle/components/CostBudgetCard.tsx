@@ -1,68 +1,72 @@
-import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import {
+  ActivityIndicator,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import Svg, { Path } from 'react-native-svg';
-import { ComponentResponse } from '@/types/vehicle';
+import { vehicleAdvisorApi, VehicleBudgetForecastResponse } from '@/api/vehicleAdvisorApi';
+import { VehicleResponse } from '@/types/vehicle';
 
 interface CostBudgetCardProps {
-  components?: ComponentResponse[];
+  vehicleId?: string;
+  vehicle?: VehicleResponse | null;
   currency?: string;
 }
 
-const ESTIMATED_PART_COSTS: Record<string, number> = {
-  oil: 65,
-  filter: 25,
-  brake: 140,
-  rotor: 180,
-  battery: 160,
-  tire: 450,
-  spark: 90,
-  coolant: 75,
-  transmission: 120,
-  wiper: 35,
-};
+export function CostBudgetCard({ vehicleId, vehicle, currency = 'EUR' }: CostBudgetCardProps) {
+  const [forecast, setForecast] = useState<VehicleBudgetForecastResponse | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [showItemized, setShowItemized] = useState(true);
 
-export function CostBudgetCard({ components = [], currency = 'EUR' }: CostBudgetCardProps) {
+  const fetchBudget = async () => {
+    if (!vehicleId) return;
+    setIsLoading(true);
+    setError(null);
+    try {
+      const data = await vehicleAdvisorApi.getBudgetForecast(vehicleId, currency);
+      setForecast(data);
+    } catch (e: any) {
+      console.error('Failed to fetch AI budget forecast:', e);
+      setError('Unable to load AI budget forecast. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchBudget();
+  }, [vehicleId, currency]);
+
   const getCurrencySymbol = (curr: string) => {
     switch (curr) {
       case 'USD': return '$';
-      case 'MAD': return 'DH';
+      case 'MAD': return 'DH ';
       case 'GBP': return '£';
       default: return '€';
     }
   };
 
-  const symbol = getCurrencySymbol(currency);
+  const symbol = getCurrencySymbol(forecast?.currency || currency);
 
-  let totalEstimatedBudget = 0;
-  let budget3M = 0;
-  let budget6M = 0;
-  let budget12M = 0;
-
-  components.forEach((comp) => {
-    const nameLower = comp.name.toLowerCase();
-    let baseCost = 80; // default average service cost
-
-    for (const [key, cost] of Object.entries(ESTIMATED_PART_COSTS)) {
-      if (nameLower.includes(key)) {
-        baseCost = cost;
-        break;
-      }
+  const getBrandTierBadgeColor = (tier?: string) => {
+    switch (tier) {
+      case 'EXOTIC': return { bg: 'rgba(239, 68, 68, 0.15)', text: '#EF4444', border: 'rgba(239, 68, 68, 0.3)' };
+      case 'LUXURY': return { bg: 'rgba(59, 130, 246, 0.15)', text: '#3B82F6', border: 'rgba(59, 130, 246, 0.3)' };
+      case 'PREMIUM': return { bg: 'rgba(168, 85, 247, 0.15)', text: '#A855F7', border: 'rgba(168, 85, 247, 0.3)' };
+      case 'ECONOMY': return { bg: 'rgba(16, 185, 129, 0.15)', text: '#10B981', border: 'rgba(16, 185, 129, 0.3)' };
+      default: return { bg: 'rgba(148, 163, 184, 0.15)', text: '#94A3B8', border: 'rgba(148, 163, 184, 0.3)' };
     }
+  };
 
-    totalEstimatedBudget += baseCost;
-
-    const remainingDays = comp.remainingDays ?? 180;
-    if (remainingDays <= 90) {
-      budget3M += baseCost;
-    } else if (remainingDays <= 180) {
-      budget6M += baseCost;
-    } else {
-      budget12M += baseCost;
-    }
-  });
+  const tierBadge = getBrandTierBadgeColor(forecast?.brandTier);
 
   return (
     <View style={styles.card}>
+      {/* Header */}
       <View style={styles.cardHeader}>
         <View style={styles.iconBox}>
           <Svg width="16" height="16" viewBox="0 0 24 24" fill="none">
@@ -72,48 +76,143 @@ export function CostBudgetCard({ components = [], currency = 'EUR' }: CostBudget
             />
           </Svg>
         </View>
-        <Text style={styles.cardTitle}>Predictive Maintenance Budget</Text>
-      </View>
-
-      <Text style={styles.cardSubtitle}>
-        Estimated parts & labor investment forecast based on component wear timelines.
-      </Text>
-
-      {/* Main Total Highlight */}
-      <View style={styles.totalBox}>
-        <Text style={styles.totalLabel}>Total Estimated Fleet Maintenance</Text>
-        <Text style={styles.totalAmount}>
-          {symbol}
-          {totalEstimatedBudget.toLocaleString()} <Text style={styles.currCode}>{currency}</Text>
-        </Text>
-      </View>
-
-      {/* Forecast Breakdown */}
-      <View style={styles.forecastGrid}>
-        <View style={styles.forecastItem}>
-          <Text style={styles.forecastPeriod}>0 - 3 Months</Text>
-          <Text style={[styles.forecastAmount, budget3M > 0 && styles.urgentAmount]}>
-            {symbol}{budget3M.toLocaleString()}
+        <View style={{ flex: 1 }}>
+          <Text style={styles.cardTitle}>AI Predictive Maintenance Budget</Text>
+          <Text style={styles.cardSubtitle}>
+            Calibrated for {vehicle ? `${vehicle.year} ${vehicle.brandName} ${vehicle.modelName}` : 'Vehicle'} based on wear, brand tier & workshop rates.
           </Text>
-          <Text style={styles.forecastSub}>High Urgency</Text>
         </View>
 
-        <View style={styles.forecastItem}>
-          <Text style={styles.forecastPeriod}>3 - 6 Months</Text>
-          <Text style={styles.forecastAmount}>
-            {symbol}{budget6M.toLocaleString()}
-          </Text>
-          <Text style={styles.forecastSub}>Medium Urgency</Text>
-        </View>
-
-        <View style={styles.forecastItem}>
-          <Text style={styles.forecastPeriod}>6 - 12 Months</Text>
-          <Text style={styles.forecastAmount}>
-            {symbol}{budget12M.toLocaleString()}
-          </Text>
-          <Text style={styles.forecastSub}>Scheduled</Text>
-        </View>
+        {forecast?.brandTier && (
+          <View style={[styles.tierPill, { backgroundColor: tierBadge.bg, borderColor: tierBadge.border }]}>
+            <Text style={[styles.tierPillText, { color: tierBadge.text }]}>{forecast.brandTier} TIER</Text>
+          </View>
+        )}
       </View>
+
+      {isLoading ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="small" color="#3B82F6" />
+          <Text style={styles.loadingText}>Analyzing Digital Twin & Computing AI Budget...</Text>
+        </View>
+      ) : error ? (
+        <View style={styles.errorContainer}>
+          <Text style={styles.errorText}>{error}</Text>
+          <TouchableOpacity style={styles.retryBtn} onPress={fetchBudget}>
+            <Text style={styles.retryText}>Retry</Text>
+          </TouchableOpacity>
+        </View>
+      ) : forecast ? (
+        <>
+          {/* Main Total Highlight */}
+          <View style={styles.totalBox}>
+            <Text style={styles.totalLabel}>12-Month Projected Maintenance</Text>
+            <Text style={styles.totalAmount}>
+              {symbol}{forecast.totalEstimatedBudget.toLocaleString()} <Text style={styles.currCode}>{forecast.currency}</Text>
+            </Text>
+            <View style={styles.laborRow}>
+              <Text style={styles.laborMeta}>
+                Est. Labor: ~{forecast.totalLaborHours} hrs @ {symbol}{forecast.estimatedLaborRatePerHour}/hr
+              </Text>
+            </View>
+          </View>
+
+          {/* Forecast Timeframe Grid */}
+          <View style={styles.forecastGrid}>
+            <View style={[styles.forecastItem, forecast.budget0To3Months > 0 && styles.forecastItemUrgent]}>
+              <Text style={styles.forecastPeriod}>0 - 3 MONTHS</Text>
+              <Text style={[styles.forecastAmount, forecast.budget0To3Months > 0 && styles.urgentAmount]}>
+                {symbol}{forecast.budget0To3Months.toLocaleString()}
+              </Text>
+              <Text style={[styles.forecastSub, forecast.budget0To3Months > 0 && styles.urgentSub]}>
+                {forecast.budget0To3Months > 0 ? 'High Urgency' : 'Optimal'}
+              </Text>
+            </View>
+
+            <View style={styles.forecastItem}>
+              <Text style={styles.forecastPeriod}>3 - 6 MONTHS</Text>
+              <Text style={styles.forecastAmount}>
+                {symbol}{forecast.budget3To6Months.toLocaleString()}
+              </Text>
+              <Text style={styles.forecastSub}>Upcoming Wear</Text>
+            </View>
+
+            <View style={styles.forecastItem}>
+              <Text style={styles.forecastPeriod}>6 - 12 MONTHS</Text>
+              <Text style={styles.forecastAmount}>
+                {symbol}{forecast.budget6To12Months.toLocaleString()}
+              </Text>
+              <Text style={styles.forecastSub}>Scheduled OEM</Text>
+            </View>
+          </View>
+
+          {/* AI Master Technician Summary Insight */}
+          {forecast.aiSummary && (
+            <View style={styles.aiInsightBox}>
+              <View style={styles.aiInsightHeader}>
+                <Svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                  <Path
+                    d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"
+                    fill="#3B82F6"
+                  />
+                </Svg>
+                <Text style={styles.aiInsightTitle}>AI Mechanic Breakdown</Text>
+              </View>
+              <Text style={styles.aiInsightText}>{forecast.aiSummary}</Text>
+            </View>
+          )}
+
+          {/* Itemized Parts & Labor Breakdown Section */}
+          {forecast.items && forecast.items.length > 0 && (
+            <View style={styles.itemizedSection}>
+              <TouchableOpacity
+                style={styles.toggleRow}
+                onPress={() => setShowItemized(!showItemized)}
+                activeOpacity={0.8}
+              >
+                <Text style={styles.itemizedTitle}>Itemized Component Estimates ({forecast.items.length})</Text>
+                <Text style={styles.toggleText}>{showItemized ? 'Hide ▲' : 'Show ▼'}</Text>
+              </TouchableOpacity>
+
+              {showItemized && (
+                <View style={styles.itemList}>
+                  {forecast.items.map((item, idx) => {
+                    const isUrgent = item.urgency === 'URGENT';
+                    const isUpcoming = item.urgency === 'UPCOMING';
+                    const urgencyColor = isUrgent ? '#EF4444' : isUpcoming ? '#F59E0B' : '#10B981';
+
+                    return (
+                      <View key={`${item.componentName}-${idx}`} style={styles.itemRow}>
+                        <View style={styles.itemMain}>
+                          <View style={styles.itemNameRow}>
+                            <Text style={styles.itemName} numberOfLines={1}>{item.componentName}</Text>
+                            <View style={[styles.urgencyPill, { borderColor: urgencyColor, backgroundColor: `${urgencyColor}18` }]}>
+                              <Text style={[styles.urgencyText, { color: urgencyColor }]}>{item.timeframe}</Text>
+                            </View>
+                          </View>
+
+                          <Text style={styles.itemAdvice}>{item.aiRecommendation}</Text>
+
+                          <View style={styles.costDetailsRow}>
+                            <Text style={styles.costDetailText}>Parts: {symbol}{item.estimatedPartCost}</Text>
+                            <Text style={styles.costDetailDivider}>•</Text>
+                            <Text style={styles.costDetailText}>Labor: {symbol}{item.estimatedLaborCost}</Text>
+                          </View>
+                        </View>
+
+                        <View style={styles.itemTotalCol}>
+                          <Text style={styles.itemTotalAmount}>{symbol}{item.totalCost}</Text>
+                          <Text style={styles.itemHealthText}>{item.healthScore}% health</Text>
+                        </View>
+                      </View>
+                    );
+                  })}
+                </View>
+              )}
+            </View>
+          )}
+        </>
+      ) : null}
     </View>
   );
 }
@@ -129,17 +228,18 @@ const styles = StyleSheet.create({
   },
   cardHeader: {
     flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginBottom: 4,
+    alignItems: 'flex-start',
+    gap: 10,
+    marginBottom: 12,
   },
   iconBox: {
-    width: 28,
-    height: 28,
-    borderRadius: 7,
+    width: 32,
+    height: 32,
+    borderRadius: 8,
     backgroundColor: 'rgba(59, 130, 246, 0.12)',
     justifyContent: 'center',
     alignItems: 'center',
+    marginTop: 2,
   },
   cardTitle: {
     fontSize: 15,
@@ -150,8 +250,51 @@ const styles = StyleSheet.create({
   cardSubtitle: {
     fontSize: 12,
     color: '#94A3B8',
-    lineHeight: 17,
-    marginBottom: 14,
+    lineHeight: 16,
+    marginTop: 2,
+  },
+  tierPill: {
+    borderWidth: 1,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+    alignSelf: 'flex-start',
+  },
+  tierPillText: {
+    fontSize: 10,
+    fontWeight: '800',
+    letterSpacing: 0.5,
+  },
+  loadingContainer: {
+    padding: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  loadingText: {
+    color: '#94A3B8',
+    fontSize: 12,
+    marginTop: 8,
+  },
+  errorContainer: {
+    padding: 16,
+    alignItems: 'center',
+  },
+  errorText: {
+    color: '#EF4444',
+    fontSize: 12,
+    textAlign: 'center',
+    marginBottom: 8,
+  },
+  retryBtn: {
+    backgroundColor: '#181D2A',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 8,
+  },
+  retryText: {
+    color: '#3B82F6',
+    fontSize: 12,
+    fontWeight: '600',
   },
   totalBox: {
     backgroundColor: '#181D2A',
@@ -168,7 +311,7 @@ const styles = StyleSheet.create({
     color: '#64748B',
     textTransform: 'uppercase',
     marginBottom: 4,
-    letterSpacing: 0.3,
+    letterSpacing: 0.4,
   },
   totalAmount: {
     fontSize: 26,
@@ -181,10 +324,19 @@ const styles = StyleSheet.create({
     color: '#94A3B8',
     fontWeight: '600',
   },
+  laborRow: {
+    marginTop: 4,
+  },
+  laborMeta: {
+    fontSize: 11,
+    color: '#94A3B8',
+    fontWeight: '500',
+  },
   forecastGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 8,
+    marginBottom: 12,
   },
   forecastItem: {
     flex: 1,
@@ -195,6 +347,10 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(255, 255, 255, 0.04)',
     padding: 10,
     alignItems: 'center',
+  },
+  forecastItemUrgent: {
+    borderColor: 'rgba(239, 68, 68, 0.3)',
+    backgroundColor: 'rgba(239, 68, 68, 0.06)',
   },
   forecastPeriod: {
     fontSize: 10,
@@ -215,5 +371,123 @@ const styles = StyleSheet.create({
     color: '#94A3B8',
     marginTop: 2,
     fontWeight: '500',
+  },
+  urgentSub: {
+    color: '#EF4444',
+    fontWeight: '700',
+  },
+  aiInsightBox: {
+    backgroundColor: 'rgba(59, 130, 246, 0.08)',
+    borderColor: 'rgba(59, 130, 246, 0.25)',
+    borderWidth: 1,
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 12,
+  },
+  aiInsightHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginBottom: 4,
+  },
+  aiInsightTitle: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#3B82F6',
+  },
+  aiInsightText: {
+    fontSize: 12,
+    color: '#E2E8F0',
+    lineHeight: 17,
+  },
+  itemizedSection: {
+    marginTop: 4,
+  },
+  toggleRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 8,
+  },
+  itemizedTitle: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#F8FAFC',
+  },
+  toggleText: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: '#3B82F6',
+  },
+  itemList: {
+    gap: 8,
+    marginTop: 6,
+  },
+  itemRow: {
+    backgroundColor: '#181D2A',
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.04)',
+    padding: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  itemMain: {
+    flex: 1,
+  },
+  itemNameRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginBottom: 2,
+  },
+  itemName: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#F8FAFC',
+    flexShrink: 1,
+  },
+  urgencyPill: {
+    borderWidth: 1,
+    borderRadius: 4,
+    paddingHorizontal: 4,
+    paddingVertical: 1,
+  },
+  urgencyText: {
+    fontSize: 9,
+    fontWeight: '700',
+  },
+  itemAdvice: {
+    fontSize: 11,
+    color: '#94A3B8',
+    marginBottom: 4,
+  },
+  costDetailsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  costDetailText: {
+    fontSize: 10,
+    color: '#64748B',
+  },
+  costDetailDivider: {
+    fontSize: 10,
+    color: '#64748B',
+  },
+  itemTotalCol: {
+    alignItems: 'flex-end',
+    minWidth: 60,
+  },
+  itemTotalAmount: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#F8FAFC',
+  },
+  itemHealthText: {
+    fontSize: 10,
+    color: '#64748B',
+    marginTop: 2,
   },
 });

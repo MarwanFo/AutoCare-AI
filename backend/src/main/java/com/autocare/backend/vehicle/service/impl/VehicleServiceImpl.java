@@ -685,5 +685,238 @@ public class VehicleServiceImpl implements VehicleService {
                 .criticalWarnings(warnings)
                 .build();
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public com.autocare.backend.vehicle.dto.VehicleBudgetForecastResponse getVehicleBudgetForecast(UUID userId, UUID vehicleId, String requestedCurrency) {
+        UserVehicle vehicle = userVehicleRepository.findById(vehicleId)
+                .orElseThrow(() -> new ResourceNotFoundException("Vehicle not found with ID: " + vehicleId));
+
+        if (!vehicle.getUser().getId().equals(userId)) {
+            throw new AccessDeniedException("Access denied: You do not own this vehicle.");
+        }
+
+        String brandName = vehicle.getTemplate().getBrand().getName().trim();
+        String modelName = vehicle.getTemplate().getModel().getName().trim();
+        int year = vehicle.getTemplate().getYear();
+        String fuelType = vehicle.getFuelType() != null ? vehicle.getFuelType().name() : "GASOLINE";
+        String currency = (requestedCurrency != null && !requestedCurrency.trim().isEmpty()) ? requestedCurrency.toUpperCase() : "EUR";
+
+        // 1. Determine Brand Tier & Rates
+        String brandTier = determineBrandTier(brandName);
+        double tierMultiplier = getTierMultiplier(brandTier);
+        int baseLaborRate = getBaseLaborRate(brandTier);
+        double currencyRate = getCurrencyExchangeRate(currency);
+
+        int laborRatePerHour = (int) Math.round(baseLaborRate * currencyRate);
+
+        // 2. Build items and calculate timeframe budgets
+        java.util.List<com.autocare.backend.vehicle.dto.VehicleBudgetForecastResponse.BudgetItem> budgetItems = new java.util.ArrayList<>();
+        int budget0To3 = 0;
+        int budget3To6 = 0;
+        int budget6To12 = 0;
+        double totalLaborHours = 0.0;
+
+        if (vehicle.getComponents() != null && !vehicle.getComponents().isEmpty()) {
+            for (com.autocare.backend.vehicle.entity.UserComponent c : vehicle.getComponents()) {
+                String cName = c.getName();
+                String nameLower = cName.toLowerCase();
+
+                // Skip combustion-only parts for Electric Vehicles
+                if ("ELECTRIC".equalsIgnoreCase(fuelType) && (nameLower.contains("oil") || nameLower.contains("spark") || nameLower.contains("timing"))) {
+                    continue;
+                }
+
+                int health = c.getHealthScore() != null ? c.getHealthScore() : 100;
+                Integer remainingDays = c.getRemainingDays();
+
+                // Determine base part cost & labor hours
+                ComponentCostEstimate estimate = getComponentBaseEstimate(nameLower);
+                int partCost = (int) Math.round(estimate.basePartCost * tierMultiplier * currencyRate);
+                int laborCost = (int) Math.round(estimate.laborHours * laborRatePerHour);
+                int itemTotal = partCost + laborCost;
+                totalLaborHours += estimate.laborHours;
+
+                // Determine timeframe & urgency based on health and remaining lifespan
+                String timeframe;
+                String urgency;
+                String recommendation;
+
+                if (health < 40 || (remainingDays != null && remainingDays <= 90)) {
+                    timeframe = "0-3M";
+                    urgency = "URGENT";
+                    budget0To3 += itemTotal;
+                    recommendation = "High wear detected (" + health + "% health). Schedule replacement soon to avoid breakdown.";
+                } else if (health < 70 || (remainingDays != null && remainingDays <= 180)) {
+                    timeframe = "3-6M";
+                    urgency = "UPCOMING";
+                    budget3To6 += itemTotal;
+                    recommendation = "Moderate wear. Monitor condition during upcoming routine inspections.";
+                } else {
+                    timeframe = "6-12M";
+                    urgency = "SCHEDULED";
+                    budget6To12 += itemTotal;
+                    recommendation = "Good condition. Standard preventive factory maintenance scheduled.";
+                }
+
+                budgetItems.add(com.autocare.backend.vehicle.dto.VehicleBudgetForecastResponse.BudgetItem.builder()
+                        .componentName(cName)
+                        .category(c.getCategory() != null ? c.getCategory().name() : "GENERAL")
+                        .healthScore(health)
+                        .urgency(urgency)
+                        .estimatedPartCost(partCost)
+                        .estimatedLaborCost(laborCost)
+                        .totalCost(itemTotal)
+                        .timeframe(timeframe)
+                        .aiRecommendation(recommendation)
+                        .build());
+            }
+        }
+
+        int totalBudget = budget0To3 + budget3To6 + budget6To12;
+
+        // 3. Generate rich AI summary
+        String aiSummary = String.format(
+                "AI Maintenance Forecast for %d %s %s (%s Tier, %s):\n" +
+                "Estimated 12-month investment is %s %s (%s %s parts + %s %s labor across %.1f workshop hours). " +
+                (budget0To3 > 0
+                        ? "Priority attention required for 0-3 month items due to critical component wear."
+                        : "No immediate critical repairs needed; major maintenance is deferred to scheduled 6-12 month intervals."),
+                year, brandName, modelName, brandTier, fuelType,
+                currencySymbol(currency), totalBudget,
+                currencySymbol(currency), (int)(totalBudget * 0.6),
+                currencySymbol(currency), (int)(totalBudget * 0.4),
+                totalLaborHours
+        );
+
+        String vehicleTitle = String.format("%d %s %s", year, brandName, modelName);
+
+        return com.autocare.backend.vehicle.dto.VehicleBudgetForecastResponse.builder()
+                .vehicleId(vehicle.getId().toString())
+                .vehicleTitle(vehicleTitle)
+                .brandTier(brandTier)
+                .currency(currency)
+                .totalEstimatedBudget(totalBudget)
+                .budget0To3Months(budget0To3)
+                .budget3To6Months(budget3To6)
+                .budget6To12Months(budget6To12)
+                .estimatedLaborRatePerHour(laborRatePerHour)
+                .totalLaborHours(Math.round(totalLaborHours * 10.0) / 10.0)
+                .aiSummary(aiSummary)
+                .items(budgetItems)
+                .build();
+    }
+
+    private String determineBrandTier(String brand) {
+        if (brand == null) return "STANDARD";
+        String b = brand.toLowerCase().trim();
+
+        if (b.contains("ferrari") || b.contains("lamborghini") || b.contains("mclaren") || b.contains("bugatti") ||
+            b.contains("rolls-royce") || b.contains("bentley") || b.contains("aston martin") || b.contains("maserati")) {
+            return "EXOTIC";
+        }
+        if (b.contains("porsche") || b.contains("audi") || b.contains("bmw") || b.contains("mercedes") ||
+            b.contains("land rover") || b.contains("jaguar") || b.contains("lexus") || b.contains("genesis") || b.contains("alfa")) {
+            return "LUXURY";
+        }
+        if (b.contains("tesla") || b.contains("volvo") || b.contains("mini") || b.contains("infiniti") ||
+            b.contains("acura") || b.contains("cupra") || b.contains("jeep") || b.contains("ds")) {
+            return "PREMIUM";
+        }
+        if (b.contains("dacia") || b.contains("renault") || b.contains("fiat") || b.contains("citroen") ||
+            b.contains("suzuki") || b.contains("lada") || b.contains("mg") || b.contains("mitsubishi") || b.contains("byd") || b.contains("geely")) {
+            return "ECONOMY";
+        }
+        return "STANDARD";
+    }
+
+    private double getTierMultiplier(String tier) {
+        switch (tier) {
+            case "EXOTIC": return 3.5;
+            case "LUXURY": return 2.1;
+            case "PREMIUM": return 1.45;
+            case "ECONOMY": return 0.75;
+            case "STANDARD":
+            default: return 1.0;
+        }
+    }
+
+    private int getBaseLaborRate(String tier) {
+        switch (tier) {
+            case "EXOTIC": return 180;
+            case "LUXURY": return 125;
+            case "PREMIUM": return 95;
+            case "ECONOMY": return 55;
+            case "STANDARD":
+            default: return 75;
+        }
+    }
+
+    private double getCurrencyExchangeRate(String currency) {
+        switch (currency) {
+            case "USD": return 1.08;
+            case "MAD": return 10.8;
+            case "GBP": return 0.85;
+            case "EUR":
+            default: return 1.0;
+        }
+    }
+
+    private String currencySymbol(String currency) {
+        switch (currency) {
+            case "USD": return "$";
+            case "MAD": return "DH";
+            case "GBP": return "£";
+            case "EUR":
+            default: return "€";
+        }
+    }
+
+    private static class ComponentCostEstimate {
+        final int basePartCost;
+        final double laborHours;
+
+        ComponentCostEstimate(int basePartCost, double laborHours) {
+            this.basePartCost = basePartCost;
+            this.laborHours = laborHours;
+        }
+    }
+
+    private ComponentCostEstimate getComponentBaseEstimate(String nameLower) {
+        if (nameLower.contains("oil filter") || nameLower.contains("cabin") || nameLower.contains("air filter")) {
+            return new ComponentCostEstimate(25, 0.3);
+        }
+        if (nameLower.contains("engine oil") || nameLower.contains("oil change")) {
+            return new ComponentCostEstimate(65, 0.5);
+        }
+        if (nameLower.contains("brake rotor") || nameLower.contains("rotor")) {
+            return new ComponentCostEstimate(120, 1.5);
+        }
+        if (nameLower.contains("brake pad") || nameLower.contains("brake")) {
+            return new ComponentCostEstimate(80, 1.0);
+        }
+        if (nameLower.contains("tire") || nameLower.contains("tyre")) {
+            return new ComponentCostEstimate(340, 0.8);
+        }
+        if (nameLower.contains("battery")) {
+            return new ComponentCostEstimate(130, 0.4);
+        }
+        if (nameLower.contains("spark plug") || nameLower.contains("spark")) {
+            return new ComponentCostEstimate(60, 1.0);
+        }
+        if (nameLower.contains("timing") || nameLower.contains("belt") || nameLower.contains("chain")) {
+            return new ComponentCostEstimate(220, 3.5);
+        }
+        if (nameLower.contains("transmission") || nameLower.contains("clutch") || nameLower.contains("gearbox")) {
+            return new ComponentCostEstimate(150, 2.0);
+        }
+        if (nameLower.contains("coolant") || nameLower.contains("radiator")) {
+            return new ComponentCostEstimate(50, 0.8);
+        }
+        if (nameLower.contains("wiper")) {
+            return new ComponentCostEstimate(30, 0.2);
+        }
+        return new ComponentCostEstimate(70, 0.8);
+    }
 }
 

@@ -442,6 +442,53 @@ public class GeminiClientImpl implements GeminiClient {
         }
     }
 
+    @Override
+    public com.autocare.backend.vehicle.dto.VehicleBudgetForecastResponse generateBudgetForecast(String prompt) {
+        if (apiKey == null || apiKey.trim().isEmpty() || "mock".equalsIgnoreCase(apiKey) || apiKey.toLowerCase().contains("dummy")) {
+            log.info("Gemini API key is missing or mock. Using dynamic factory-calibrated budget fallback engine...");
+            return null;
+        }
+
+        String requestUrl = apiUrl + "?key=" + apiKey;
+
+        GeminiApiRequest requestPayload = new GeminiApiRequest();
+        GeminiApiRequest.Part part = new GeminiApiRequest.Part();
+        part.setText(prompt);
+
+        GeminiApiRequest.Content content = new GeminiApiRequest.Content();
+        content.setParts(Collections.singletonList(part));
+        requestPayload.setContents(Collections.singletonList(content));
+
+        GeminiApiRequest.GenerationConfig config = new GeminiApiRequest.GenerationConfig();
+        config.setResponseMimeType("application/json");
+        config.setTemperature(0.2);
+        requestPayload.setGenerationConfig(config);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        HttpEntity<GeminiApiRequest> entity = new HttpEntity<>(requestPayload, headers);
+
+        try {
+            log.info("Sending AI predictive budget estimation request to Gemini API...");
+            ResponseEntity<GeminiApiResponse> responseEntity = restTemplate.postForEntity(requestUrl, entity, GeminiApiResponse.class);
+            GeminiApiResponse apiResponse = responseEntity.getBody();
+
+            if (apiResponse != null && apiResponse.getCandidates() != null && !apiResponse.getCandidates().isEmpty()) {
+                GeminiApiResponse.Candidate candidate = apiResponse.getCandidates().get(0);
+                if (candidate.getContent() != null && candidate.getContent().getParts() != null && !candidate.getContent().getParts().isEmpty()) {
+                    String rawJson = candidate.getContent().getParts().get(0).getText();
+                    log.debug("Received raw budget JSON from Gemini: {}", rawJson);
+                    return objectMapper.readValue(rawJson, com.autocare.backend.vehicle.dto.VehicleBudgetForecastResponse.class);
+                }
+            }
+            return null;
+        } catch (Exception e) {
+            log.warn("Gemini budget generation failed or returned unparseable JSON: {}. Falling back to deterministic OEM engine.", e.getMessage());
+            return null;
+        }
+    }
+
     // --- Private Helper DTOs for Gemini REST API Protocol ---
 
     @Getter
