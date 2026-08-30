@@ -1,7 +1,9 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
+import { Platform } from 'react-native';
 import { ENV } from '@/config/env';
 import { useAuthStore } from '@/stores/authStore';
 import { secureStore } from '@/storage/secureStore';
+import { useI18nStore } from '@/i18n/i18nStore';
 
 // Create a queue for requests that failed with 401 while refreshing
 let isRefreshing = false;
@@ -29,8 +31,6 @@ export const apiClient = axios.create({
   },
 });
 
-import { useI18nStore } from '@/i18n/i18nStore';
-
 // Request Interceptor
 apiClient.interceptors.request.use(
   async (config: InternalAxiosRequestConfig) => {
@@ -39,7 +39,7 @@ apiClient.interceptors.request.use(
 
     if (config.headers) {
       config.headers['Accept-Language'] = currentLanguage;
-      if (!config.headers['User-Agent']) {
+      if (Platform.OS !== 'web' && !config.headers['User-Agent']) {
         config.headers['User-Agent'] = 'AutoCare-Mobile/1.0';
       }
       if (token) {

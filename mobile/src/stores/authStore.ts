@@ -1,5 +1,4 @@
 import { create } from 'zustand';
-import { performGoogleSignOut } from '@/features/auth/services/googleAuth';
 
 export interface User {
   id?: string;
@@ -29,7 +28,9 @@ export const useAuthStore = create<AuthState>((set) => ({
   isLoading: true,
   setSession: (accessToken, user) => set({ accessToken, user, isAuthenticated: true, isLoading: false }),
   clearSession: () => {
-    performGoogleSignOut().catch(() => {});
+    import('@/features/auth/services/googleAuth')
+      .then((m) => m.performGoogleSignOut())
+      .catch(() => {});
     set({ accessToken: null, user: null, isAuthenticated: false, isLoading: false });
   },
   setLoading: (isLoading) => set({ isLoading }),
@@ -38,3 +39,4 @@ export const useAuthStore = create<AuthState>((set) => ({
       user: state.user ? { ...state.user, ...updatedUser } : null,
     })),
 }));
+
