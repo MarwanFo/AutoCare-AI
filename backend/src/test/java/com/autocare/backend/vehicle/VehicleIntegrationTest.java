@@ -90,8 +90,6 @@ class VehicleIntegrationTest {
     void setUp() throws Exception {
         userVehicleRepository.deleteAll();
         vehicleTemplateRepository.deleteAll();
-        modelRepository.deleteAll();
-        brandRepository.deleteAll();
         userSessionRepository.deleteAll();
         userRepository.deleteAll();
 
@@ -102,16 +100,22 @@ class VehicleIntegrationTest {
         tokenUser1 = obtainMobileToken("alex@example.com");
         tokenUser2 = obtainMobileToken("bob@example.com");
 
-        // 2. Setup Brand & Model
-        brand = new Brand();
-        brand.setName("Toyota");
-        brand.setLogoUrl("https://logo.png");
-        brand = brandRepository.save(brand);
+        // 2. Setup Brand & Model (Safely reuse or create without wiping database)
+        brand = brandRepository.findByNameIgnoreCase("Toyota")
+                .orElseGet(() -> {
+                    Brand b = new Brand();
+                    b.setName("Toyota");
+                    b.setLogoUrl("https://logo.png");
+                    return brandRepository.save(b);
+                });
 
-        model = new Model();
-        model.setName("Camry");
-        model.setBrand(brand);
-        model = modelRepository.save(model);
+        model = modelRepository.findByBrandIdAndNameIgnoreCase(brand.getId(), "Camry")
+                .orElseGet(() -> {
+                    Model m = new Model();
+                    m.setName("Camry");
+                    m.setBrand(brand);
+                    return modelRepository.save(m);
+                });
 
         // 3. Mock GeminiClient Response
         GeminiVehicleProfileResponse mockProfile = new GeminiVehicleProfileResponse();

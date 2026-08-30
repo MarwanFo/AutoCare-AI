@@ -83,8 +83,6 @@ class SaasVehicleIntegrationTest {
     void setUp() throws Exception {
         userVehicleRepository.deleteAll();
         vehicleTemplateRepository.deleteAll();
-        modelRepository.deleteAll();
-        brandRepository.deleteAll();
         userSessionRepository.deleteAll();
         userRepository.deleteAll();
 
@@ -92,16 +90,22 @@ class SaasVehicleIntegrationTest {
         createTestUser("alex@example.com", "Alex Owner");
         tokenUser1 = obtainMobileToken("alex@example.com");
 
-        // Setup Brand & Model
-        brand = new Brand();
-        brand.setName("Toyota");
-        brand.setLogoUrl("https://logo.png");
-        brand = brandRepository.save(brand);
+        // Setup Brand & Model (Safely reuse or create without wiping database)
+        brand = brandRepository.findByNameIgnoreCase("Toyota")
+                .orElseGet(() -> {
+                    Brand b = new Brand();
+                    b.setName("Toyota");
+                    b.setLogoUrl("https://logo.png");
+                    return brandRepository.save(b);
+                });
 
-        model = new Model();
-        model.setName("Camry");
-        model.setBrand(brand);
-        model = modelRepository.save(model);
+        model = modelRepository.findByBrandIdAndNameIgnoreCase(brand.getId(), "Camry")
+                .orElseGet(() -> {
+                    Model m = new Model();
+                    m.setName("Camry");
+                    m.setBrand(brand);
+                    return modelRepository.save(m);
+                });
 
         // Mock GeminiClient Response with documents in specifications JSON
         GeminiVehicleProfileResponse mockProfile = new GeminiVehicleProfileResponse();

@@ -15,6 +15,7 @@ import com.autocare.backend.vehicle.entity.UserVehicle;
 import com.autocare.backend.vehicle.entity.enums.ComponentStatus;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import jakarta.persistence.EntityManager;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -36,6 +37,7 @@ public class NotificationServiceImpl implements NotificationService {
     private final NotificationRepository notificationRepository;
     private final UserRepository userRepository;
     private final Clock clock;
+    private final EntityManager entityManager;
 
     @Value("${autocare.notifications.document-expiry-warning-days:30}")
     private int documentExpiryWarningDays;
@@ -60,7 +62,7 @@ public class NotificationServiceImpl implements NotificationService {
                 .orElseThrow(() -> new ResourceNotFoundException("Notification not found with ID: " + notificationId));
 
         if (!notification.getUser().getId().equals(userId)) {
-            throw new AccessDeniedException("Access denied: You do not own this notification.");
+            throw new AccessDeniedException("You are not authorized to mark this notification as read.");
         }
 
         notification.setRead(true);
@@ -110,26 +112,19 @@ public class NotificationServiceImpl implements NotificationService {
         if (status == ComponentStatus.CRITICAL) {
             desiredType = NotificationType.COMPONENT_CRITICAL;
             severity = NotificationSeverity.DANGER;
-            int health = component.getHealthScore() != null ? component.getHealthScore() : 0;
-            if (health <= 0) {
-                title = "Immediate inspection recommended: " + compName;
-                message = String.format("Immediate inspection recommended: Estimated health of %s on %s is 0%%. We recommend scheduling a professional inspection promptly.", compName, vehicleTitle);
-            } else {
-                title = "Critical component attention required: " + compName;
-                message = String.format("Critical component attention required: Your %s on %s has very low remaining health (%d%%). Have it inspected soon and replace it if necessary.", compName, vehicleTitle, health);
-            }
+            title = "Critical maintenance required: " + compName;
+            message = String.format("The %s on %s has exceeded its safe lifespan and requires immediate replacement.", compName, vehicleTitle);
         } else if (status == ComponentStatus.WARNING) {
             desiredType = NotificationType.COMPONENT_WARNING;
             severity = NotificationSeverity.WARNING;
-            title = "Maintenance coming up: " + compName;
-            message = String.format("Maintenance coming up: %s on %s is approaching its recommended service interval. Consider scheduling an inspection or replacement.", compName, vehicleTitle);
+            title = "Maintenance approaching: " + compName;
+            message = String.format("The %s on %s is approaching its recommended service interval.", compName, vehicleTitle);
         } else if (status == ComponentStatus.UNKNOWN) {
             desiredType = NotificationType.COMPONENT_DATA_REQUIRED;
             severity = NotificationSeverity.INFO;
-            title = "Component information needed: " + compName;
-            message = String.format("More maintenance information is needed to calculate %s's health on %s.", compName, vehicleTitle);
+            title = "Service history missing: " + compName;
+            message = String.format("We need past replacement history for the %s on %s to calibrate accurate wear predictions.", compName, vehicleTitle);
         } else {
-            // GOOD status -> no active condition notification
             desiredType = null;
         }
 
@@ -137,7 +132,9 @@ public class NotificationServiceImpl implements NotificationService {
 
         if (desiredType == null) {
             if (activeOpt.isPresent()) {
-                notificationRepository.resolveActiveComponentConditionNotifications(userId, component.getId(), Instant.now(clock));
+                Notification active = activeOpt.get();
+                active.setResolvedAt(Instant.now(clock));
+                notificationRepository.saveAndFlush(active);
             }
             return;
         }
@@ -145,14 +142,12 @@ public class NotificationServiceImpl implements NotificationService {
         if (activeOpt.isPresent()) {
             Notification active = activeOpt.get();
             if (active.getType() == desiredType) {
-                // Same state recalculation: retain existing active notification intact (no history spam)
                 return;
             }
-            // State transition (e.g. WARNING -> CRITICAL or CRITICAL -> UNKNOWN): resolve old active notification
-            notificationRepository.resolveActiveComponentConditionNotifications(userId, component.getId(), Instant.now(clock));
+            active.setResolvedAt(Instant.now(clock));
+            notificationRepository.saveAndFlush(active);
         }
 
-        // Insert desired new active notification
         notificationRepository.insertActiveComponentNotification(
                 UUID.randomUUID(),
                 userId,
@@ -200,7 +195,9 @@ public class NotificationServiceImpl implements NotificationService {
 
         if (desiredType == null) {
             if (activeOpt.isPresent()) {
-                notificationRepository.resolveActiveDocumentConditionNotifications(userId, document.getId(), Instant.now(clock));
+                Notification active = activeOpt.get();
+                active.setResolvedAt(Instant.now(clock));
+                notificationRepository.saveAndFlush(active);
             }
             return;
         }
@@ -208,14 +205,12 @@ public class NotificationServiceImpl implements NotificationService {
         if (activeOpt.isPresent()) {
             Notification active = activeOpt.get();
             if (active.getType() == desiredType) {
-                // Same state: retain existing active notification intact (no history spam)
                 return;
             }
-            // State transition (e.g. DOCUMENT_EXPIRING -> DOCUMENT_EXPIRED): resolve old active notification
-            notificationRepository.resolveActiveDocumentConditionNotifications(userId, document.getId(), Instant.now(clock));
+            active.setResolvedAt(Instant.now(clock));
+            notificationRepository.saveAndFlush(active);
         }
 
-        // Insert desired new active notification
         notificationRepository.insertActiveDocumentNotification(
                 UUID.randomUUID(),
                 userId,

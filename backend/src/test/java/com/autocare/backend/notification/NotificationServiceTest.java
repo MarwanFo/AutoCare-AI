@@ -302,15 +302,27 @@ public class NotificationServiceTest {
     @Test
     void testDocumentExpiringToExpiredTransition() {
         testDocument.setExpiryDate(LocalDate.now().plusDays(5));
-        userDocumentRepository.save(testDocument);
+        userDocumentRepository.saveAndFlush(testDocument);
         notificationService.evaluateDocumentNotification(testUser.getId(), testVehicle, testDocument);
+
+        if (entityManager != null) {
+            entityManager.flush();
+            entityManager.clear();
+        }
 
         Notification expiringNotif = notificationRepository.findActiveDocumentConditionNotification(testUser.getId(), testDocument.getId()).orElseThrow();
+        assertEquals(NotificationType.DOCUMENT_EXPIRING, expiringNotif.getType());
 
         // Time moves past expiry
+        testDocument = userDocumentRepository.findById(testDocument.getId()).orElseThrow();
         testDocument.setExpiryDate(LocalDate.now().minusDays(1));
-        userDocumentRepository.save(testDocument);
+        userDocumentRepository.saveAndFlush(testDocument);
         notificationService.evaluateDocumentNotification(testUser.getId(), testVehicle, testDocument);
+
+        if (entityManager != null) {
+            entityManager.flush();
+            entityManager.clear();
+        }
 
         Notification expiredNotif = notificationRepository.findActiveDocumentConditionNotification(testUser.getId(), testDocument.getId()).orElseThrow();
         assertEquals(NotificationType.DOCUMENT_EXPIRED, expiredNotif.getType());
@@ -335,6 +347,11 @@ public class NotificationServiceTest {
         Optional<Notification> active = notificationRepository.findActiveDocumentConditionNotification(testUser.getId(), testDocument.getId());
         assertTrue(active.isEmpty(), "Active notification must be resolved when expiry date becomes NULL.");
 
+        if (entityManager != null) {
+            entityManager.flush();
+            entityManager.clear();
+        }
+
         Notification resolved = notificationRepository.findById(expiringNotif.getId()).orElseThrow();
         assertNotNull(resolved.getResolvedAt());
     }
@@ -344,7 +361,8 @@ public class NotificationServiceTest {
 
     @Test
     void testDocumentDeleteResolvesActiveNotificationsBeforeDelete() {
-        testDocument.setExpiryDate(LocalDate.now().plusDays(10));
+        LocalDate today = LocalDate.now(fixedClock);
+        testDocument.setExpiryDate(today.plusDays(10));
         userDocumentRepository.save(testDocument);
         notificationService.evaluateDocumentNotification(testUser.getId(), testVehicle, testDocument);
 

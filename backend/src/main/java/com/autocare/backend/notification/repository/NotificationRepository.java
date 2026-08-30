@@ -22,18 +22,18 @@ public interface NotificationRepository extends JpaRepository<Notification, UUID
 
     boolean existsByUserIdAndComponentIdAndIsReadFalse(UUID userId, UUID componentId);
 
-    @Query("SELECT n FROM Notification n WHERE n.user.id = :userId AND n.component.id = :componentId AND n.resolvedAt IS NULL AND n.type IN ('COMPONENT_WARNING', 'COMPONENT_CRITICAL', 'COMPONENT_DATA_REQUIRED')")
+    @Query("SELECT n FROM Notification n WHERE n.user.id = :userId AND n.component.id = :componentId AND n.resolvedAt IS NULL AND n.type IN (com.autocare.backend.notification.entity.enums.NotificationType.COMPONENT_WARNING, com.autocare.backend.notification.entity.enums.NotificationType.COMPONENT_CRITICAL, com.autocare.backend.notification.entity.enums.NotificationType.COMPONENT_DATA_REQUIRED)")
     Optional<Notification> findActiveComponentConditionNotification(@Param("userId") UUID userId, @Param("componentId") UUID componentId);
 
-    @Query("SELECT n FROM Notification n WHERE n.user.id = :userId AND n.document.id = :documentId AND n.resolvedAt IS NULL AND n.type IN ('DOCUMENT_EXPIRING', 'DOCUMENT_EXPIRED')")
+    @Query("SELECT n FROM Notification n WHERE n.user.id = :userId AND n.document.id = :documentId AND n.resolvedAt IS NULL AND n.type IN (com.autocare.backend.notification.entity.enums.NotificationType.DOCUMENT_EXPIRING, com.autocare.backend.notification.entity.enums.NotificationType.DOCUMENT_EXPIRED)")
     Optional<Notification> findActiveDocumentConditionNotification(@Param("userId") UUID userId, @Param("documentId") UUID documentId);
 
-    @Modifying(clearAutomatically = true)
-    @Query("UPDATE Notification n SET n.resolvedAt = :now WHERE n.user.id = :userId AND n.component.id = :componentId AND n.resolvedAt IS NULL AND n.type IN ('COMPONENT_WARNING', 'COMPONENT_CRITICAL', 'COMPONENT_DATA_REQUIRED')")
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("UPDATE Notification n SET n.resolvedAt = :now WHERE n.user.id = :userId AND n.component.id = :componentId AND n.resolvedAt IS NULL AND n.type IN (com.autocare.backend.notification.entity.enums.NotificationType.COMPONENT_WARNING, com.autocare.backend.notification.entity.enums.NotificationType.COMPONENT_CRITICAL, com.autocare.backend.notification.entity.enums.NotificationType.COMPONENT_DATA_REQUIRED)")
     int resolveActiveComponentConditionNotifications(@Param("userId") UUID userId, @Param("componentId") UUID componentId, @Param("now") Instant now);
 
-    @Modifying(clearAutomatically = true)
-    @Query("UPDATE Notification n SET n.resolvedAt = :now WHERE n.user.id = :userId AND n.document.id = :documentId AND n.resolvedAt IS NULL AND n.type IN ('DOCUMENT_EXPIRING', 'DOCUMENT_EXPIRED')")
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("UPDATE Notification n SET n.resolvedAt = :now WHERE n.user.id = :userId AND n.document.id = :documentId AND n.resolvedAt IS NULL AND n.type IN (com.autocare.backend.notification.entity.enums.NotificationType.DOCUMENT_EXPIRING, com.autocare.backend.notification.entity.enums.NotificationType.DOCUMENT_EXPIRED)")
     int resolveActiveDocumentConditionNotifications(@Param("userId") UUID userId, @Param("documentId") UUID documentId, @Param("now") Instant now);
 
     @Modifying(clearAutomatically = true)
