@@ -12,9 +12,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     async function bootstrapAsync() {
+      console.log('[DEBUG] AuthProvider bootstrapAsync starting...');
       try {
         const accessToken = await secureStore.getItem('access_token');
         const refreshToken = await secureStore.getItem('refresh_token');
+        console.log('[DEBUG] Retrieved stored tokens:', { hasAccessToken: !!accessToken, hasRefreshToken: !!refreshToken });
 
         if (accessToken && refreshToken) {
           // Attempt to fetch profile info to verify accessToken

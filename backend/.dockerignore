@@ -1,0 +1,15 @@
+target/
+!.mvn/wrapper/maven-wrapper.jar
+*.log
+.env
+.env.*
+.git
+.gitignore
+.vscode
+.idea
+uploads/*
+!uploads/.gitkeep
+run.log
+server.log
+scratch/
+query_brands.ps1

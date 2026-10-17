@@ -43,6 +43,7 @@ const loginSchema = z.object({
 type LoginFormData = z.infer<typeof loginSchema>;
 
 export default function LoginScreen() {
+  console.log('[DEBUG] LoginScreen component mounting...');
   const { t } = useAppTranslation(['auth', 'common', 'errors', 'validation']);
   const { setSession } = useAuthStore();
   const [currentScreen, setCurrentScreen] = useState<AuthScreen>(AuthScreen.LOGIN);
@@ -59,6 +60,13 @@ export default function LoginScreen() {
       setCurrentScreen(AuthScreen.RESET_PASSWORD);
     }
   }, [shouldStartResetFlow, resetToken]);
+
+  // While email verification is disabled, automatically return to login if placed on VERIFY_EMAIL
+  useEffect(() => {
+    if (currentScreen === AuthScreen.VERIFY_EMAIL) {
+      setCurrentScreen(AuthScreen.LOGIN);
+    }
+  }, [currentScreen]);
 
   const {
     control,
@@ -127,8 +135,9 @@ export default function LoginScreen() {
       }
 
       if (result.type === 'VERIFICATION_REQUIRED') {
-        setRegisteredEmail(result.email);
-        setCurrentScreen(AuthScreen.VERIFY_EMAIL);
+        // TODO: Re-enable VERIFY_EMAIL screen when email verification is re-enabled
+        // setRegisteredEmail(result.email);
+        // setCurrentScreen(AuthScreen.VERIFY_EMAIL);
         setIsLoading(false);
         return;
       }
@@ -164,7 +173,9 @@ export default function LoginScreen() {
         onRegisterSuccess={(email) => {
           setErrorMessage(null);
           setRegisteredEmail(email);
-          setCurrentScreen(AuthScreen.VERIFY_EMAIL);
+          // TODO: Re-enable VERIFY_EMAIL screen when email verification is re-enabled
+          // setCurrentScreen(AuthScreen.VERIFY_EMAIL);
+          setCurrentScreen(AuthScreen.LOGIN);
         }}
       />
     );

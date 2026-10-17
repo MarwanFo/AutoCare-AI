@@ -46,7 +46,7 @@ public class AuthenticationController {
     public ResponseEntity<Map<String, String>> register(@Valid @RequestBody RegisterRequest request) {
         authenticationService.register(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(Map.of(
-                "message", "Registration successful. Please check your email to verify your account."
+                "message", "Registration successful. You can now log in."
         ));
     }
 

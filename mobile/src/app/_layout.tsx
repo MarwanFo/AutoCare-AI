@@ -16,16 +16,20 @@ SplashScreen.preventAutoHideAsync();
 import LoginScreen from '@/features/auth/screens/LoginScreen';
 
 function RootNavigator() {
+  console.log('[DEBUG] RootNavigator rendering...');
   const { colorScheme } = useAppTheme();
   const { isAuthenticated, isLoading } = useAuthStore();
+  console.log('[DEBUG] Auth state:', { isAuthenticated, isLoading, colorScheme });
 
   // Route to different root components depending on auth state
   if (isLoading) {
+    console.log('[DEBUG] Rendering AnimatedSplashOverlay...');
     return <AnimatedSplashOverlay />;
   }
 
   const expoTheme = colorScheme === 'dark' ? DarkTheme : DefaultTheme;
 
+  console.log('[DEBUG] Rendering target screen:', isAuthenticated ? 'AppTabs' : 'LoginScreen');
   return (
     <ExpoThemeProvider value={expoTheme}>
       {isAuthenticated ? <AppTabs /> : <LoginScreen />}

@@ -33,10 +33,15 @@ export const useI18nStore = create<I18nState>((set, get) => ({
 
       const rtl = checkIsRTL(targetLang);
 
-      // Configure native RTL direction
-      if (I18nManager.isRTL !== rtl) {
-        I18nManager.allowRTL(rtl);
-        I18nManager.forceRTL(rtl);
+      // Configure native RTL direction safely
+      try {
+        if (I18nManager.isRTL !== rtl) {
+          console.log('[DEBUG] Setting native RTL to:', rtl);
+          I18nManager.allowRTL(rtl);
+          I18nManager.forceRTL(rtl);
+        }
+      } catch (rtlErr) {
+        console.warn('[i18nStore] Non-fatal I18nManager RTL error:', rtlErr);
       }
 
       // Initialize i18next instance if required

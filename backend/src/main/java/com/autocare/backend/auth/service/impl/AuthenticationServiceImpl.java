@@ -54,7 +54,9 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
         User user = userMapper.toEntity(request);
         user.setPasswordHash(passwordEncoder.encode(request.password()));
-        user.setStatus(AccountStatus.UNVERIFIED);
+        // TODO: Re-enable email verification when ready
+        // user.setStatus(AccountStatus.UNVERIFIED);
+        user.setStatus(AccountStatus.ACTIVE);
 
         Role defaultRole = roleRepository.findByName("ROLE_USER")
                 .orElseThrow(() -> new AuthException("Default role ROLE_USER not found"));
@@ -74,8 +76,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         history.setPasswordHash(savedUser.getPasswordHash());
         passwordHistoryRepository.save(history);
 
-        // Send verification email
-        emailVerificationService.sendVerificationEmail(savedUser);
+        // TODO: Re-enable email verification when ready
+        // emailVerificationService.sendVerificationEmail(savedUser);
 
         log.info("Successfully registered user: {}", savedUser.getEmail());
         return savedUser;
@@ -91,9 +93,10 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             throw new InvalidCredentialsException("Invalid email or password.");
         }
 
-        if (user.getStatus() == AccountStatus.UNVERIFIED) {
-            throw new AuthException("Please verify your email address before logging in.");
-        }
+        // TODO: Re-enable UNVERIFIED check when email verification is re-enabled
+        // if (user.getStatus() == AccountStatus.UNVERIFIED) {
+        //     throw new AuthException("Please verify your email address before logging in.");
+        // }
 
         if (user.getStatus() == AccountStatus.SUSPENDED) {
             throw new AuthException("Your account has been suspended.");
@@ -229,11 +232,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 user.setFullName(identity.fullName() != null && !identity.fullName().isBlank() ? identity.fullName() : "Google User");
                 user.setAvatarUrl(identity.avatarUrl());
 
-                if (isAuthoritative) {
-                    user.setStatus(AccountStatus.ACTIVE);
-                } else {
-                    user.setStatus(AccountStatus.UNVERIFIED);
-                }
+                // TODO: Re-enable UNVERIFIED check for third-party non-authoritative emails when email verification is re-enabled
+                user.setStatus(AccountStatus.ACTIVE);
 
                 Role defaultRole = roleRepository.findByName("ROLE_USER")
                         .orElseThrow(() -> new AuthException("Default role ROLE_USER not found"));
@@ -253,9 +253,10 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 newIdentity.setProviderEmail(email);
                 userIdentityRepository.save(newIdentity);
 
-                if (!isAuthoritative) {
-                    emailVerificationService.sendVerificationEmail(user);
-                }
+                // TODO: Re-enable verification email when email verification is re-enabled
+                // if (!isAuthoritative) {
+                //     emailVerificationService.sendVerificationEmail(user);
+                // }
             }
         }
 
@@ -263,16 +264,17 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             throw new AuthException("Your account has been suspended.");
         }
 
-        if (user.getStatus() == AccountStatus.UNVERIFIED) {
-            if (!isAuthoritative) {
-                try {
-                    emailVerificationService.sendVerificationEmail(user);
-                } catch (Exception e) {
-                    log.warn("Resend email verification suppressed or rate limited: {}", e.getMessage());
-                }
-            }
-            return new MobileAuthResult(true, user.getEmail(), null);
-        }
+        // TODO: Re-enable UNVERIFIED check when email verification is re-enabled
+        // if (user.getStatus() == AccountStatus.UNVERIFIED) {
+        //     if (!isAuthoritative) {
+        //         try {
+        //             emailVerificationService.sendVerificationEmail(user);
+        //         } catch (Exception e) {
+        //             log.warn("Resend email verification suppressed or rate limited: {}", e.getMessage());
+        //         }
+        //     }
+        //     return new MobileAuthResult(true, user.getEmail(), null);
+        // }
 
         String refreshToken = refreshTokenService.generateRefreshToken();
         UserSession session = sessionService.createSession(

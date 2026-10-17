@@ -51,9 +51,10 @@ public class PasswordResetServiceImpl implements PasswordResetService {
         }
 
         User user = userOpt.get();
-        if (user.getStatus() == com.autocare.backend.auth.entity.AccountStatus.UNVERIFIED) {
-            throw new AuthException("Email address is unverified. Please verify your email before resetting your password.");
-        }
+        // TODO: Re-enable UNVERIFIED check when email verification is re-enabled
+        // if (user.getStatus() == com.autocare.backend.auth.entity.AccountStatus.UNVERIFIED) {
+        //     throw new AuthException("Email address is unverified. Please verify your email before resetting your password.");
+        // }
 
         Optional<AuthToken> existingOpt = authTokenRepository
                 .findByUserAndTokenTypeAndUsedAtIsNull(user, AuthTokenType.PASSWORD_RESET);

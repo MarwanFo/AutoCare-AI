@@ -14,6 +14,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 
 import { apiClient } from '@/api/client';
+import { secureStore } from '@/storage/secureStore';
 import { useAppTranslation } from '@/i18n/hooks/useAppTranslation';
 import { useAuthStore } from '@/stores/authStore';
 import { BrandHeader } from '../components/BrandHeader';
@@ -86,7 +87,37 @@ export function RegisterScreen({
         phoneNumber: data.phoneNumber,
       });
 
-      // Navigate to the verification waiting view
+      // Automatically sign in the user since email verification is disabled
+      try {
+        let deviceId = await secureStore.getItem('device_id');
+        if (!deviceId) {
+          deviceId = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+            const r = (Math.random() * 16) | 0;
+            const v = c === 'x' ? r : (r & 0x3) | 0x8;
+            return v.toString(16);
+          });
+          await secureStore.setItem('device_id', deviceId);
+        }
+
+        const loginResponse = await apiClient.post('/api/v1/auth/mobile/login', {
+          email: data.email,
+          password: data.password,
+          rememberMe: true,
+          deviceId,
+        });
+
+        const { accessToken, refreshToken, user } = loginResponse.data;
+        if (accessToken && refreshToken) {
+          await secureStore.setItem('access_token', accessToken);
+          await secureStore.setItem('refresh_token', refreshToken);
+          setSession(accessToken, user);
+          return;
+        }
+      } catch (autoLoginErr) {
+        console.warn('Auto-login following registration bypassed, falling back to login screen:', autoLoginErr);
+      }
+
+      // Fallback: Notify parent to navigate
       onRegisterSuccess(data.email);
     } catch (error: any) {
       console.error('Registration failed:', error);

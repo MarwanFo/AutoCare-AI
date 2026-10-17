@@ -1,6 +1,6 @@
 import React from 'react';
-import { NativeTabs } from 'expo-router/unstable-native-tabs';
-import { useColorScheme } from 'react-native';
+import { Tabs } from 'expo-router';
+import { useColorScheme, Image, StyleSheet } from 'react-native';
 
 import { Colors } from '@/constants/theme';
 import { useAppTranslation } from '@/i18n/hooks/useAppTranslation';
@@ -8,36 +8,68 @@ import { useAppTranslation } from '@/i18n/hooks/useAppTranslation';
 export default function AppTabs() {
   const { t } = useAppTranslation('common');
   const scheme = useColorScheme();
-  const colors = Colors[scheme === 'unspecified' ? 'light' : scheme];
+  const colors = Colors[scheme === 'unspecified' ? 'dark' : scheme];
 
   return (
-    <NativeTabs
-      backgroundColor={colors.background}
-      indicatorColor={colors.backgroundElement}
-      labelStyle={{ selected: { color: colors.text } }}>
-      <NativeTabs.Trigger name="index">
-        <NativeTabs.Trigger.Label>{t('common:nav_home')}</NativeTabs.Trigger.Label>
-        <NativeTabs.Trigger.Icon
-          src={require('@/assets/images/tabIcons/home.png')}
-          renderingMode="template"
-        />
-      </NativeTabs.Trigger>
+    <Tabs
+      screenOptions={{
+        headerShown: false,
+        tabBarStyle: {
+          backgroundColor: '#131722',
+          borderTopColor: 'rgba(255, 255, 255, 0.08)',
+          height: 60,
+          paddingBottom: 8,
+          paddingTop: 8,
+        },
+        tabBarActiveTintColor: '#3B82F6',
+        tabBarInactiveTintColor: '#94A3B8',
+        tabBarLabelStyle: {
+          fontSize: 12,
+          fontWeight: '600',
+        },
+      }}
+    >
+      <Tabs.Screen
+        name="index"
+        options={{
+          title: t('common:nav_home'),
+          tabBarIcon: ({ color, size }) => (
+            <Image
+              source={require('@/assets/images/tabIcons/home.png')}
+              style={{ width: size, height: size, tintColor: color }}
+              resizeMode="contain"
+            />
+          ),
+        }}
+      />
 
-      <NativeTabs.Trigger name="explore">
-        <NativeTabs.Trigger.Label>{t('common:nav_explore')}</NativeTabs.Trigger.Label>
-        <NativeTabs.Trigger.Icon
-          src={require('@/assets/images/tabIcons/explore.png')}
-          renderingMode="template"
-        />
-      </NativeTabs.Trigger>
+      <Tabs.Screen
+        name="explore"
+        options={{
+          title: t('common:nav_explore'),
+          tabBarIcon: ({ color, size }) => (
+            <Image
+              source={require('@/assets/images/tabIcons/explore.png')}
+              style={{ width: size, height: size, tintColor: color }}
+              resizeMode="contain"
+            />
+          ),
+        }}
+      />
 
-      <NativeTabs.Trigger name="profile">
-        <NativeTabs.Trigger.Label>{t('common:nav_profile')}</NativeTabs.Trigger.Label>
-        <NativeTabs.Trigger.Icon
-          src={require('@/assets/images/tabIcons/profile.png')}
-          renderingMode="template"
-        />
-      </NativeTabs.Trigger>
-    </NativeTabs>
+      <Tabs.Screen
+        name="profile"
+        options={{
+          title: t('common:nav_profile'),
+          tabBarIcon: ({ color, size }) => (
+            <Image
+              source={require('@/assets/images/tabIcons/profile.png')}
+              style={{ width: size, height: size, tintColor: color }}
+              resizeMode="contain"
+            />
+          ),
+        }}
+      />
+    </Tabs>
   );
 }
