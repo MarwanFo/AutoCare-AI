@@ -27,9 +27,10 @@ interface RegisterFormProps {
 }
 
 // Custom Person / User Avatar SVG Icon
+// Custom Person / User Avatar SVG Icon
 function PersonIcon({ color }: { color: string }) {
   return (
-    <Svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+    <Svg width="22" height="22" viewBox="0 0 24 24" fill="none">
       <Path
         d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"
         fill={color}
@@ -63,7 +64,7 @@ export function RegisterForm({
             error={errors.fullName?.message as string}
             editable={!isLoading}
             autoCapitalize="words"
-            prefixIcon={<PersonIcon color={errors.fullName ? '#ffb4ab' : '#c4c7c8'} />}
+            prefixIcon={<PersonIcon color={errors.fullName ? '#EF4444' : '#94A3B8'} />}
           />
         )}
       />
@@ -81,7 +82,7 @@ export function RegisterForm({
             error={errors.email?.message as string}
             editable={!isLoading}
             keyboardType="email-address"
-            prefixIcon={<MailIcon color={errors.email ? '#ffb4ab' : '#c4c7c8'} />}
+            prefixIcon={<MailIcon color={errors.email ? '#EF4444' : '#94A3B8'} />}
           />
         )}
       />

@@ -92,17 +92,17 @@ export function PrimaryButton({
 
 const styles = StyleSheet.create({
   button: {
-    height: 50,
-    borderRadius: 12,
+    height: 52,
+    borderRadius: 14,
     backgroundColor: '#2563EB',
     justifyContent: 'center',
     alignItems: 'center',
     alignSelf: 'stretch',
     shadowColor: '#2563EB',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 10,
-    elevation: 4,
+    shadowOpacity: 0.35,
+    shadowRadius: 12,
+    elevation: 5,
   },
   contentContainer: {
     flexDirection: 'row',
@@ -110,10 +110,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   buttonText: {
-    fontSize: 14,
+    fontSize: 15,
     fontWeight: '700',
-    letterSpacing: 0.2,
+    letterSpacing: 0.3,
     color: '#FFFFFF',
+    fontFamily: 'Inter',
     marginRight: 8,
   },
 });

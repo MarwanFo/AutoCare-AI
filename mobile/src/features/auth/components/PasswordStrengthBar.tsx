@@ -18,15 +18,15 @@ export function PasswordStrengthBar({ password = '' }: PasswordStrengthBarProps)
 
     switch (score) {
       case 1:
-        return { score, text: 'Weak', color: '#ffb4ab' }; // error red
+        return { score, text: 'Weak', color: '#EF4444' };
       case 2:
-        return { score, text: 'Fair', color: '#f3b064' }; // orange
+        return { score, text: 'Fair', color: '#F59E0B' };
       case 3:
-        return { score, text: 'Good', color: '#e5e2e1' }; // light grey/cream
+        return { score, text: 'Good', color: '#3B82F6' };
       case 4:
-        return { score, text: 'Strong', color: '#88c8a1' }; // green
+        return { score, text: 'Strong', color: '#10B981' };
       default:
-        return { score: 0, text: '', color: '#444748' };
+        return { score: 0, text: '', color: 'rgba(255, 255, 255, 0.1)' };
     }
   };
 
@@ -44,7 +44,7 @@ export function PasswordStrengthBar({ password = '' }: PasswordStrengthBarProps)
               style={[
                 styles.barSegment,
                 {
-                  backgroundColor: isActive ? color : '#353534', // active color or grey surface-variant
+                  backgroundColor: isActive ? color : 'rgba(255, 255, 255, 0.08)',
                 },
               ]}
             />
@@ -70,8 +70,8 @@ export function PasswordStrengthBar({ password = '' }: PasswordStrengthBarProps)
 const styles = StyleSheet.create({
   container: {
     alignSelf: 'stretch',
-    marginTop: -8,
-    marginBottom: 20,
+    marginTop: -4,
+    marginBottom: 16,
   },
   barRow: {
     flexDirection: 'row',
@@ -79,7 +79,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     width: '100%',
     height: 4,
-    marginBottom: 8,
+    marginBottom: 6,
   },
   barSegment: {
     flex: 1,
@@ -96,7 +96,7 @@ const styles = StyleSheet.create({
   hintsText: {
     fontSize: 11,
     fontFamily: 'Inter',
-    color: '#8e9192', // outline color
-    lineHeight: 16,
+    color: '#64748B',
+    lineHeight: 15,
   },
 });

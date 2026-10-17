@@ -29,7 +29,7 @@ function CheckboxIcon({ checked }: { checked: boolean }) {
     <Svg width="12" height="12" viewBox="0 0 24 24" fill="none">
       <Path
         d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17Z"
-        fill="#131313"
+        fill="#FFFFFF"
       />
     </Svg>
   );
@@ -60,7 +60,7 @@ export function LoginForm({
             error={errors.email?.message as string}
             editable={!isLoading}
             keyboardType="email-address"
-            prefixIcon={<MailIcon color={errors.email ? '#ffb4ab' : '#c4c7c8'} />}
+            prefixIcon={<MailIcon color={errors.email ? '#EF4444' : '#94A3B8'} />}
           />
         )}
       />
@@ -98,7 +98,7 @@ export function LoginForm({
               <View
                 style={[
                   styles.checkbox,
-                  value && { backgroundColor: '#abc7ff', borderColor: '#abc7ff' },
+                  value && { backgroundColor: '#3B82F6', borderColor: '#3B82F6' },
                 ]}
               >
                 <CheckboxIcon checked={!!value} />
@@ -140,7 +140,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     width: '100%',
-    marginBottom: 32,
+    marginBottom: 20,
+    marginTop: 2,
   },
   checkboxContainer: {
     flexDirection: 'row',
@@ -149,23 +150,25 @@ const styles = StyleSheet.create({
   checkbox: {
     width: 20,
     height: 20,
-    borderRadius: 4,
-    borderWidth: 1,
-    borderColor: '#444748',
-    backgroundColor: '#353534',
+    borderRadius: 6,
+    borderWidth: 1.5,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
+    backgroundColor: '#11141B',
     alignItems: 'center',
     justifyContent: 'center',
   },
   rememberText: {
-    fontSize: 14,
+    fontSize: 13,
     fontFamily: 'Inter',
-    color: '#c4c7c8',
-    marginLeft: 12,
+    color: '#94A3B8',
+    marginLeft: 10,
+    fontWeight: '500',
   },
   forgotText: {
-    fontSize: 14,
+    fontSize: 13,
     fontFamily: 'Inter',
-    color: '#abc7ff',
+    fontWeight: '600',
+    color: '#3B82F6',
   },
   actionContainer: {
     alignSelf: 'stretch',

@@ -4,6 +4,7 @@ import {
   Pressable,
   StyleSheet,
   Text,
+  View,
   ViewStyle,
 } from 'react-native';
 import Animated, {
@@ -74,50 +75,78 @@ export function GoogleButton({
   const isBtnDisabled = disabled || isLoading;
 
   return (
-    <AnimatedPressable
-      style={[
-        styles.button,
-        {
-          opacity: isBtnDisabled ? 0.7 : 1,
-        },
-        animatedStyle,
-        style,
-      ]}
-      onPress={onPress}
-      onPressIn={handlePressIn}
-      onPressOut={handlePressOut}
-      disabled={isBtnDisabled}
-      accessibilityRole="button"
-      accessibilityState={{ disabled: isBtnDisabled }}
-    >
-      {isLoading ? (
-        <ActivityIndicator color="#1a202c" />
-      ) : (
-        <Animated.View style={styles.contentContainer}>
-          <GoogleIcon />
-          <Text style={styles.buttonText}>{title}</Text>
-        </Animated.View>
-      )}
-    </AnimatedPressable>
+    <View style={styles.wrapper}>
+      <View style={styles.dividerRow}>
+        <View style={styles.dividerLine} />
+        <Text style={styles.dividerText}>or</Text>
+        <View style={styles.dividerLine} />
+      </View>
+
+      <AnimatedPressable
+        style={[
+          styles.button,
+          {
+            opacity: isBtnDisabled ? 0.7 : 1,
+          },
+          animatedStyle,
+          style,
+        ]}
+        onPress={onPress}
+        onPressIn={handlePressIn}
+        onPressOut={handlePressOut}
+        disabled={isBtnDisabled}
+        accessibilityRole="button"
+        accessibilityState={{ disabled: isBtnDisabled }}
+      >
+        {isLoading ? (
+          <ActivityIndicator color="#F8FAFC" />
+        ) : (
+          <Animated.View style={styles.contentContainer}>
+            <GoogleIcon />
+            <Text style={styles.buttonText}>{title}</Text>
+          </Animated.View>
+        )}
+      </AnimatedPressable>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  wrapper: {
+    alignSelf: 'stretch',
+  },
+  dividerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 14,
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+  },
+  dividerText: {
+    marginHorizontal: 10,
+    fontSize: 11,
+    fontFamily: 'Inter',
+    color: '#64748B',
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+  },
   button: {
     height: 52,
-    borderRadius: 9999,
-    backgroundColor: '#ffffff',
-    borderColor: '#e2e8f0',
+    borderRadius: 14,
+    backgroundColor: '#181D2A',
+    borderColor: 'rgba(255, 255, 255, 0.1)',
     borderWidth: 1,
     justifyContent: 'center',
     alignItems: 'center',
     alignSelf: 'stretch',
     shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
     elevation: 2,
-    marginTop: 12,
   },
   contentContainer: {
     flexDirection: 'row',
@@ -128,8 +157,8 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: 'Inter',
     fontWeight: '600',
-    letterSpacing: 0.14,
-    color: '#1a202c',
+    letterSpacing: 0.2,
+    color: '#F8FAFC',
     marginLeft: 10,
   },
 });

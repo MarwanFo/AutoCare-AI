@@ -238,7 +238,7 @@ export default function LoginScreen() {
       <View style={styles.bottomGlow} pointerEvents="none" />
 
       <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         style={styles.keyboardView}
       >
         <ScrollView
@@ -309,29 +309,46 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     justifyContent: 'center',
     paddingHorizontal: 20,
-    paddingVertical: 32,
+    paddingVertical: 20,
   },
   topGlow: {
-    display: 'none',
+    position: 'absolute',
+    top: -80,
+    right: -80,
+    width: 260,
+    height: 260,
+    borderRadius: 130,
+    backgroundColor: '#3B82F6',
+    opacity: 0.08,
   },
   bottomGlow: {
-    display: 'none',
+    position: 'absolute',
+    bottom: -60,
+    left: -60,
+    width: 220,
+    height: 220,
+    borderRadius: 110,
+    backgroundColor: '#1D4ED8',
+    opacity: 0.06,
   },
   screenFooter: {
-    marginTop: 28,
+    marginTop: 20,
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
   },
   footerText: {
-    fontSize: 13,
+    fontSize: 14,
+    fontFamily: 'Inter',
     color: '#94A3B8',
   },
   footerLinkContainer: {
     marginLeft: 6,
+    paddingVertical: 4,
   },
   footerLinkText: {
-    fontSize: 13,
+    fontSize: 14,
+    fontFamily: 'Inter',
     fontWeight: '700',
     color: '#3B82F6',
   },

@@ -23,12 +23,12 @@ export function ErrorBanner({ message }: ErrorBannerProps) {
 
   return (
     <Animated.View
-      entering={FadeInDown.duration(350)}
-      exiting={FadeOutUp.duration(350)}
+      entering={FadeInDown.duration(300)}
+      exiting={FadeOutUp.duration(300)}
       style={styles.container}
     >
       <View style={styles.iconContainer}>
-        <WarningIcon color="#ffb4ab" />
+        <WarningIcon color="#EF4444" />
       </View>
       <View style={styles.textContainer}>
         <Text style={styles.title}>System Alert</Text>
@@ -41,17 +41,17 @@ export function ErrorBanner({ message }: ErrorBannerProps) {
 const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
-    backgroundColor: '#93000a', // bg-error-container = #93000a
+    backgroundColor: 'rgba(239, 68, 68, 0.12)',
     borderWidth: 1,
-    borderColor: '#ffb4ab', // border-error = #ffb4ab
-    borderRadius: 16, // rounded-md = 16px
-    padding: 14,
+    borderColor: 'rgba(239, 68, 68, 0.35)',
+    borderRadius: 14,
+    padding: 12,
     alignItems: 'center',
     alignSelf: 'stretch',
-    marginBottom: 24, // spacing.baseline * 3 = 24px
+    marginBottom: 16,
   },
   iconContainer: {
-    marginRight: 12,
+    marginRight: 10,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -59,15 +59,15 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   title: {
-    color: '#ffb4ab', // error = #ffb4ab
+    color: '#F87171',
     fontSize: 12,
-    fontFamily: 'JetBrains Mono',
-    fontWeight: 'bold',
+    fontFamily: 'Inter',
+    fontWeight: '700',
     letterSpacing: 0.5,
     marginBottom: 2,
   },
   message: {
-    color: '#ffdad6', // on-error-container = #ffdad6
+    color: '#FECACA',
     fontSize: 13,
     fontFamily: 'Inter',
     lineHeight: 18,

@@ -10,11 +10,11 @@ interface AuthCardProps {
 export function AuthCard({ children, style }: AuthCardProps) {
   return (
     <Animated.View
-      entering={FadeInDown.duration(600).delay(200)}
+      entering={FadeInDown.duration(500).delay(200)}
       style={[styles.card, style]}
     >
-      {/* Top Accent Gradient Bar Accent */}
-      <View style={styles.topAccentBarContainer}>
+      {/* Top Accent Gradient Bar */}
+      <View style={styles.topAccentBarContainer} pointerEvents="none">
         <View style={styles.topAccentBar} />
       </View>
       
@@ -26,19 +26,19 @@ export function AuthCard({ children, style }: AuthCardProps) {
 const styles = StyleSheet.create({
   card: {
     alignSelf: 'stretch',
-    backgroundColor: '#131722',
+    backgroundColor: '#141824',
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.08)',
-    borderRadius: 24,
-    paddingHorizontal: 20,
-    paddingVertical: 28,
+    borderRadius: 20,
+    paddingHorizontal: 18,
+    paddingVertical: 22,
     position: 'relative',
     overflow: 'hidden',
     shadowColor: '#000000',
     shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.35,
-    shadowRadius: 16,
-    elevation: 8,
+    shadowOpacity: 0.4,
+    shadowRadius: 18,
+    elevation: 6,
   },
   topAccentBarContainer: {
     position: 'absolute',
@@ -50,9 +50,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   topAccentBar: {
-    width: '60%',
+    width: '50%',
     height: '100%',
     backgroundColor: '#3B82F6',
-    opacity: 0.6,
+    opacity: 0.8,
+    borderRadius: 1,
   },
 });
+
