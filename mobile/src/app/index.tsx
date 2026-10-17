@@ -19,9 +19,12 @@ import { GarageVehicleCard } from '@/features/garage/components/GarageVehicleCar
 import { GarageEmptyState } from '@/features/garage/components/GarageEmptyState';
 import { GarageSkeleton } from '@/features/garage/components/GarageSkeleton';
 import { useAppTranslation } from '@/i18n/hooks/useAppTranslation';
+import { useAppTheme } from '@/theme/ThemeProvider';
+import { ThemeToggle } from '@/components/ThemeToggle';
 
 export default function GarageHomeScreen() {
   const { t } = useAppTranslation('garage');
+  const { isDark, colors } = useAppTheme();
   const { data: vehiclesData, isLoading, isRefetching, refetch } = useVehicles();
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [selectedVehicleId, setSelectedVehicleId] = useState<string | null>(null);
@@ -43,16 +46,19 @@ export default function GarageHomeScreen() {
   }
 
   return (
-    <View style={styles.background}>
-      <StatusBar barStyle="light-content" backgroundColor="#0B0D11" />
-      <View style={styles.topGlow} pointerEvents="none" />
-      <View style={styles.bottomGlow} pointerEvents="none" />
+    <View style={[styles.background, !isDark && styles.backgroundLight]}>
+      <StatusBar
+        barStyle={isDark ? 'light-content' : 'dark-content'}
+        backgroundColor={isDark ? '#0B0D11' : '#F8FAFC'}
+      />
+      <View style={[styles.topGlow, !isDark && styles.topGlowLight]} pointerEvents="none" />
+      <View style={[styles.bottomGlow, !isDark && styles.bottomGlowLight]} pointerEvents="none" />
 
       <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
         {/* Screen Header */}
         <View style={styles.header}>
           <View style={styles.headerTitleRow}>
-            <View style={styles.brandBadgeIcon}>
+            <View style={[styles.brandBadgeIcon, !isDark && styles.brandBadgeIconLight]}>
               <Image
                 source={require('@/assets/images/autocare-mark.png')}
                 style={styles.brandMarkImage}
@@ -61,10 +67,10 @@ export default function GarageHomeScreen() {
               />
             </View>
             <View style={styles.titleTextContainer}>
-              <Text style={styles.headerTitle} numberOfLines={1}>
+              <Text style={[styles.headerTitle, !isDark && styles.headerTitleLight]} numberOfLines={1}>
                 {t('garage:dashboard.title')}
               </Text>
-              <Text style={styles.headerSubtitle} numberOfLines={1}>
+              <Text style={[styles.headerSubtitle, !isDark && styles.headerSubtitleLight]} numberOfLines={1}>
                 {totalVehicles > 0
                   ? t('garage:dashboard.subtitle_active', {
                       count: totalVehicles,
@@ -75,20 +81,26 @@ export default function GarageHomeScreen() {
             </View>
           </View>
 
-          {/* Primary Action Button */}
-          <TouchableOpacity
-            style={styles.addButton}
-            onPress={() => setShowOnboarding(true)}
-            activeOpacity={0.85}
-            accessible={true}
-            accessibilityRole="button"
-            accessibilityLabel={t('garage:dashboard.add_vehicle')}
-          >
-            <Svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-              <Path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" fill="#FFFFFF" />
-            </Svg>
-            <Text style={styles.addButtonText}>{t('garage:dashboard.add_vehicle')}</Text>
-          </TouchableOpacity>
+          {/* Header Action Buttons Row */}
+          <View style={styles.headerActionsRow}>
+            {/* Quick Theme Toggle (Sun/Moon) */}
+            <ThemeToggle style={styles.themeToggleBtn} />
+
+            {/* Primary Add Vehicle Button */}
+            <TouchableOpacity
+              style={styles.addButton}
+              onPress={() => setShowOnboarding(true)}
+              activeOpacity={0.85}
+              accessible={true}
+              accessibilityRole="button"
+              accessibilityLabel={t('garage:dashboard.add_vehicle')}
+            >
+              <Svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                <Path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" fill="#FFFFFF" />
+              </Svg>
+              <Text style={styles.addButtonText}>{t('garage:dashboard.add_vehicle')}</Text>
+            </TouchableOpacity>
+          </View>
         </View>
 
         {/* Content Section */}
@@ -112,8 +124,8 @@ export default function GarageHomeScreen() {
               <RefreshControl
                 refreshing={isRefetching}
                 onRefresh={refetch}
-                tintColor="#3B82F6"
-                colors={['#3B82F6']}
+                tintColor={colors.primary}
+                colors={[colors.primary]}
               />
             }
           />
@@ -139,6 +151,9 @@ const styles = StyleSheet.create({
     position: 'relative',
     overflow: 'hidden',
   },
+  backgroundLight: {
+    backgroundColor: '#F8FAFC',
+  },
   topGlow: {
     position: 'absolute',
     top: -80,
@@ -149,6 +164,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#3B82F6',
     opacity: 0.08,
   },
+  topGlowLight: {
+    opacity: 0.04,
+  },
   bottomGlow: {
     position: 'absolute',
     bottom: -60,
@@ -158,6 +176,9 @@ const styles = StyleSheet.create({
     borderRadius: 110,
     backgroundColor: '#1D4ED8',
     opacity: 0.06,
+  },
+  bottomGlowLight: {
+    opacity: 0.03,
   },
   safeArea: {
     flex: 1,
@@ -195,6 +216,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  brandBadgeIconLight: {
+    backgroundColor: 'rgba(37, 99, 235, 0.08)',
+    borderColor: 'rgba(37, 99, 235, 0.2)',
+  },
   brandMarkImage: {
     width: 24,
     height: 24,
@@ -205,11 +230,27 @@ const styles = StyleSheet.create({
     color: '#F8FAFC',
     letterSpacing: -0.3,
   },
+  headerTitleLight: {
+    color: '#0F172A',
+  },
   headerSubtitle: {
     fontSize: 12,
     color: '#94A3B8',
     marginTop: 1,
     fontWeight: '500',
+  },
+  headerSubtitleLight: {
+    color: '#64748B',
+  },
+  headerActionsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  themeToggleBtn: {
+    paddingHorizontal: 8,
+    paddingVertical: 7,
+    borderRadius: 10,
   },
   addButton: {
     flexDirection: 'row',

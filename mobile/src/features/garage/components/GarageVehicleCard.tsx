@@ -1,8 +1,9 @@
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import Svg, { Path, Rect } from 'react-native-svg';
+import Svg, { Path } from 'react-native-svg';
 import { VehicleSummaryResponse } from '@/types/vehicle';
 import { useAppTranslation } from '@/i18n/hooks/useAppTranslation';
+import { useAppTheme } from '@/theme/ThemeProvider';
 
 interface GarageVehicleCardProps {
   vehicle: VehicleSummaryResponse;
@@ -11,6 +12,7 @@ interface GarageVehicleCardProps {
 
 export function GarageVehicleCard({ vehicle, onPress }: GarageVehicleCardProps) {
   const { t } = useAppTranslation('garage');
+  const { isDark } = useAppTheme();
 
   const title = vehicle.nickname
     ? vehicle.nickname
@@ -28,7 +30,7 @@ export function GarageVehicleCard({ vehicle, onPress }: GarageVehicleCardProps) 
     <TouchableOpacity
       onPress={onPress}
       activeOpacity={0.85}
-      style={styles.card}
+      style={[styles.card, !isDark && styles.cardLight]}
       accessible={true}
       accessibilityRole="button"
       accessibilityLabel={`View details for ${title}`}
@@ -36,17 +38,17 @@ export function GarageVehicleCard({ vehicle, onPress }: GarageVehicleCardProps) 
       {/* Top Identity & Status Row */}
       <View style={styles.headerRow}>
         <View style={styles.brandTitleContainer}>
-          <Text style={styles.titleText} numberOfLines={1}>
+          <Text style={[styles.titleText, !isDark && styles.titleTextLight]} numberOfLines={1}>
             {title}
           </Text>
-          <Text style={styles.subtitleText} numberOfLines={1}>
+          <Text style={[styles.subtitleText, !isDark && styles.subtitleTextLight]} numberOfLines={1}>
             {subtitle}
           </Text>
         </View>
 
         {/* Primary Star or Vehicle Badge */}
         {vehicle.isPrimary ? (
-          <View style={styles.primaryBadge}>
+          <View style={[styles.primaryBadge, !isDark && styles.primaryBadgeLight]}>
             <Svg width="11" height="11" viewBox="0 0 24 24" fill="none">
               <Path
                 d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"
@@ -56,32 +58,32 @@ export function GarageVehicleCard({ vehicle, onPress }: GarageVehicleCardProps) 
             <Text style={styles.primaryBadgeText}>{t('garage:vehicle.primary')}</Text>
           </View>
         ) : (
-          <View style={styles.yearBadge}>
-            <Text style={styles.yearBadgeText}>{vehicle.year}</Text>
+          <View style={[styles.yearBadge, !isDark && styles.yearBadgeLight]}>
+            <Text style={[styles.yearBadgeText, !isDark && styles.yearBadgeTextLight]}>{vehicle.year}</Text>
           </View>
         )}
       </View>
 
       {/* Middle Spec Grid */}
-      <View style={styles.metricsContainer}>
+      <View style={[styles.metricsContainer, !isDark && styles.metricsContainerLight]}>
         {/* Metric 1: Odometer */}
         <View style={styles.metricItem}>
           <View style={styles.metricHeader}>
             <Svg width="13" height="13" viewBox="0 0 24 24" fill="none">
               <Path
                 d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm.5-13H11v6l5.2 3.1.8-1.3-4.5-2.7V7z"
-                fill="#94A3B8"
+                fill={isDark ? '#94A3B8' : '#64748B'}
               />
             </Svg>
-            <Text style={styles.metricLabel}>{t('garage:vehicle.odometer')}</Text>
+            <Text style={[styles.metricLabel, !isDark && styles.metricLabelLight]}>{t('garage:vehicle.odometer')}</Text>
           </View>
-          <Text style={styles.metricValue}>
+          <Text style={[styles.metricValue, !isDark && styles.metricValueLight]}>
             {formatMileage(vehicle.currentMileage)}{' '}
-            <Text style={styles.metricUnit}>{vehicle.mileageUnit || 'KM'}</Text>
+            <Text style={[styles.metricUnit, !isDark && styles.metricUnitLight]}>{vehicle.mileageUnit || 'KM'}</Text>
           </Text>
         </View>
 
-        <View style={styles.metricDivider} />
+        <View style={[styles.metricDivider, !isDark && styles.metricDividerLight]} />
 
         {/* Metric 2: License Plate */}
         <View style={styles.metricItem}>
@@ -89,19 +91,19 @@ export function GarageVehicleCard({ vehicle, onPress }: GarageVehicleCardProps) 
             <Svg width="13" height="13" viewBox="0 0 24 24" fill="none">
               <Path
                 d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14z"
-                fill="#94A3B8"
+                fill={isDark ? '#94A3B8' : '#64748B'}
               />
             </Svg>
-            <Text style={styles.metricLabel}>{t('garage:vehicle.plate')}</Text>
+            <Text style={[styles.metricLabel, !isDark && styles.metricLabelLight]}>{t('garage:vehicle.plate')}</Text>
           </View>
-          <View style={styles.plateBox}>
-            <Text style={styles.plateText} numberOfLines={1}>
+          <View style={[styles.plateBox, !isDark && styles.plateBoxLight]}>
+            <Text style={[styles.plateText, !isDark && styles.plateTextLight]} numberOfLines={1}>
               {vehicle.licensePlate || '---'}
             </Text>
           </View>
         </View>
 
-        <View style={styles.metricDivider} />
+        <View style={[styles.metricDivider, !isDark && styles.metricDividerLight]} />
 
         {/* Metric 3: Powertrain */}
         <View style={styles.metricItem}>
@@ -109,12 +111,12 @@ export function GarageVehicleCard({ vehicle, onPress }: GarageVehicleCardProps) 
             <Svg width="13" height="13" viewBox="0 0 24 24" fill="none">
               <Path
                 d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"
-                fill="#94A3B8"
+                fill={isDark ? '#94A3B8' : '#64748B'}
               />
             </Svg>
-            <Text style={styles.metricLabel}>{t('garage:vehicle.powertrain')}</Text>
+            <Text style={[styles.metricLabel, !isDark && styles.metricLabelLight]}>{t('garage:vehicle.powertrain')}</Text>
           </View>
-          <Text style={styles.metricValue} numberOfLines={1}>
+          <Text style={[styles.metricValue, !isDark && styles.metricValueLight]} numberOfLines={1}>
             {vehicle.fuelType || 'GASOLINE'}
           </Text>
         </View>
@@ -156,6 +158,15 @@ const styles = StyleSheet.create({
     elevation: 3,
     width: '100%',
   },
+  cardLight: {
+    backgroundColor: '#FFFFFF',
+    borderColor: 'rgba(15, 23, 42, 0.08)',
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 10,
+    elevation: 2,
+  },
   headerRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -174,10 +185,16 @@ const styles = StyleSheet.create({
     letterSpacing: -0.2,
     marginBottom: 3,
   },
+  titleTextLight: {
+    color: '#0F172A',
+  },
   subtitleText: {
     fontSize: 13,
     color: '#94A3B8',
     fontWeight: '500',
+  },
+  subtitleTextLight: {
+    color: '#64748B',
   },
   primaryBadge: {
     flexDirection: 'row',
@@ -189,6 +206,10 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     borderWidth: 1,
     borderColor: 'rgba(59, 130, 246, 0.3)',
+  },
+  primaryBadgeLight: {
+    backgroundColor: 'rgba(37, 99, 235, 0.08)',
+    borderColor: 'rgba(37, 99, 235, 0.25)',
   },
   primaryBadgeText: {
     fontSize: 11,
@@ -204,10 +225,17 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.06)',
   },
+  yearBadgeLight: {
+    backgroundColor: '#F1F5F9',
+    borderColor: 'rgba(15, 23, 42, 0.06)',
+  },
   yearBadgeText: {
     fontSize: 11,
     fontWeight: '600',
     color: '#94A3B8',
+  },
+  yearBadgeTextLight: {
+    color: '#64748B',
   },
   metricsContainer: {
     flexDirection: 'row',
@@ -219,6 +247,10 @@ const styles = StyleSheet.create({
     marginBottom: 14,
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.05)',
+  },
+  metricsContainerLight: {
+    backgroundColor: '#F8FAFC',
+    borderColor: 'rgba(15, 23, 42, 0.06)',
   },
   metricItem: {
     flex: 1,
@@ -238,15 +270,24 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
     letterSpacing: 0.3,
   },
+  metricLabelLight: {
+    color: '#64748B',
+  },
   metricValue: {
     fontSize: 13,
     fontWeight: '700',
     color: '#F8FAFC',
   },
+  metricValueLight: {
+    color: '#0F172A',
+  },
   metricUnit: {
     fontSize: 10,
     color: '#94A3B8',
     fontWeight: '500',
+  },
+  metricUnitLight: {
+    color: '#64748B',
   },
   plateBox: {
     backgroundColor: '#0F131C',
@@ -257,17 +298,27 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(255, 255, 255, 0.1)',
     maxWidth: '100%',
   },
+  plateBoxLight: {
+    backgroundColor: '#E2E8F0',
+    borderColor: 'rgba(15, 23, 42, 0.15)',
+  },
   plateText: {
     fontSize: 11,
     fontWeight: '700',
     color: '#E2E8F0',
     letterSpacing: 0.5,
   },
+  plateTextLight: {
+    color: '#0F172A',
+  },
   metricDivider: {
     width: 1,
     height: 24,
     backgroundColor: 'rgba(255, 255, 255, 0.06)',
     marginHorizontal: 8,
+  },
+  metricDividerLight: {
+    backgroundColor: 'rgba(15, 23, 42, 0.08)',
   },
   footerRow: {
     flexDirection: 'row',

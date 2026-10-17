@@ -9,6 +9,7 @@ import {
 import Svg, { Path } from 'react-native-svg';
 import { useLanguage } from '@/i18n/hooks/useLanguage';
 import { useAppTranslation } from '@/i18n/hooks/useAppTranslation';
+import { useAppTheme } from '@/theme/ThemeProvider';
 
 interface ProfileHeaderCardProps {
   fullName: string;
@@ -29,6 +30,7 @@ export function ProfileHeaderCard({
 }: ProfileHeaderCardProps) {
   const { t } = useAppTranslation(['profile', 'common']);
   const { isRTL } = useLanguage();
+  const { isDark } = useAppTheme();
 
   const getInitials = (name: string) => {
     if (!name) return 'AC';
@@ -40,8 +42,8 @@ export function ProfileHeaderCard({
   };
 
   return (
-    <View style={styles.card}>
-      <View style={styles.topGlow} pointerEvents="none" />
+    <View style={[styles.card, !isDark && styles.cardLight]}>
+      <View style={[styles.topGlow, !isDark && styles.topGlowLight]} pointerEvents="none" />
 
       <View style={[styles.contentRow, isRTL && styles.rowReverse]}>
         {/* Avatar with Camera badge */}
@@ -53,11 +55,11 @@ export function ProfileHeaderCard({
           {avatarUrl ? (
             <Image source={{ uri: avatarUrl }} style={styles.avatarImage} />
           ) : (
-            <View style={styles.avatarPlaceholder}>
+            <View style={[styles.avatarPlaceholder, !isDark && styles.avatarPlaceholderLight]}>
               <Text style={styles.avatarInitials}>{getInitials(fullName)}</Text>
             </View>
           )}
-          <View style={styles.badgeOverlay}>
+          <View style={[styles.badgeOverlay, !isDark && styles.badgeOverlayLight]}>
             <Svg width="12" height="12" viewBox="0 0 24 24" fill="none">
               <Path
                 d="M12 15.2a3.2 3.2 0 1 0 0-6.4 3.2 3.2 0 0 0 0 6.4z"
@@ -73,7 +75,7 @@ export function ProfileHeaderCard({
 
         {/* User Info */}
         <View style={[styles.infoColumn, isRTL && styles.alignRight]}>
-          <Text style={[styles.userName, isRTL && styles.textRight]} numberOfLines={1}>
+          <Text style={[styles.userName, !isDark && styles.userNameLight, isRTL && styles.textRight]} numberOfLines={1}>
             {fullName || 'Driver'}
           </Text>
 
@@ -82,10 +84,10 @@ export function ProfileHeaderCard({
               <Svg width="13" height="13" viewBox="0 0 24 24" fill="none">
                 <Path
                   d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"
-                  fill="#94A3B8"
+                  fill={isDark ? '#94A3B8' : '#64748B'}
                 />
               </Svg>
-              <Text style={styles.userEmail} numberOfLines={1}>
+              <Text style={[styles.userEmail, !isDark && styles.userEmailLight]} numberOfLines={1}>
                 {email}
               </Text>
             </View>
@@ -104,24 +106,24 @@ export function ProfileHeaderCard({
       </View>
 
       {/* Stats Divider Bar */}
-      <View style={styles.statsBar}>
+      <View style={[styles.statsBar, !isDark && styles.statsBarLight]}>
         <View style={styles.statBox}>
           <Text style={styles.statVal}>{vehiclesCount}</Text>
-          <Text style={styles.statLbl}>Vehicles</Text>
+          <Text style={[styles.statLbl, !isDark && styles.statLblLight]}>Vehicles</Text>
         </View>
 
-        <View style={styles.statDivider} />
+        <View style={[styles.statDivider, !isDark && styles.statDividerLight]} />
 
         <View style={styles.statBox}>
           <Text style={styles.statVal}>100%</Text>
-          <Text style={styles.statLbl}>Digital Twin</Text>
+          <Text style={[styles.statLbl, !isDark && styles.statLblLight]}>Digital Twin</Text>
         </View>
 
-        <View style={styles.statDivider} />
+        <View style={[styles.statDivider, !isDark && styles.statDividerLight]} />
 
         <View style={styles.statBox}>
           <Text style={[styles.statVal, { color: '#10B981' }]}>ACTIVE</Text>
-          <Text style={styles.statLbl}>Status</Text>
+          <Text style={[styles.statLbl, !isDark && styles.statLblLight]}>Status</Text>
         </View>
       </View>
     </View>
@@ -144,6 +146,15 @@ const styles = StyleSheet.create({
     shadowRadius: 10,
     elevation: 3,
   },
+  cardLight: {
+    backgroundColor: '#FFFFFF',
+    borderColor: 'rgba(15, 23, 42, 0.08)',
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
+    elevation: 2,
+  },
   topGlow: {
     position: 'absolute',
     top: -40,
@@ -153,6 +164,9 @@ const styles = StyleSheet.create({
     borderRadius: 70,
     backgroundColor: '#3B82F6',
     opacity: 0.1,
+  },
+  topGlowLight: {
+    opacity: 0.05,
   },
   contentRow: {
     flexDirection: 'row',
@@ -191,6 +205,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  avatarPlaceholderLight: {
+    backgroundColor: '#F1F5F9',
+  },
   avatarInitials: {
     fontSize: 22,
     fontWeight: '700',
@@ -209,6 +226,9 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: '#131722',
   },
+  badgeOverlayLight: {
+    borderColor: '#FFFFFF',
+  },
   infoColumn: {
     flex: 1,
     justifyContent: 'center',
@@ -218,6 +238,9 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: '#F8FAFC',
     marginBottom: 2,
+  },
+  userNameLight: {
+    color: '#0F172A',
   },
   emailRow: {
     flexDirection: 'row',
@@ -229,6 +252,9 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#94A3B8',
     flex: 1,
+  },
+  userEmailLight: {
+    color: '#64748B',
   },
   badgesRow: {
     flexDirection: 'row',
@@ -268,6 +294,10 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.04)',
   },
+  statsBarLight: {
+    backgroundColor: '#F8FAFC',
+    borderColor: 'rgba(15, 23, 42, 0.06)',
+  },
   statBox: {
     flex: 1,
     alignItems: 'center',
@@ -283,9 +313,15 @@ const styles = StyleSheet.create({
     marginTop: 2,
     fontWeight: '500',
   },
+  statLblLight: {
+    color: '#94A3B8',
+  },
   statDivider: {
     width: 1,
     height: 20,
     backgroundColor: 'rgba(255, 255, 255, 0.06)',
+  },
+  statDividerLight: {
+    backgroundColor: 'rgba(15, 23, 42, 0.08)',
   },
 });

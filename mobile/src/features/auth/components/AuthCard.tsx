@@ -1,6 +1,7 @@
 import React from 'react';
 import { StyleSheet, View, ViewStyle } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
+import { useAppTheme } from '@/theme/ThemeProvider';
 
 interface AuthCardProps {
   children: React.ReactNode;
@@ -8,10 +9,16 @@ interface AuthCardProps {
 }
 
 export function AuthCard({ children, style }: AuthCardProps) {
+  const { isDark } = useAppTheme();
+
   return (
     <Animated.View
       entering={FadeInDown.duration(500).delay(200)}
-      style={[styles.card, style]}
+      style={[
+        styles.card,
+        !isDark && styles.cardLight,
+        style,
+      ]}
     >
       {/* Top Accent Gradient Bar */}
       <View style={styles.topAccentBarContainer} pointerEvents="none">
@@ -40,6 +47,15 @@ const styles = StyleSheet.create({
     shadowRadius: 18,
     elevation: 6,
   },
+  cardLight: {
+    backgroundColor: '#FFFFFF',
+    borderColor: 'rgba(15, 23, 42, 0.08)',
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.06,
+    shadowRadius: 16,
+    elevation: 3,
+  },
   topAccentBarContainer: {
     position: 'absolute',
     top: 0,
@@ -57,4 +73,3 @@ const styles = StyleSheet.create({
     borderRadius: 1,
   },
 });
-

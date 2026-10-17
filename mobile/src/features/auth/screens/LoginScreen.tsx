@@ -3,6 +3,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  StatusBar,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -17,6 +18,8 @@ import { secureStore } from '@/storage/secureStore';
 import { useAuthStore } from '@/stores/authStore';
 import { apiClient } from '@/api/client';
 import { useAppTranslation } from '@/i18n/hooks/useAppTranslation';
+import { useAppTheme } from '@/theme/ThemeProvider';
+import { ThemeToggle } from '@/components/ThemeToggle';
 
 import { BrandHeader } from '../components/BrandHeader';
 import { AuthCard } from '../components/AuthCard';
@@ -45,6 +48,7 @@ type LoginFormData = z.infer<typeof loginSchema>;
 export default function LoginScreen() {
   console.log('[DEBUG] LoginScreen component mounting...');
   const { t } = useAppTranslation(['auth', 'common', 'errors', 'validation']);
+  const { isDark } = useAppTheme();
   const { setSession } = useAuthStore();
   const [currentScreen, setCurrentScreen] = useState<AuthScreen>(AuthScreen.LOGIN);
   const [registeredEmail, setRegisteredEmail] = useState('');
@@ -232,10 +236,19 @@ export default function LoginScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, !isDark && styles.containerLight]}>
+      <StatusBar
+        barStyle={isDark ? 'light-content' : 'dark-content'}
+        backgroundColor={isDark ? '#0B0D11' : '#F8FAFC'}
+      />
       {/* Abstract Background Glows */}
-      <View style={styles.topGlow} pointerEvents="none" />
-      <View style={styles.bottomGlow} pointerEvents="none" />
+      <View style={[styles.topGlow, !isDark && styles.topGlowLight]} pointerEvents="none" />
+      <View style={[styles.bottomGlow, !isDark && styles.bottomGlowLight]} pointerEvents="none" />
+
+      {/* Top Bar with Quick Theme Toggle */}
+      <View style={styles.topBar}>
+        <ThemeToggle />
+      </View>
 
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
@@ -274,7 +287,7 @@ export default function LoginScreen() {
 
           {/* Footer Link (Centered Create Account row below card) */}
           <View style={styles.screenFooter}>
-            <Text style={styles.footerText}>{t('auth:no_account_prompt')}</Text>
+            <Text style={[styles.footerText, !isDark && styles.footerTextLight]}>{t('auth:no_account_prompt')}</Text>
             <TouchableOpacity
               accessibilityRole="link"
               accessibilityLabel={t('auth:sign_up_button')}
@@ -301,6 +314,16 @@ const styles = StyleSheet.create({
     position: 'relative',
     overflow: 'hidden',
   },
+  containerLight: {
+    backgroundColor: '#F8FAFC',
+  },
+  topBar: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    paddingHorizontal: 20,
+    paddingTop: 8,
+    zIndex: 20,
+  },
   keyboardView: {
     flex: 1,
     zIndex: 10,
@@ -309,7 +332,7 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     justifyContent: 'center',
     paddingHorizontal: 20,
-    paddingVertical: 20,
+    paddingBottom: 24,
   },
   topGlow: {
     position: 'absolute',
@@ -321,6 +344,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#3B82F6',
     opacity: 0.08,
   },
+  topGlowLight: {
+    opacity: 0.04,
+  },
   bottomGlow: {
     position: 'absolute',
     bottom: -60,
@@ -330,6 +356,9 @@ const styles = StyleSheet.create({
     borderRadius: 110,
     backgroundColor: '#1D4ED8',
     opacity: 0.06,
+  },
+  bottomGlowLight: {
+    opacity: 0.03,
   },
   screenFooter: {
     marginTop: 20,
@@ -341,6 +370,9 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: 'Inter',
     color: '#94A3B8',
+  },
+  footerTextLight: {
+    color: '#64748B',
   },
   footerLinkContainer: {
     marginLeft: 6,

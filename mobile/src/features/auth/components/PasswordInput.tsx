@@ -15,6 +15,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import Svg, { Path } from 'react-native-svg';
+import { useAppTheme } from '@/theme/ThemeProvider';
 
 // Custom SVG Icons matching the Material Symbols used in Stitch
 export function MailIcon({ color }: { color: string }) {
@@ -60,26 +61,27 @@ export function EyeIcon({ color, visible }: { color: string; visible: boolean })
   );
 }
 
-interface FloatingInputProps extends TextInputProps {
+export interface FloatingInputProps extends TextInputProps {
   label: string;
-  error?: string;
-  editable?: boolean;
-  prefixIcon: React.ReactNode;
+  error?: string | null;
+  prefixIcon?: React.ReactNode;
   children?: React.ReactNode;
+  editable?: boolean;
 }
 
 export function FloatingInput({
   label,
+  value = '',
   error,
-  editable = true,
   prefixIcon,
   children,
-  value = '',
+  editable = true,
   onFocus,
   onBlur,
   style,
   ...props
 }: FloatingInputProps) {
+  const { isDark } = useAppTheme();
   const [isFocused, setIsFocused] = useState(false);
   const inputRef = useRef<TextInput>(null);
   const floatProgress = useSharedValue(value.length > 0 ? 1 : 0);
@@ -95,7 +97,7 @@ export function FloatingInput({
     const color = interpolateColor(
       floatProgress.value,
       [0, 1],
-      ['#64748B', isFocused ? '#3B82F6' : '#94A3B8']
+      ['#64748B', isFocused ? '#3B82F6' : (isDark ? '#94A3B8' : '#64748B')]
     );
 
     return {
@@ -118,8 +120,12 @@ export function FloatingInput({
               ? '#EF4444'
               : isFocused
               ? '#3B82F6'
-              : 'rgba(255, 255, 255, 0.08)',
-            backgroundColor: isFocused ? '#181D2A' : '#11141B',
+              : isDark
+              ? 'rgba(255, 255, 255, 0.08)'
+              : 'rgba(15, 23, 42, 0.12)',
+            backgroundColor: isDark
+              ? (isFocused ? '#181D2A' : '#11141B')
+              : (isFocused ? '#FFFFFF' : '#F8FAFC'),
           },
           isFocused && styles.containerFocused,
         ]}
@@ -142,7 +148,7 @@ export function FloatingInput({
           </Animated.Text>
           <TextInput
             ref={inputRef}
-            style={[styles.textInput, style]}
+            style={[styles.textInput, !isDark && styles.textInputLight, style]}
             value={value}
             editable={editable}
             autoCapitalize="none"
@@ -175,6 +181,7 @@ export function PasswordInput({
   editable = true,
   ...props
 }: Omit<FloatingInputProps, 'prefixIcon'>) {
+  const { isDark } = useAppTheme();
   const [secureTextEntry, setSecureTextEntry] = useState(true);
 
   return (
@@ -183,7 +190,7 @@ export function PasswordInput({
       error={error}
       editable={editable}
       secureTextEntry={secureTextEntry}
-      prefixIcon={<LockIcon color={error ? '#EF4444' : '#94A3B8'} />}
+      prefixIcon={<LockIcon color={error ? '#EF4444' : isDark ? '#94A3B8' : '#64748B'} />}
       {...props}
     >
       {/* Suffix password toggle button */}
@@ -196,7 +203,7 @@ export function PasswordInput({
         accessibilityLabel={secureTextEntry ? 'Show password' : 'Hide password'}
       >
         <EyeIcon
-          color={error ? '#EF4444' : '#94A3B8'}
+          color={error ? '#EF4444' : isDark ? '#94A3B8' : '#64748B'}
           visible={!secureTextEntry}
         />
       </TouchableOpacity>
@@ -252,6 +259,9 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: '#F8FAFC',
     fontFamily: 'Inter',
+  },
+  textInputLight: {
+    color: '#0F172A',
   },
   suffixButton: {
     paddingHorizontal: 6,

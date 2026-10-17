@@ -11,10 +11,12 @@ import Svg, { Path } from 'react-native-svg';
 import { useSessions, useRevokeSession, useLogoutAllSessions } from '@/hooks/user/useSessions';
 import { useAppTranslation } from '@/i18n/hooks/useAppTranslation';
 import { useLanguage } from '@/i18n/hooks/useLanguage';
+import { useAppTheme } from '@/theme/ThemeProvider';
 
 export function ActiveSessionsCard() {
   const { t } = useAppTranslation(['profile', 'common']);
   const { isRTL } = useLanguage();
+  const { isDark } = useAppTheme();
 
   const { data: sessions = [], isLoading, isError, refetch } = useSessions();
   const revokeMutation = useRevokeSession();
@@ -52,21 +54,23 @@ export function ActiveSessionsCard() {
 
   if (isLoading) {
     return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="small" color="#abc7ff" />
-        <Text style={styles.loadingText}>Loading active sessions...</Text>
+      <View style={[styles.container, !isDark && styles.containerLight]}>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="small" color="#3B82F6" />
+          <Text style={[styles.loadingText, !isDark && styles.loadingTextLight]}>Loading active sessions...</Text>
+        </View>
       </View>
     );
   }
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, !isDark && styles.containerLight]}>
       <View style={[styles.headerRow, isRTL && styles.rowReverse]}>
         <View style={{ flex: 1 }}>
-          <Text style={[styles.title, isRTL && styles.textRight]}>
+          <Text style={[styles.title, !isDark && styles.titleLight, isRTL && styles.textRight]}>
             {t('profile:active_sessions_title', { defaultValue: 'Active Devices & Sessions' })}
           </Text>
-          <Text style={[styles.subtitle, isRTL && styles.textRight]}>
+          <Text style={[styles.subtitle, !isDark && styles.subtitleLight, isRTL && styles.textRight]}>
             {t('profile:active_sessions_subtitle', { defaultValue: 'Manage device sessions currently logged into your account' })}
           </Text>
         </View>
@@ -92,8 +96,8 @@ export function ActiveSessionsCard() {
           const isWeb = ua.includes('mozilla') || ua.includes('chrome') || ua.includes('safari');
           const sessionKey = sess?.id || `session-${idx}`;
           return (
-            <View key={sessionKey} style={[styles.sessionRow, isRTL && styles.rowReverse]}>
-              <View style={styles.deviceIconBox}>
+            <View key={sessionKey} style={[styles.sessionRow, !isDark && styles.sessionRowLight, isRTL && styles.rowReverse]}>
+              <View style={[styles.deviceIconBox, !isDark && styles.deviceIconBoxLight]}>
                 <Svg width="18" height="18" viewBox="0 0 24 24" fill="none">
                   {isWeb ? (
                     <Path
@@ -111,7 +115,7 @@ export function ActiveSessionsCard() {
 
               <View style={[styles.sessionDetails, isRTL && styles.alignRight]}>
                 <View style={[styles.deviceTitleRow, isRTL && styles.rowReverse]}>
-                  <Text style={styles.deviceType}>
+                  <Text style={[styles.deviceType, !isDark && styles.deviceTypeLight]}>
                     {sess.deviceType || (isWeb ? 'Web Browser' : 'Mobile App')}
                   </Text>
                   {sess.isCurrentSession && (
@@ -123,14 +127,14 @@ export function ActiveSessionsCard() {
                   )}
                 </View>
 
-                <Text style={styles.sessionMeta}>
+                <Text style={[styles.sessionMeta, !isDark && styles.sessionMetaLight]}>
                   IP: {sess.ipAddress || '127.0.0.1'} • {sess.lastActiveAt ? new Date(sess.lastActiveAt).toLocaleDateString() : 'Just now'}
                 </Text>
               </View>
 
               {!sess.isCurrentSession && (
                 <TouchableOpacity
-                  style={styles.revokeBtn}
+                  style={[styles.revokeBtn, !isDark && styles.revokeBtnLight]}
                   onPress={() => handleRevoke(sess.id)}
                   disabled={revokeMutation.isPending}
                 >
@@ -161,6 +165,15 @@ const styles = StyleSheet.create({
     shadowRadius: 10,
     elevation: 3,
   },
+  containerLight: {
+    backgroundColor: '#FFFFFF',
+    borderColor: 'rgba(15, 23, 42, 0.08)',
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
+    elevation: 2,
+  },
   loadingContainer: {
     padding: 24,
     alignItems: 'center',
@@ -170,6 +183,9 @@ const styles = StyleSheet.create({
     marginTop: 8,
     color: '#94A3B8',
     fontSize: 13,
+  },
+  loadingTextLight: {
+    color: '#64748B',
   },
   headerRow: {
     flexDirection: 'row',
@@ -192,10 +208,16 @@ const styles = StyleSheet.create({
     color: '#F8FAFC',
     marginBottom: 2,
   },
+  titleLight: {
+    color: '#0F172A',
+  },
   subtitle: {
     fontSize: 12,
     color: '#94A3B8',
     lineHeight: 16,
+  },
+  subtitleLight: {
+    color: '#64748B',
   },
   logoutAllBtn: {
     backgroundColor: 'rgba(239, 68, 68, 0.12)',
@@ -223,6 +245,10 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(255, 255, 255, 0.04)',
     gap: 10,
   },
+  sessionRowLight: {
+    backgroundColor: '#F8FAFC',
+    borderColor: 'rgba(15, 23, 42, 0.06)',
+  },
   deviceIconBox: {
     width: 36,
     height: 36,
@@ -230,6 +256,9 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(59, 130, 246, 0.12)',
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  deviceIconBoxLight: {
+    backgroundColor: 'rgba(37, 99, 235, 0.08)',
   },
   sessionDetails: {
     flex: 1,
@@ -243,6 +272,9 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '600',
     color: '#F8FAFC',
+  },
+  deviceTypeLight: {
+    color: '#0F172A',
   },
   thisDeviceBadge: {
     backgroundColor: 'rgba(16, 185, 129, 0.15)',
@@ -262,11 +294,17 @@ const styles = StyleSheet.create({
     color: '#64748B',
     marginTop: 2,
   },
+  sessionMetaLight: {
+    color: '#94A3B8',
+  },
   revokeBtn: {
     backgroundColor: '#1C2232',
     paddingHorizontal: 10,
     paddingVertical: 5,
     borderRadius: 6,
+  },
+  revokeBtnLight: {
+    backgroundColor: '#E2E8F0',
   },
   revokeBtnText: {
     fontSize: 11,

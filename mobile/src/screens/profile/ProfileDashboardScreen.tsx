@@ -38,6 +38,8 @@ import { useAuthStore } from '@/stores/authStore';
 import { secureStore } from '@/storage/secureStore';
 import { apiClient } from '@/api/client';
 import { QueryClient, useQueryClient } from '@tanstack/react-query';
+import { useAppTheme } from '@/theme/ThemeProvider';
+import { ThemeToggle } from '@/components/ThemeToggle';
 
 const PRESET_AVATARS = [
   { name: 'Classic Racer', url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&h=200&fit=crop' },
@@ -48,6 +50,7 @@ const PRESET_AVATARS = [
 
 export default function ProfileDashboardScreen() {
   const { t } = useAppTranslation(['profile', 'common', 'errors', 'validation']);
+  const { isDark, colors, themeMode, setThemeMode } = useAppTheme();
   const { data: profile, isLoading, isError, refetch } = useUserProfile();
   const { data: vehiclesData } = useVehicles({ page: 0, size: 1 });
   const vehiclesCount = vehiclesData?.totalElements || 0;
@@ -147,11 +150,7 @@ export default function ProfileDashboardScreen() {
       },
       {
         onSuccess: () => {
-          setPrefSuccessMsg(t('profile:preferences_updated_success'));
-          const lowerLang = lang.toLowerCase() as 'en' | 'fr' | 'ar';
-          if (lowerLang !== currentLanguage) {
-            setLanguage(lowerLang);
-          }
+          setPrefSuccessMsg(t('profile:preferences_saved_success'));
         },
         onError: (err: any) => {
           setPrefErrorMsg(err?.response?.data?.message || t('profile:preferences_update_failed'));
@@ -165,12 +164,17 @@ export default function ProfileDashboardScreen() {
     setPwdErrorMsg(null);
 
     if (!oldPassword || !newPassword || !confirmPassword) {
-      setPwdErrorMsg('All password fields are required.');
+      setPwdErrorMsg(t('profile:fill_all_password_fields'));
       return;
     }
 
     if (newPassword !== confirmPassword) {
-      setPwdErrorMsg('New password and confirmation do not match.');
+      setPwdErrorMsg(t('profile:passwords_do_not_match'));
+      return;
+    }
+
+    if (newPassword.length < 8) {
+      setPwdErrorMsg(t('profile:password_min_length'));
       return;
     }
 
@@ -178,7 +182,7 @@ export default function ProfileDashboardScreen() {
       { oldPassword, newPassword },
       {
         onSuccess: () => {
-          setPwdSuccessMsg(t('profile:password_updated_success'));
+          setPwdSuccessMsg(t('profile:password_changed_success'));
           setOldPassword('');
           setNewPassword('');
           setConfirmPassword('');
@@ -190,10 +194,16 @@ export default function ProfileDashboardScreen() {
     );
   };
 
-  const handleClearCache = () => {
-    setStorageMsg(null);
-    queryClient.clear();
-    setStorageMsg(t('profile:cache_cleared_msg', { defaultValue: 'Local app cache and temporary image storage successfully cleared.' }));
+  const handleClearCache = async () => {
+    try {
+      await queryClient.cancelQueries();
+      queryClient.clear();
+      setStorageMsg(t('profile:cache_cleared_success', { defaultValue: 'App cache cleared successfully!' }));
+      setTimeout(() => setStorageMsg(null), 3500);
+      refetch();
+    } catch {
+      setStorageMsg('Failed to clear local cache.');
+    }
   };
 
   const handleDeactivate = () => {
@@ -250,16 +260,16 @@ export default function ProfileDashboardScreen() {
 
   if (isLoading) {
     return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#abc7ff" />
-        <Text style={styles.loadingText}>{t('profile:syncing_profile')}</Text>
+      <View style={[styles.loadingContainer, !isDark && styles.loadingContainerLight]}>
+        <ActivityIndicator size="large" color={colors.primary} />
+        <Text style={[styles.loadingText, !isDark && styles.loadingTextLight]}>{t('profile:syncing_profile')}</Text>
       </View>
     );
   }
 
   if (isError) {
     return (
-      <View style={styles.errorContainer}>
+      <View style={[styles.errorContainer, !isDark && styles.errorContainerLight]}>
         <ErrorBanner message={t('profile:sync_failed')} />
         <TouchableOpacity style={styles.retryBtn} onPress={() => refetch()}>
           <Text style={styles.retryBtnText}>{t('profile:retry_sync')}</Text>
@@ -269,27 +279,33 @@ export default function ProfileDashboardScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
-      <StatusBar barStyle="light-content" />
-      <View style={styles.topGlow} pointerEvents="none" />
-      <View style={styles.bottomGlow} pointerEvents="none" />
+    <SafeAreaView style={[styles.container, !isDark && styles.containerLight]} edges={['top', 'bottom']}>
+      <StatusBar
+        barStyle={isDark ? 'light-content' : 'dark-content'}
+        backgroundColor={isDark ? '#0B0D11' : '#F8FAFC'}
+      />
+      <View style={[styles.topGlow, !isDark && styles.topGlowLight]} pointerEvents="none" />
+      <View style={[styles.bottomGlow, !isDark && styles.bottomGlowLight]} pointerEvents="none" />
 
       {/* Screen Top Header */}
       <View style={[styles.topNav, isRTL && styles.rowReverse]}>
         <View style={{ flex: 1 }}>
-          <Text style={[styles.screenTitle, isRTL && styles.textRight]}>
+          <Text style={[styles.screenTitle, !isDark && styles.screenTitleLight, isRTL && styles.textRight]}>
             {t('profile:header_title')}
           </Text>
-          <Text style={[styles.screenSubtitle, isRTL && styles.textRight]}>
+          <Text style={[styles.screenSubtitle, !isDark && styles.screenSubtitleLight, isRTL && styles.textRight]}>
             {t('profile:header_subtitle')}
           </Text>
         </View>
+
+        {/* Quick Theme Toggle in Top Header */}
+        <ThemeToggle />
       </View>
 
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
-        refreshControl={<RefreshControl refreshing={isLoading} onRefresh={refetch} tintColor="#abc7ff" />}
+        refreshControl={<RefreshControl refreshing={isLoading} onRefresh={refetch} tintColor={colors.primary} />}
       >
         {/* Profile Hero Header Card */}
         <ProfileHeaderCard
@@ -303,7 +319,7 @@ export default function ProfileDashboardScreen() {
 
         {/* Navigation Tabs Bar */}
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 16 }}>
-          <View style={styles.tabContainer}>
+          <View style={[styles.tabContainer, !isDark && styles.tabContainerLight]}>
             {[
               { id: 'personal', label: t('profile:tab_personal', { defaultValue: 'Personal' }) },
               { id: 'preferences', label: t('profile:tab_preferences', { defaultValue: 'Preferences' }) },
@@ -312,10 +328,20 @@ export default function ProfileDashboardScreen() {
             ].map((tab) => (
               <TouchableOpacity
                 key={tab.id}
-                style={[styles.tabItem, activeTab === tab.id && styles.tabItemActive]}
+                style={[
+                  styles.tabItem,
+                  !isDark && styles.tabItemLight,
+                  activeTab === tab.id && styles.tabItemActive,
+                ]}
                 onPress={() => setActiveTab(tab.id as any)}
               >
-                <Text style={[styles.tabText, activeTab === tab.id && styles.tabTextActive]}>
+                <Text
+                  style={[
+                    styles.tabText,
+                    !isDark && styles.tabTextLight,
+                    activeTab === tab.id && styles.tabTextActive,
+                  ]}
+                >
                   {tab.label}
                 </Text>
               </TouchableOpacity>
@@ -325,8 +351,8 @@ export default function ProfileDashboardScreen() {
 
         {/* TAB 1: PERSONAL DETAILS */}
         {activeTab === 'personal' && (
-          <View style={styles.tabContentCard}>
-            <Text style={[styles.sectionHeading, isRTL && styles.textRight]}>
+          <View style={[styles.tabContentCard, !isDark && styles.tabContentCardLight]}>
+            <Text style={[styles.sectionHeading, !isDark && styles.sectionHeadingLight, isRTL && styles.textRight]}>
               {t('profile:personal_details')}
             </Text>
 
@@ -334,25 +360,25 @@ export default function ProfileDashboardScreen() {
             {profileErrorMsg && <ErrorBanner message={profileErrorMsg} />}
 
             <View style={styles.formGroup}>
-              <Text style={[styles.inputLabel, isRTL && styles.textRight]}>Full Name</Text>
+              <Text style={[styles.inputLabel, !isDark && styles.inputLabelLight, isRTL && styles.textRight]}>{t('profile:full_name')}</Text>
               <TextInput
-                style={[styles.textInput, isRTL && styles.textRight]}
+                style={[styles.textInput, !isDark && styles.textInputLight, isRTL && styles.textRight]}
                 value={fullName}
                 onChangeText={setFullName}
-                placeholder={t('profile:full_name_placeholder')}
-                placeholderTextColor="#8e9192"
+                placeholder="Driver Name"
+                placeholderTextColor={isDark ? '#8e9192' : '#94A3B8'}
               />
             </View>
 
             <View style={styles.formGroup}>
-              <Text style={[styles.inputLabel, isRTL && styles.textRight]}>{t('profile:phone_number_label')}</Text>
+              <Text style={[styles.inputLabel, !isDark && styles.inputLabelLight, isRTL && styles.textRight]}>{t('profile:phone_number')}</Text>
               <TextInput
-                style={[styles.textInput, isRTL && styles.textRight]}
+                style={[styles.textInput, !isDark && styles.textInputLight, isRTL && styles.textRight]}
                 value={phoneNumber}
                 onChangeText={setPhoneNumber}
                 keyboardType="phone-pad"
                 placeholder="+1 234 567 8900"
-                placeholderTextColor="#8e9192"
+                placeholderTextColor={isDark ? '#8e9192' : '#94A3B8'}
               />
             </View>
 
@@ -362,7 +388,7 @@ export default function ProfileDashboardScreen() {
               disabled={updateProfile.isPending}
             >
               {updateProfile.isPending ? (
-                <ActivityIndicator size="small" color="#131313" />
+                <ActivityIndicator size="small" color="#FFFFFF" />
               ) : (
                 <Text style={styles.primaryActionText}>{t('profile:save_details')}</Text>
               )}
@@ -372,17 +398,51 @@ export default function ProfileDashboardScreen() {
 
         {/* TAB 2: PREFERENCES */}
         {activeTab === 'preferences' && (
-          <View style={styles.tabContentCard}>
-            <Text style={[styles.sectionHeading, isRTL && styles.textRight]}>
+          <View style={[styles.tabContentCard, !isDark && styles.tabContentCardLight]}>
+            <Text style={[styles.sectionHeading, !isDark && styles.sectionHeadingLight, isRTL && styles.textRight]}>
               {t('profile:app_preferences')}
             </Text>
 
             {prefSuccessMsg && <View style={styles.successBanner}><Text style={styles.successText}>{prefSuccessMsg}</Text></View>}
             {prefErrorMsg && <ErrorBanner message={prefErrorMsg} />}
 
+            {/* Appearance Theme Selector */}
+            <View style={styles.formGroup}>
+              <Text style={[styles.inputLabel, !isDark && styles.inputLabelLight, isRTL && styles.textRight]}>
+                {t('profile:theme_mode', { defaultValue: 'Appearance & Theme' })}
+              </Text>
+              <View style={styles.pillRow}>
+                {[
+                  { mode: 'dark', label: '🌙 Dark Mode' },
+                  { mode: 'light', label: '☀️ Light Mode' },
+                  { mode: 'system', label: '📱 System Default' },
+                ].map((item) => (
+                  <TouchableOpacity
+                    key={item.mode}
+                    style={[
+                      styles.pillOption,
+                      !isDark && styles.pillOptionLight,
+                      themeMode === item.mode && (isDark ? styles.pillOptionActive : styles.pillOptionActiveLight),
+                    ]}
+                    onPress={() => setThemeMode(item.mode as any)}
+                  >
+                    <Text
+                      style={[
+                        styles.pillText,
+                        !isDark && styles.pillTextLight,
+                        themeMode === item.mode && (isDark ? styles.pillTextActive : styles.pillTextActiveLightText),
+                      ]}
+                    >
+                      {item.label}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
+
             {/* Language Selector */}
             <View style={styles.formGroup}>
-              <Text style={[styles.inputLabel, isRTL && styles.textRight]}>{t('profile:language')}</Text>
+              <Text style={[styles.inputLabel, !isDark && styles.inputLabelLight, isRTL && styles.textRight]}>{t('profile:language')}</Text>
               <View style={styles.pillRow}>
                 {[
                   { code: 'EN', label: 'English', target: 'en' },
@@ -391,13 +451,23 @@ export default function ProfileDashboardScreen() {
                 ].map((item) => (
                   <TouchableOpacity
                     key={item.code}
-                    style={[styles.pillOption, (currentLanguage.toUpperCase() === item.code || lang === item.code) && styles.pillOptionActive]}
+                    style={[
+                      styles.pillOption,
+                      !isDark && styles.pillOptionLight,
+                      (currentLanguage.toUpperCase() === item.code || lang === item.code) && (isDark ? styles.pillOptionActive : styles.pillOptionActiveLight),
+                    ]}
                     onPress={() => {
                       setLang(item.code as any);
                       setLanguage(item.target as any);
                     }}
                   >
-                    <Text style={[styles.pillText, (currentLanguage.toUpperCase() === item.code || lang === item.code) && styles.pillTextActive]}>
+                    <Text
+                      style={[
+                        styles.pillText,
+                        !isDark && styles.pillTextLight,
+                        (currentLanguage.toUpperCase() === item.code || lang === item.code) && (isDark ? styles.pillTextActive : styles.pillTextActiveLightText),
+                      ]}
+                    >
                       {item.label}
                     </Text>
                   </TouchableOpacity>
@@ -407,15 +477,25 @@ export default function ProfileDashboardScreen() {
 
             {/* Currency Selector */}
             <View style={styles.formGroup}>
-              <Text style={[styles.inputLabel, isRTL && styles.textRight]}>{t('profile:currency')}</Text>
+              <Text style={[styles.inputLabel, !isDark && styles.inputLabelLight, isRTL && styles.textRight]}>{t('profile:currency')}</Text>
               <View style={styles.pillRow}>
                 {['EUR', 'USD', 'MAD', 'GBP'].map((curr) => (
                   <TouchableOpacity
                     key={curr}
-                    style={[styles.pillOption, currency === curr && styles.pillOptionActive]}
+                    style={[
+                      styles.pillOption,
+                      !isDark && styles.pillOptionLight,
+                      currency === curr && (isDark ? styles.pillOptionActive : styles.pillOptionActiveLight),
+                    ]}
                     onPress={() => setCurrency(curr as any)}
                   >
-                    <Text style={[styles.pillText, currency === curr && styles.pillTextActive]}>
+                    <Text
+                      style={[
+                        styles.pillText,
+                        !isDark && styles.pillTextLight,
+                        currency === curr && (isDark ? styles.pillTextActive : styles.pillTextActiveLightText),
+                      ]}
+                    >
                       {curr}
                     </Text>
                   </TouchableOpacity>
@@ -425,7 +505,7 @@ export default function ProfileDashboardScreen() {
 
             {/* Distance Unit Selector */}
             <View style={styles.formGroup}>
-              <Text style={[styles.inputLabel, isRTL && styles.textRight]}>{t('profile:distance_unit')}</Text>
+              <Text style={[styles.inputLabel, !isDark && styles.inputLabelLight, isRTL && styles.textRight]}>{t('profile:distance_unit')}</Text>
               <View style={styles.pillRow}>
                 {[
                   { code: 'KM', label: t('profile:kilometers') },
@@ -433,10 +513,20 @@ export default function ProfileDashboardScreen() {
                 ].map((u) => (
                   <TouchableOpacity
                     key={u.code}
-                    style={[styles.pillOption, unit === u.code && styles.pillOptionActive]}
+                    style={[
+                      styles.pillOption,
+                      !isDark && styles.pillOptionLight,
+                      unit === u.code && (isDark ? styles.pillOptionActive : styles.pillOptionActiveLight),
+                    ]}
                     onPress={() => setUnit(u.code as any)}
                   >
-                    <Text style={[styles.pillText, unit === u.code && styles.pillTextActive]}>
+                    <Text
+                      style={[
+                        styles.pillText,
+                        !isDark && styles.pillTextLight,
+                        unit === u.code && (isDark ? styles.pillTextActive : styles.pillTextActiveLightText),
+                      ]}
+                    >
                       {u.label}
                     </Text>
                   </TouchableOpacity>
@@ -445,29 +535,29 @@ export default function ProfileDashboardScreen() {
             </View>
 
             {/* Notification Toggles */}
-            <View style={[styles.switchRow, isRTL && styles.rowReverse]}>
+            <View style={[styles.switchRow, !isDark && styles.switchRowLight, isRTL && styles.rowReverse]}>
               <View style={{ flex: 1, marginRight: 12 }}>
-                <Text style={styles.switchTitle}>{t('profile:push_notifications_title')}</Text>
-                <Text style={styles.switchSubtitle}>{t('profile:push_notifications_subtitle')}</Text>
+                <Text style={[styles.switchTitle, !isDark && styles.switchTitleLight]}>{t('profile:push_notifications_title')}</Text>
+                <Text style={[styles.switchSubtitle, !isDark && styles.switchSubtitleLight]}>{t('profile:push_notifications_subtitle')}</Text>
               </View>
               <Switch
                 value={pushEnabled}
                 onValueChange={setPushEnabled}
-                thumbColor={pushEnabled ? '#abc7ff' : '#444748'}
-                trackColor={{ false: '#2a2a2a', true: '#abc7ff50' }}
+                thumbColor={pushEnabled ? '#3B82F6' : (isDark ? '#444748' : '#CBD5E1')}
+                trackColor={{ false: isDark ? '#2a2a2a' : '#E2E8F0', true: 'rgba(59, 130, 246, 0.4)' }}
               />
             </View>
 
-            <View style={[styles.switchRow, isRTL && styles.rowReverse]}>
+            <View style={[styles.switchRow, !isDark && styles.switchRowLight, isRTL && styles.rowReverse]}>
               <View style={{ flex: 1, marginRight: 12 }}>
-                <Text style={styles.switchTitle}>{t('profile:email_notifications_title')}</Text>
-                <Text style={styles.switchSubtitle}>{t('profile:email_notifications_subtitle')}</Text>
+                <Text style={[styles.switchTitle, !isDark && styles.switchTitleLight]}>{t('profile:email_notifications_title')}</Text>
+                <Text style={[styles.switchSubtitle, !isDark && styles.switchSubtitleLight]}>{t('profile:email_notifications_subtitle')}</Text>
               </View>
               <Switch
                 value={emailEnabled}
                 onValueChange={setEmailEnabled}
-                thumbColor={emailEnabled ? '#abc7ff' : '#444748'}
-                trackColor={{ false: '#2a2a2a', true: '#abc7ff50' }}
+                thumbColor={emailEnabled ? '#3B82F6' : (isDark ? '#444748' : '#CBD5E1')}
+                trackColor={{ false: isDark ? '#2a2a2a' : '#E2E8F0', true: 'rgba(59, 130, 246, 0.4)' }}
               />
             </View>
 
@@ -477,7 +567,7 @@ export default function ProfileDashboardScreen() {
               disabled={updatePreferences.isPending}
             >
               {updatePreferences.isPending ? (
-                <ActivityIndicator size="small" color="#131313" />
+                <ActivityIndicator size="small" color="#FFFFFF" />
               ) : (
                 <Text style={styles.primaryActionText}>{t('profile:update_preferences')}</Text>
               )}
@@ -492,8 +582,8 @@ export default function ProfileDashboardScreen() {
             <ActiveSessionsCard />
 
             {/* Password Change Card */}
-            <View style={styles.tabContentCard}>
-              <Text style={[styles.sectionHeading, isRTL && styles.textRight]}>
+            <View style={[styles.tabContentCard, !isDark && styles.tabContentCardLight]}>
+              <Text style={[styles.sectionHeading, !isDark && styles.sectionHeadingLight, isRTL && styles.textRight]}>
                 {t('profile:security_credentials')}
               </Text>
 
@@ -501,38 +591,38 @@ export default function ProfileDashboardScreen() {
               {pwdErrorMsg && <ErrorBanner message={pwdErrorMsg} />}
 
               <View style={styles.formGroup}>
-                <Text style={[styles.inputLabel, isRTL && styles.textRight]}>{t('profile:current_password_label')}</Text>
+                <Text style={[styles.inputLabel, !isDark && styles.inputLabelLight, isRTL && styles.textRight]}>{t('profile:current_password_label')}</Text>
                 <TextInput
-                  style={[styles.textInput, isRTL && styles.textRight]}
+                  style={[styles.textInput, !isDark && styles.textInputLight, isRTL && styles.textRight]}
                   value={oldPassword}
                   onChangeText={setOldPassword}
                   secureTextEntry
                   placeholder="••••••••"
-                  placeholderTextColor="#8e9192"
+                  placeholderTextColor={isDark ? '#8e9192' : '#94A3B8'}
                 />
               </View>
 
               <View style={styles.formGroup}>
-                <Text style={[styles.inputLabel, isRTL && styles.textRight]}>{t('profile:new_password_label')}</Text>
+                <Text style={[styles.inputLabel, !isDark && styles.inputLabelLight, isRTL && styles.textRight]}>{t('profile:new_password_label')}</Text>
                 <TextInput
-                  style={[styles.textInput, isRTL && styles.textRight]}
+                  style={[styles.textInput, !isDark && styles.textInputLight, isRTL && styles.textRight]}
                   value={newPassword}
                   onChangeText={setNewPassword}
                   secureTextEntry
                   placeholder="••••••••"
-                  placeholderTextColor="#8e9192"
+                  placeholderTextColor={isDark ? '#8e9192' : '#94A3B8'}
                 />
               </View>
 
               <View style={styles.formGroup}>
-                <Text style={[styles.inputLabel, isRTL && styles.textRight]}>{t('profile:confirm_new_password_label')}</Text>
+                <Text style={[styles.inputLabel, !isDark && styles.inputLabelLight, isRTL && styles.textRight]}>{t('profile:confirm_new_password_label')}</Text>
                 <TextInput
-                  style={[styles.textInput, isRTL && styles.textRight]}
+                  style={[styles.textInput, !isDark && styles.textInputLight, isRTL && styles.textRight]}
                   value={confirmPassword}
                   onChangeText={setConfirmPassword}
                   secureTextEntry
                   placeholder="••••••••"
-                  placeholderTextColor="#8e9192"
+                  placeholderTextColor={isDark ? '#8e9192' : '#94A3B8'}
                 />
               </View>
 
@@ -542,7 +632,7 @@ export default function ProfileDashboardScreen() {
                 disabled={changePassword.isPending}
               >
                 {changePassword.isPending ? (
-                  <ActivityIndicator size="small" color="#131313" />
+                  <ActivityIndicator size="small" color="#FFFFFF" />
                 ) : (
                   <Text style={styles.primaryActionText}>{t('profile:change_password')}</Text>
                 )}
@@ -565,21 +655,21 @@ export default function ProfileDashboardScreen() {
 
         {/* TAB 4: STORAGE & APP */}
         {activeTab === 'storage' && (
-          <View style={styles.tabContentCard}>
-            <Text style={[styles.sectionHeading, isRTL && styles.textRight]}>
+          <View style={[styles.tabContentCard, !isDark && styles.tabContentCardLight]}>
+            <Text style={[styles.sectionHeading, !isDark && styles.sectionHeadingLight, isRTL && styles.textRight]}>
               {t('profile:data_storage_title', { defaultValue: 'Data & App Storage' })}
             </Text>
-            <Text style={[styles.sectionSubheading, isRTL && styles.textRight]}>
+            <Text style={[styles.sectionSubheading, !isDark && styles.sectionSubheadingLight, isRTL && styles.textRight]}>
               {t('profile:data_storage_subtitle', { defaultValue: 'Manage temporary cached files, images, and local data' })}
             </Text>
 
             {storageMsg && <View style={styles.successBanner}><Text style={styles.successText}>{storageMsg}</Text></View>}
 
-            <TouchableOpacity style={styles.clearCacheCardBtn} onPress={handleClearCache}>
+            <TouchableOpacity style={[styles.clearCacheCardBtn, !isDark && styles.clearCacheCardBtnLight]} onPress={handleClearCache}>
               <Svg width="20" height="20" viewBox="0 0 24 24" fill="none">
                 <Path
                   d="M19 8l-4 4h3c0 3.31-2.69 6-6 6-1.01 0-1.97-.25-2.8-.7l-1.46 1.46C9.01 19.43 10.93 20 13 20c4.42 0 8-3.58 8-8h3l-4-4zM6 12c0-3.31 2.69-6 6-6 1.01 0 1.97.25 2.8.7l1.46-1.46C14.99 4.57 13.07 4 11 4c-4.42 0-8 3.58-8 8H0l4 4 4-4H5z"
-                  fill="#abc7ff"
+                  fill="#3B82F6"
                 />
               </Svg>
               <Text style={styles.clearCacheText}>
@@ -588,7 +678,7 @@ export default function ProfileDashboardScreen() {
             </TouchableOpacity>
 
             <View style={styles.versionFooter}>
-              <Text style={styles.versionText}>
+              <Text style={[styles.versionText, !isDark && styles.versionTextLight]}>
                 {t('profile:app_version', { defaultValue: 'AutoCare AI v1.0.0 Twin Engine' })}
               </Text>
             </View>
@@ -601,7 +691,7 @@ export default function ProfileDashboardScreen() {
             <Svg width="20" height="20" viewBox="0 0 24 24" fill="none">
               <Path
                 d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"
-                fill="#ffb4ab"
+                fill="#EF4444"
               />
             </Svg>
             <Text style={styles.logoutBtnText}>{t('profile:logout_button')}</Text>
@@ -612,22 +702,22 @@ export default function ProfileDashboardScreen() {
       {/* Avatar Picker Modal */}
       <Modal visible={isAvatarModalVisible} transparent animationType="fade">
         <Pressable style={styles.modalOverlay} onPress={() => setIsAvatarModalVisible(false)}>
-          <View style={styles.modalContentCard}>
-            <Text style={styles.modalTitle}>{t('profile:choose_avatar_preset')}</Text>
-            <Text style={styles.modalSubtitle}>{t('profile:select_avatar_subtitle')}</Text>
+          <View style={[styles.modalContentCard, !isDark && styles.modalContentCardLight]}>
+            <Text style={[styles.modalTitle, !isDark && styles.modalTitleLight]}>{t('profile:choose_avatar_preset')}</Text>
+            <Text style={[styles.modalSubtitle, !isDark && styles.modalSubtitleLight]}>{t('profile:select_avatar_subtitle')}</Text>
 
             <View style={styles.presetGrid}>
               {PRESET_AVATARS.map((av) => (
                 <TouchableOpacity
                   key={av.name}
-                  style={styles.presetItem}
+                  style={[styles.presetItem, !isDark && styles.presetItemLight]}
                   onPress={() => {
                     useAuthStore.getState().updateUser({ avatarUrl: av.url });
                     setIsAvatarModalVisible(false);
                   }}
                 >
                   <Image source={{ uri: av.url }} style={styles.presetImg} />
-                  <Text style={styles.presetName}>{av.name}</Text>
+                  <Text style={[styles.presetName, !isDark && styles.presetNameLight]}>{av.name}</Text>
                 </TouchableOpacity>
               ))}
             </View>
@@ -645,10 +735,10 @@ export default function ProfileDashboardScreen() {
             )}
 
             <TouchableOpacity
-              style={styles.modalCloseBtn}
+              style={[styles.modalCloseBtn, !isDark && styles.modalCloseBtnLight]}
               onPress={() => setIsAvatarModalVisible(false)}
             >
-              <Text style={styles.modalCloseText}>{t('common:cancel')}</Text>
+              <Text style={[styles.modalCloseText, !isDark && styles.modalCloseTextLight]}>{t('common:cancel')}</Text>
             </TouchableOpacity>
           </View>
         </Pressable>
@@ -657,27 +747,27 @@ export default function ProfileDashboardScreen() {
       {/* Account Deactivation Modal */}
       <Modal visible={isDeactivateModalVisible} transparent animationType="fade">
         <Pressable style={styles.modalOverlay} onPress={() => setIsDeactivateModalVisible(false)}>
-          <View style={styles.modalContentCard}>
-            <Text style={styles.modalTitle}>{t('profile:confirm_account_deactivation')}</Text>
-            <Text style={styles.modalSubtitle}>{t('profile:confirm_deactivation_subtitle')}</Text>
+          <View style={[styles.modalContentCard, !isDark && styles.modalContentCardLight]}>
+            <Text style={[styles.modalTitle, !isDark && styles.modalTitleLight]}>{t('profile:confirm_account_deactivation')}</Text>
+            <Text style={[styles.modalSubtitle, !isDark && styles.modalSubtitleLight]}>{t('profile:confirm_deactivation_subtitle')}</Text>
 
             {deactivateErrorMsg && <ErrorBanner message={deactivateErrorMsg} />}
 
             <TextInput
-              style={styles.textInput}
+              style={[styles.textInput, !isDark && styles.textInputLight]}
               value={confirmDeactivatePassword}
               onChangeText={setConfirmDeactivatePassword}
               secureTextEntry
               placeholder="••••••••"
-              placeholderTextColor="#8e9192"
+              placeholderTextColor={isDark ? '#8e9192' : '#94A3B8'}
             />
 
             <View style={styles.modalBtnRow}>
               <TouchableOpacity
-                style={styles.modalCancelBtn}
+                style={[styles.modalCancelBtn, !isDark && styles.modalCancelBtnLight]}
                 onPress={() => setIsDeactivateModalVisible(false)}
               >
-                <Text style={styles.modalCancelText}>{t('common:cancel')}</Text>
+                <Text style={[styles.modalCancelText, !isDark && styles.modalCancelTextLight]}>{t('common:cancel')}</Text>
               </TouchableOpacity>
 
               <TouchableOpacity
@@ -706,11 +796,17 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#0B0D11',
   },
+  containerLight: {
+    backgroundColor: '#F8FAFC',
+  },
   loadingContainer: {
     flex: 1,
     backgroundColor: '#0B0D11',
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  loadingContainerLight: {
+    backgroundColor: '#F8FAFC',
   },
   loadingText: {
     marginTop: 12,
@@ -718,11 +814,17 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '500',
   },
+  loadingTextLight: {
+    color: '#64748B',
+  },
   errorContainer: {
     flex: 1,
     backgroundColor: '#0B0D11',
     padding: 24,
     justifyContent: 'center',
+  },
+  errorContainerLight: {
+    backgroundColor: '#F8FAFC',
   },
   retryBtn: {
     marginTop: 16,
@@ -736,6 +838,9 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   topNav: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     paddingHorizontal: 16,
     paddingVertical: 12,
   },
@@ -751,6 +856,9 @@ const styles = StyleSheet.create({
     color: '#F8FAFC',
     letterSpacing: -0.3,
   },
+  screenTitleLight: {
+    color: '#0F172A',
+  },
   topGlow: {
     position: 'absolute',
     top: -80,
@@ -760,6 +868,9 @@ const styles = StyleSheet.create({
     borderRadius: 130,
     backgroundColor: '#3B82F6',
     opacity: 0.08,
+  },
+  topGlowLight: {
+    opacity: 0.04,
   },
   bottomGlow: {
     position: 'absolute',
@@ -771,11 +882,17 @@ const styles = StyleSheet.create({
     backgroundColor: '#1D4ED8',
     opacity: 0.06,
   },
+  bottomGlowLight: {
+    opacity: 0.03,
+  },
   screenSubtitle: {
     fontSize: 12,
     color: '#94A3B8',
     marginTop: 2,
     fontWeight: '500',
+  },
+  screenSubtitleLight: {
+    color: '#64748B',
   },
   scrollView: {
     flex: 1,
@@ -797,6 +914,10 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.08)',
   },
+  tabContainerLight: {
+    backgroundColor: '#E2E8F0',
+    borderColor: 'rgba(15, 23, 42, 0.08)',
+  },
   tabItem: {
     minWidth: 95,
     paddingVertical: 10,
@@ -805,6 +926,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderRadius: 10,
   },
+  tabItemLight: {},
   tabItemActive: {
     backgroundColor: '#2563EB',
   },
@@ -812,6 +934,9 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '600',
     color: '#94A3B8',
+  },
+  tabTextLight: {
+    color: '#64748B',
   },
   tabTextActive: {
     color: '#FFFFFF',
@@ -830,17 +955,32 @@ const styles = StyleSheet.create({
     shadowRadius: 10,
     elevation: 3,
   },
+  tabContentCardLight: {
+    backgroundColor: '#FFFFFF',
+    borderColor: 'rgba(15, 23, 42, 0.08)',
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
+    elevation: 2,
+  },
   sectionHeading: {
     fontSize: 16,
     fontWeight: '700',
     color: '#F8FAFC',
     marginBottom: 14,
   },
+  sectionHeadingLight: {
+    color: '#0F172A',
+  },
   sectionSubheading: {
     fontSize: 12,
     color: '#94A3B8',
     marginTop: -8,
     marginBottom: 14,
+  },
+  sectionSubheadingLight: {
+    color: '#64748B',
   },
   successBanner: {
     backgroundColor: 'rgba(16, 185, 129, 0.12)',
@@ -864,6 +1004,9 @@ const styles = StyleSheet.create({
     color: '#94A3B8',
     marginBottom: 6,
   },
+  inputLabelLight: {
+    color: '#475569',
+  },
   textInput: {
     backgroundColor: '#181D2A',
     borderRadius: 14,
@@ -874,6 +1017,11 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#F8FAFC',
     justifyContent: 'center',
+  },
+  textInputLight: {
+    backgroundColor: '#F1F5F9',
+    borderColor: 'rgba(15, 23, 42, 0.12)',
+    color: '#0F172A',
   },
   primaryActionBtn: {
     backgroundColor: '#2563EB',
@@ -907,17 +1055,32 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.06)',
   },
+  pillOptionLight: {
+    backgroundColor: '#F1F5F9',
+    borderColor: 'rgba(15, 23, 42, 0.08)',
+  },
   pillOptionActive: {
     backgroundColor: 'rgba(59, 130, 246, 0.15)',
     borderColor: '#3B82F6',
+  },
+  pillOptionActiveLight: {
+    backgroundColor: 'rgba(37, 99, 235, 0.12)',
+    borderColor: '#2563EB',
   },
   pillText: {
     fontSize: 12,
     fontWeight: '600',
     color: '#94A3B8',
   },
+  pillTextLight: {
+    color: '#64748B',
+  },
   pillTextActive: {
     color: '#3B82F6',
+    fontWeight: '700',
+  },
+  pillTextActiveLightText: {
+    color: '#2563EB',
     fontWeight: '700',
   },
   switchRow: {
@@ -928,15 +1091,24 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: 'rgba(255, 255, 255, 0.05)',
   },
+  switchRowLight: {
+    borderBottomColor: 'rgba(15, 23, 42, 0.06)',
+  },
   switchTitle: {
     fontSize: 13,
     fontWeight: '600',
     color: '#F8FAFC',
   },
+  switchTitleLight: {
+    color: '#0F172A',
+  },
   switchSubtitle: {
     fontSize: 11,
     color: '#64748B',
     marginTop: 2,
+  },
+  switchSubtitleLight: {
+    color: '#94A3B8',
   },
   dangerCard: {
     backgroundColor: 'rgba(239, 68, 68, 0.08)',
@@ -982,6 +1154,10 @@ const styles = StyleSheet.create({
     padding: 14,
     marginBottom: 16,
   },
+  clearCacheCardBtnLight: {
+    backgroundColor: '#F8FAFC',
+    borderColor: 'rgba(15, 23, 42, 0.08)',
+  },
   clearCacheText: {
     fontSize: 13,
     fontWeight: '600',
@@ -994,6 +1170,9 @@ const styles = StyleSheet.create({
   versionText: {
     fontSize: 11,
     color: '#64748B',
+  },
+  versionTextLight: {
+    color: '#94A3B8',
   },
   logoutSection: {
     marginTop: 16,
@@ -1032,17 +1211,32 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(255, 255, 255, 0.08)',
     padding: 18,
   },
+  modalContentCardLight: {
+    backgroundColor: '#FFFFFF',
+    borderColor: 'rgba(15, 23, 42, 0.12)',
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 16,
+    elevation: 8,
+  },
   modalTitle: {
     fontSize: 16,
     fontWeight: '700',
     color: '#F8FAFC',
     marginBottom: 4,
   },
+  modalTitleLight: {
+    color: '#0F172A',
+  },
   modalSubtitle: {
     fontSize: 12,
     color: '#94A3B8',
     marginBottom: 14,
     lineHeight: 16,
+  },
+  modalSubtitleLight: {
+    color: '#64748B',
   },
   presetGrid: {
     flexDirection: 'row',
@@ -1060,6 +1254,10 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.04)',
   },
+  presetItemLight: {
+    backgroundColor: '#F8FAFC',
+    borderColor: 'rgba(15, 23, 42, 0.08)',
+  },
   presetImg: {
     width: 56,
     height: 56,
@@ -1071,6 +1269,9 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#F8FAFC',
     textAlign: 'center',
+  },
+  presetNameLight: {
+    color: '#0F172A',
   },
   deleteAvatarBtn: {
     paddingVertical: 8,
@@ -1088,10 +1289,16 @@ const styles = StyleSheet.create({
     backgroundColor: '#181D2A',
     borderRadius: 10,
   },
+  modalCloseBtnLight: {
+    backgroundColor: '#F1F5F9',
+  },
   modalCloseText: {
     fontSize: 12,
     color: '#F8FAFC',
     fontWeight: '600',
+  },
+  modalCloseTextLight: {
+    color: '#0F172A',
   },
   modalBtnRow: {
     flexDirection: 'row',
@@ -1106,10 +1313,16 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     backgroundColor: '#181D2A',
   },
+  modalCancelBtnLight: {
+    backgroundColor: '#F1F5F9',
+  },
   modalCancelText: {
     fontSize: 12,
     color: '#F8FAFC',
     fontWeight: '600',
+  },
+  modalCancelTextLight: {
+    color: '#0F172A',
   },
   modalConfirmDeactivateBtn: {
     flex: 1,

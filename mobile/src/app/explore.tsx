@@ -6,9 +6,12 @@ import { useAppTranslation } from '@/i18n/hooks/useAppTranslation';
 import { useVehicles } from '@/hooks/vehicle/useVehicles';
 import { useRTL } from '@/i18n/hooks/useRTL';
 import { useRouter } from 'expo-router';
+import { useAppTheme } from '@/theme/ThemeProvider';
+import { ThemeToggle } from '@/components/ThemeToggle';
 
 export default function ExploreScreen() {
   const { t } = useAppTranslation(['garage', 'common', 'maintenance']);
+  const { isDark, colors } = useAppTheme();
   const { isRTL } = useRTL();
   const router = useRouter();
   const { data: vehiclesData, isLoading, refetch, isRefetching } = useVehicles({ page: 0, size: 50 });
@@ -30,19 +33,25 @@ export default function ExploreScreen() {
   };
 
   return (
-    <View style={styles.background}>
-      <StatusBar barStyle="light-content" backgroundColor="#0B0D11" />
-      <View style={styles.topGlow} pointerEvents="none" />
-      <View style={styles.bottomGlow} pointerEvents="none" />
+    <View style={[styles.background, !isDark && styles.backgroundLight]}>
+      <StatusBar
+        barStyle={isDark ? 'light-content' : 'dark-content'}
+        backgroundColor={isDark ? '#0B0D11' : '#F8FAFC'}
+      />
+      <View style={[styles.topGlow, !isDark && styles.topGlowLight]} pointerEvents="none" />
+      <View style={[styles.bottomGlow, !isDark && styles.bottomGlowLight]} pointerEvents="none" />
 
       <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
         <View style={[styles.header, isRTL && styles.headerRtl]}>
-          <Text style={[styles.headerTitle, isRTL && styles.textRtl]}>
-            {t('garage:dashboard.fleet_health_overview')}
-          </Text>
-          <Text style={[styles.headerSubtitle, isRTL && styles.textRtl]}>
-            {t('garage:dashboard.overall_status')}
-          </Text>
+          <View style={{ flex: 1 }}>
+            <Text style={[styles.headerTitle, !isDark && styles.headerTitleLight, isRTL && styles.textRtl]}>
+              {t('garage:dashboard.fleet_health_overview')}
+            </Text>
+            <Text style={[styles.headerSubtitle, !isDark && styles.headerSubtitleLight, isRTL && styles.textRtl]}>
+              {t('garage:dashboard.overall_status')}
+            </Text>
+          </View>
+          <ThemeToggle />
         </View>
 
         <ScrollView
@@ -52,22 +61,24 @@ export default function ExploreScreen() {
             <RefreshControl
               refreshing={isRefetching}
               onRefresh={refetch}
-              tintColor="#3B82F6"
-              colors={['#3B82F6']}
+              tintColor={colors.primary}
+              colors={[colors.primary]}
             />
           }
         >
           {isLoading ? (
             <View style={styles.loadingContainer}>
-              <ActivityIndicator size="large" color="#3B82F6" />
-              <Text style={styles.loadingText}>{t('common:status.loading')}</Text>
+              <ActivityIndicator size="large" color={colors.primary} />
+              <Text style={[styles.loadingText, !isDark && styles.loadingTextLight]}>
+                {t('common:status.loading')}
+              </Text>
             </View>
           ) : (
             <>
               {/* Card 1: Live Fleet Health Score */}
-              <View style={styles.card}>
+              <View style={[styles.card, !isDark && styles.cardLight]}>
                 <View style={[styles.cardHeader, isRTL && styles.rowRtl]}>
-                  <View style={styles.iconWrapper}>
+                  <View style={[styles.iconWrapper, !isDark && styles.iconWrapperLight]}>
                     <Svg width="18" height="18" viewBox="0 0 24 24" fill="none">
                       <Path
                         d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"
@@ -76,10 +87,10 @@ export default function ExploreScreen() {
                     </Svg>
                   </View>
                   <View style={{ flex: 1 }}>
-                    <Text style={[styles.cardTitle, isRTL && styles.textRtl]}>
+                    <Text style={[styles.cardTitle, !isDark && styles.cardTitleLight, isRTL && styles.textRtl]}>
                       {t('garage:dashboard.fleet_health_overview')}
                     </Text>
-                    <Text style={[styles.cardSubtitle, isRTL && styles.textRtl]}>
+                    <Text style={[styles.cardSubtitle, !isDark && styles.cardSubtitleLight, isRTL && styles.textRtl]}>
                       {totalVehicles > 0
                         ? `${totalVehicles} ${totalVehicles === 1 ? 'vehicle' : 'vehicles'} active`
                         : 'No vehicles in garage'}
@@ -91,16 +102,16 @@ export default function ExploreScreen() {
                   <Text style={[styles.metricNumber, { color: getHealthBadgeColor(avgFleetHealth) }]}>
                     {avgFleetHealth}%
                   </Text>
-                  <Text style={[styles.metricLabel, isRTL && styles.textRtl]}>
+                  <Text style={[styles.metricLabel, !isDark && styles.metricLabelLight, isRTL && styles.textRtl]}>
                     {avgFleetHealth >= 80 ? t('garage:dashboard.optimal_state') : 'Attention Required'}
                   </Text>
                 </View>
               </View>
 
               {/* Card 2: Predictive Maintenance AI */}
-              <View style={styles.card}>
+              <View style={[styles.card, !isDark && styles.cardLight]}>
                 <View style={[styles.cardHeader, isRTL && styles.rowRtl]}>
-                  <View style={styles.iconWrapper}>
+                  <View style={[styles.iconWrapper, !isDark && styles.iconWrapperLight]}>
                     <Svg width="18" height="18" viewBox="0 0 24 24" fill="none">
                       <Path
                         d="M12 2L14.85 8.15L21.5 9.12L16.7 13.8L17.83 20.42L12 17.27L6.17 20.42L7.3 13.8L2.5 9.12L9.15 8.15L12 2Z"
@@ -109,24 +120,24 @@ export default function ExploreScreen() {
                     </Svg>
                   </View>
                   <View style={{ flex: 1 }}>
-                    <Text style={[styles.cardTitle, isRTL && styles.textRtl]}>
+                    <Text style={[styles.cardTitle, !isDark && styles.cardTitleLight, isRTL && styles.textRtl]}>
                       {t('garage:dashboard.predictive_maintenance')}
                     </Text>
-                    <Text style={[styles.cardSubtitle, isRTL && styles.textRtl]}>
+                    <Text style={[styles.cardSubtitle, !isDark && styles.cardSubtitleLight, isRTL && styles.textRtl]}>
                       {t('garage:dashboard.gemini_engine')}
                     </Text>
                   </View>
                 </View>
 
-                <Text style={[styles.cardDescription, isRTL && styles.textRtl]}>
+                <Text style={[styles.cardDescription, !isDark && styles.cardDescriptionLight, isRTL && styles.textRtl]}>
                   {t('garage:dashboard.telemetry_description')}
                 </Text>
               </View>
 
               {/* Card 3: Vehicles Fleet Breakdown */}
               {totalVehicles > 0 && (
-                <View style={styles.card}>
-                  <Text style={[styles.sectionTitle, isRTL && styles.textRtl]}>
+                <View style={[styles.card, !isDark && styles.cardLight]}>
+                  <Text style={[styles.sectionTitle, !isDark && styles.sectionTitleLight, isRTL && styles.textRtl]}>
                     Fleet Breakdown
                   </Text>
 
@@ -134,12 +145,12 @@ export default function ExploreScreen() {
                     {vehicles.map((v) => {
                       const score = v.completenessScore != null ? v.completenessScore : 85;
                       return (
-                        <View key={v.id} style={[styles.vehicleItem, isRTL && styles.rowRtl]}>
+                        <View key={v.id} style={[styles.vehicleItem, !isDark && styles.vehicleItemLight, isRTL && styles.rowRtl]}>
                           <View style={{ flex: 1, minWidth: 0 }}>
-                            <Text style={[styles.vehicleName, isRTL && styles.textRtl]} numberOfLines={1}>
+                            <Text style={[styles.vehicleName, !isDark && styles.vehicleNameLight, isRTL && styles.textRtl]} numberOfLines={1}>
                               {v.year} {v.brandName} {v.modelName}
                             </Text>
-                            <Text style={[styles.vehicleSub, isRTL && styles.textRtl]} numberOfLines={1}>
+                            <Text style={[styles.vehicleSub, !isDark && styles.vehicleSubLight, isRTL && styles.textRtl]} numberOfLines={1}>
                               {v.currentMileage ? `${v.currentMileage.toLocaleString()} ${v.mileageUnit || 'KM'}` : '0 KM'}
                               {v.nickname ? ` • "${v.nickname}"` : ''}
                             </Text>
@@ -170,6 +181,9 @@ const styles = StyleSheet.create({
     position: 'relative',
     overflow: 'hidden',
   },
+  backgroundLight: {
+    backgroundColor: '#F8FAFC',
+  },
   topGlow: {
     position: 'absolute',
     top: -80,
@@ -179,6 +193,9 @@ const styles = StyleSheet.create({
     borderRadius: 130,
     backgroundColor: '#3B82F6',
     opacity: 0.08,
+  },
+  topGlowLight: {
+    opacity: 0.04,
   },
   bottomGlow: {
     position: 'absolute',
@@ -190,6 +207,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#1D4ED8',
     opacity: 0.06,
   },
+  bottomGlowLight: {
+    opacity: 0.03,
+  },
   safeArea: {
     flex: 1,
     width: '100%',
@@ -198,11 +218,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
   },
   header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     paddingVertical: 14,
     marginBottom: 6,
   },
   headerRtl: {
-    alignItems: 'flex-end',
+    flexDirection: 'row-reverse',
   },
   headerTitle: {
     fontSize: 20,
@@ -210,11 +233,17 @@ const styles = StyleSheet.create({
     color: '#F8FAFC',
     letterSpacing: -0.3,
   },
+  headerTitleLight: {
+    color: '#0F172A',
+  },
   headerSubtitle: {
     fontSize: 12,
     color: '#94A3B8',
     marginTop: 2,
     fontWeight: '500',
+  },
+  headerSubtitleLight: {
+    color: '#64748B',
   },
   textRtl: {
     textAlign: 'right',
@@ -237,6 +266,9 @@ const styles = StyleSheet.create({
     color: '#94A3B8',
     fontWeight: '500',
   },
+  loadingTextLight: {
+    color: '#64748B',
+  },
   card: {
     backgroundColor: '#141824',
     borderRadius: 18,
@@ -248,6 +280,15 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.35,
     shadowRadius: 10,
     elevation: 3,
+  },
+  cardLight: {
+    backgroundColor: '#FFFFFF',
+    borderColor: 'rgba(15, 23, 42, 0.08)',
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
+    elevation: 2,
   },
   cardHeader: {
     flexDirection: 'row',
@@ -265,14 +306,24 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  iconWrapperLight: {
+    backgroundColor: 'rgba(37, 99, 235, 0.08)',
+    borderColor: 'rgba(37, 99, 235, 0.2)',
+  },
   cardTitle: {
     fontSize: 15,
     fontWeight: '700',
     color: '#F8FAFC',
   },
+  cardTitleLight: {
+    color: '#0F172A',
+  },
   cardSubtitle: {
     fontSize: 12,
     color: '#94A3B8',
+  },
+  cardSubtitleLight: {
+    color: '#64748B',
   },
   metricBig: {
     alignItems: 'flex-start',
@@ -288,16 +339,25 @@ const styles = StyleSheet.create({
     marginTop: 2,
     fontWeight: '500',
   },
+  metricLabelLight: {
+    color: '#64748B',
+  },
   cardDescription: {
     fontSize: 13,
     color: '#94A3B8',
     lineHeight: 18,
+  },
+  cardDescriptionLight: {
+    color: '#475569',
   },
   sectionTitle: {
     fontSize: 14,
     fontWeight: '700',
     color: '#F8FAFC',
     marginBottom: 12,
+  },
+  sectionTitleLight: {
+    color: '#0F172A',
   },
   vehiclesList: {
     gap: 8,
@@ -313,15 +373,25 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.04)',
   },
+  vehicleItemLight: {
+    backgroundColor: '#F8FAFC',
+    borderColor: 'rgba(15, 23, 42, 0.06)',
+  },
   vehicleName: {
     fontSize: 13,
     fontWeight: '600',
     color: '#F8FAFC',
   },
+  vehicleNameLight: {
+    color: '#0F172A',
+  },
   vehicleSub: {
     fontSize: 11,
     color: '#64748B',
     marginTop: 2,
+  },
+  vehicleSubLight: {
+    color: '#94A3B8',
   },
   scorePill: {
     paddingHorizontal: 8,
@@ -333,4 +403,3 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
 });
-

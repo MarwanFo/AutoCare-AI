@@ -2,6 +2,7 @@ import React from 'react';
 import { Image, StyleSheet, Text, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useAppTranslation } from '@/i18n/hooks/useAppTranslation';
+import { useAppTheme } from '@/theme/ThemeProvider';
 
 interface BrandHeaderProps {
   subtitle?: string;
@@ -9,6 +10,7 @@ interface BrandHeaderProps {
 
 export function BrandHeader({ subtitle }: BrandHeaderProps) {
   const { t } = useAppTranslation('auth');
+  const { isDark } = useAppTheme();
 
   return (
     <Animated.View
@@ -17,7 +19,7 @@ export function BrandHeader({ subtitle }: BrandHeaderProps) {
     >
       {/* Automotive Brand Logo with Ambient Glow */}
       <View style={styles.logoWrapper}>
-        <View style={styles.logoGlow} pointerEvents="none" />
+        <View style={[styles.logoGlow, !isDark && styles.logoGlowLight]} pointerEvents="none" />
         <Image
           source={require('@/assets/images/autocare-logo.png')}
           style={styles.logoImage}
@@ -27,7 +29,9 @@ export function BrandHeader({ subtitle }: BrandHeaderProps) {
       </View>
 
       {/* Tagline Subtitle */}
-      <Text style={styles.subtitle}>{subtitle || t('auth:subtitle')}</Text>
+      <Text style={[styles.subtitle, !isDark && styles.subtitleLight]}>
+        {subtitle || t('auth:subtitle')}
+      </Text>
     </Animated.View>
   );
 }
@@ -57,6 +61,10 @@ const styles = StyleSheet.create({
     shadowRadius: 24,
     elevation: 4,
   },
+  logoGlowLight: {
+    backgroundColor: 'rgba(37, 99, 235, 0.10)',
+    shadowOpacity: 0.3,
+  },
   logoImage: {
     width: 210,
     height: 102,
@@ -71,5 +79,8 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     maxWidth: 300,
     letterSpacing: 0.2,
+  },
+  subtitleLight: {
+    color: '#64748B',
   },
 });

@@ -1,13 +1,14 @@
 import React from 'react';
 import { Tabs } from 'expo-router';
-import { useColorScheme, Image, StyleSheet, Platform } from 'react-native';
+import { Image, Platform } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { Colors } from '@/constants/theme';
+import { useAppTheme } from '@/theme/ThemeProvider';
 import { useAppTranslation } from '@/i18n/hooks/useAppTranslation';
 
 export default function AppTabs() {
   const { t } = useAppTranslation('common');
+  const { isDark, colors } = useAppTheme();
   const insets = useSafeAreaInsets();
   const bottomInset = Math.max(insets.bottom, Platform.OS === 'ios' ? 8 : 6);
 
@@ -16,20 +17,20 @@ export default function AppTabs() {
       screenOptions={{
         headerShown: false,
         tabBarStyle: {
-          backgroundColor: '#0F131D',
-          borderTopColor: 'rgba(255, 255, 255, 0.08)',
+          backgroundColor: isDark ? '#0F131D' : '#FFFFFF',
+          borderTopColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(15, 23, 42, 0.08)',
           borderTopWidth: 1,
           height: 56 + bottomInset,
           paddingBottom: bottomInset,
           paddingTop: 6,
-          elevation: 12,
+          elevation: isDark ? 12 : 6,
           shadowColor: '#000000',
           shadowOffset: { width: 0, height: -4 },
-          shadowOpacity: 0.35,
+          shadowOpacity: isDark ? 0.35 : 0.06,
           shadowRadius: 10,
         },
-        tabBarActiveTintColor: '#3B82F6',
-        tabBarInactiveTintColor: '#94A3B8',
+        tabBarActiveTintColor: colors.primary,
+        tabBarInactiveTintColor: isDark ? '#94A3B8' : '#64748B',
         tabBarLabelStyle: {
           fontSize: 11,
           fontWeight: '700',
