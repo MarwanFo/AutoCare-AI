@@ -499,7 +499,7 @@ export function VehicleOnboardingScreen({
                 <Svg width="24" height="24" viewBox="0 0 24 24" fill="none">
                   <Path
                     d="M12 2L14.85 8.15L21.5 9.12L16.7 13.8L17.83 20.42L12 17.27L6.17 20.42L7.3 13.8L2.5 9.12L9.15 8.15L12 2Z"
-                    fill={store.purchaseCondition === 'BRAND_NEW' ? '#131313' : '#abc7ff'}
+                    fill={store.purchaseCondition === 'BRAND_NEW' ? '#FFFFFF' : '#3B82F6'}
                   />
                 </Svg>
               </View>
@@ -524,7 +524,7 @@ export function VehicleOnboardingScreen({
                 <Svg width="24" height="24" viewBox="0 0 24 24" fill="none">
                   <Path
                     d="M12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22ZM12 20C7.59 20 4 16.41 4 12C4 7.59 7.59 4 12 4C16.41 4 20 7.59 20 12C20 16.41 16.41 20 12 20ZM16.59 7.58L10 14.17L7.41 11.59L6 13L10 17L18 9L16.59 7.58Z"
-                    fill={store.purchaseCondition === 'USED' ? '#131313' : '#abc7ff'}
+                    fill={store.purchaseCondition === 'USED' ? '#FFFFFF' : '#3B82F6'}
                   />
                 </Svg>
               </View>
@@ -832,28 +832,28 @@ const styles = StyleSheet.create({
   searchBar: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#131313',
-    borderRadius: 16,
+    backgroundColor: '#141824',
+    borderRadius: 14,
     paddingHorizontal: 16,
-    height: 56,
-    marginBottom: 20,
-    borderWidth: 1,
-    borderColor: '#2f3131',
+    height: 52,
+    marginBottom: 16,
+    borderWidth: 1.5,
+    borderColor: 'rgba(255, 255, 255, 0.08)',
   },
   searchIcon: {
-    marginRight: 12,
+    marginRight: 10,
   },
   searchInput: {
     flex: 1,
     fontFamily: 'Inter',
-    fontSize: 16,
-    color: '#ffffff',
+    fontSize: 15,
+    color: '#F8FAFC',
     height: '100%',
     padding: 0,
   },
 
   list: {
-    marginTop: 8,
+    marginTop: 6,
   },
   loading: {
     marginTop: 40,
@@ -862,17 +862,17 @@ const styles = StyleSheet.create({
   errorText: {
     fontFamily: 'Inter',
     fontSize: 14,
-    color: '#ffb4ab',
+    color: '#EF4444',
     textAlign: 'center',
     marginTop: 20,
   },
   brandGridWrapper: {
-    gap: 12,
+    gap: 10,
   },
   noModelsText: {
     fontFamily: 'Inter',
     fontSize: 14,
-    color: '#c4c7c8',
+    color: '#94A3B8',
     textAlign: 'center',
     marginTop: 40,
   },
@@ -880,16 +880,16 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   inputGroup: {
-    marginBottom: 24,
+    marginBottom: 20,
   },
   groupLabel: {
     fontFamily: 'Inter',
     fontSize: 12,
     fontWeight: '700',
-    color: '#abc7ff',
+    color: '#3B82F6',
     textTransform: 'uppercase',
-    letterSpacing: 0.5,
-    marginBottom: 12,
+    letterSpacing: 0.8,
+    marginBottom: 10,
   },
   mileageContainer: {
     flexDirection: 'row',
@@ -898,33 +898,33 @@ const styles = StyleSheet.create({
   },
   unitSelector: {
     flexDirection: 'row',
-    backgroundColor: '#131313',
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: '#2f3131',
-    height: 64,
+    backgroundColor: '#141824',
+    borderRadius: 14,
+    borderWidth: 1.5,
+    borderColor: 'rgba(255, 255, 255, 0.08)',
+    height: 58,
     padding: 4,
     alignItems: 'center',
   },
   unitPill: {
     height: '100%',
-    paddingHorizontal: 16,
+    paddingHorizontal: 14,
     justifyContent: 'center',
     alignItems: 'center',
-    borderRadius: 12,
+    borderRadius: 10,
     backgroundColor: 'transparent',
   },
   unitPillActive: {
-    backgroundColor: '#2e3132',
+    backgroundColor: '#2563EB',
   },
   unitPillText: {
     fontFamily: 'Inter',
     fontSize: 13,
     fontWeight: '700',
-    color: '#c4c7c8',
+    color: '#94A3B8',
   },
   unitPillTextActive: {
-    color: '#ffffff',
+    color: '#FFFFFF',
   },
   selectorGrid: {
     flexDirection: 'row',
@@ -934,9 +934,9 @@ const styles = StyleSheet.create({
   selectorButton: {
     flex: 1,
     minWidth: '45%',
-    backgroundColor: '#131313',
-    borderColor: '#2f3131',
-    borderWidth: 1,
+    backgroundColor: '#141824',
+    borderColor: 'rgba(255, 255, 255, 0.08)',
+    borderWidth: 1.5,
     paddingVertical: 14,
     paddingHorizontal: 12,
     borderRadius: 12,
@@ -944,114 +944,115 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   selectorButtonActive: {
-    borderColor: '#abc7ff',
-    backgroundColor: '#1b2333',
+    borderColor: '#3B82F6',
+    backgroundColor: 'rgba(59, 130, 246, 0.15)',
   },
   selectorText: {
     fontFamily: 'Inter',
     fontSize: 14,
     fontWeight: '600',
-    color: '#c4c7c8',
+    color: '#94A3B8',
   },
   selectorTextActive: {
-    color: '#ffffff',
+    color: '#F8FAFC',
+    fontWeight: '700',
   },
   primarySwitchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#1c1c1c',
-    borderRadius: 20,
+    backgroundColor: '#141824',
+    borderRadius: 16,
     borderWidth: 1,
-    borderColor: '#2f3131',
+    borderColor: 'rgba(255, 255, 255, 0.08)',
     padding: 16,
     marginTop: 8,
-    marginBottom: 32,
+    marginBottom: 24,
   },
   switchLabel: {
     fontFamily: 'Inter',
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#ffffff',
-    marginBottom: 4,
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#F8FAFC',
+    marginBottom: 3,
   },
   switchSublabel: {
     fontFamily: 'Inter',
     fontSize: 12,
-    color: '#c4c7c8',
+    color: '#94A3B8',
   },
   conditionCard: {
-    backgroundColor: '#131313',
-    borderColor: '#2f3131',
-    borderWidth: 1,
-    borderRadius: 20,
-    padding: 20,
-    marginBottom: 16,
+    backgroundColor: '#141824',
+    borderColor: 'rgba(255, 255, 255, 0.08)',
+    borderWidth: 1.5,
+    borderRadius: 18,
+    padding: 18,
+    marginBottom: 14,
     alignSelf: 'stretch',
   },
   conditionCardActive: {
-    borderColor: '#abc7ff',
-    backgroundColor: '#1b2333',
+    borderColor: '#3B82F6',
+    backgroundColor: 'rgba(59, 130, 246, 0.12)',
   },
   conditionHeader: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    gap: 16,
+    gap: 14,
   },
   conditionIconWrapper: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: '#2e313250',
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: 'rgba(59, 130, 246, 0.12)',
     alignItems: 'center',
     justifyContent: 'center',
   },
   conditionIconWrapperActive: {
-    backgroundColor: '#abc7ff',
+    backgroundColor: '#3B82F6',
   },
   conditionTitleContainer: {
     flex: 1,
   },
   conditionTitle: {
     fontFamily: 'Inter',
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: '700',
-    color: '#ffffff',
-    marginBottom: 6,
+    color: '#F8FAFC',
+    marginBottom: 4,
   },
   conditionDescription: {
     fontFamily: 'Inter',
     fontSize: 13,
-    color: '#c4c7c8',
+    color: '#94A3B8',
     lineHeight: 18,
   },
   healthIntroText: {
     fontFamily: 'Inter',
     fontSize: 14,
-    color: '#c4c7c8',
-    marginBottom: 20,
+    color: '#94A3B8',
+    marginBottom: 16,
     lineHeight: 20,
   },
   healthRow: {
-    backgroundColor: '#1c1c1c',
+    backgroundColor: '#141824',
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: '#2f3131',
+    borderColor: 'rgba(255, 255, 255, 0.08)',
     padding: 16,
-    marginBottom: 16,
+    marginBottom: 12,
   },
   healthHeaderContainer: {
-    marginBottom: 12,
+    marginBottom: 10,
   },
   healthLabel: {
     fontFamily: 'Inter',
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '700',
-    color: '#ffffff',
+    color: '#F8FAFC',
   },
   healthDesc: {
     fontFamily: 'Inter',
     fontSize: 12,
-    color: '#c4c7c8',
+    color: '#94A3B8',
     marginTop: 2,
   },
   healthButtonsContainer: {
@@ -1060,39 +1061,39 @@ const styles = StyleSheet.create({
   },
   healthBtn: {
     flex: 1,
-    backgroundColor: '#131313',
-    borderColor: '#2f3131',
+    backgroundColor: '#181D2A',
+    borderColor: 'rgba(255, 255, 255, 0.08)',
     borderWidth: 1,
     paddingVertical: 10,
-    borderRadius: 8,
+    borderRadius: 10,
     alignItems: 'center',
     justifyContent: 'center',
   },
   healthBtnGoodActive: {
-    borderColor: '#4caf50',
-    backgroundColor: '#1b3a24',
+    borderColor: '#10B981',
+    backgroundColor: 'rgba(16, 185, 129, 0.15)',
   },
   healthBtnWarningActive: {
-    borderColor: '#ff9800',
-    backgroundColor: '#3d2600',
+    borderColor: '#F59E0B',
+    backgroundColor: 'rgba(245, 158, 11, 0.15)',
   },
   healthBtnCriticalActive: {
-    borderColor: '#f44336',
-    backgroundColor: '#3d1614',
+    borderColor: '#EF4444',
+    backgroundColor: 'rgba(239, 68, 68, 0.15)',
   },
   healthBtnText: {
     fontFamily: 'Inter',
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: '700',
-    color: '#c4c7c8',
+    color: '#94A3B8',
   },
   healthBtnTextGoodActive: {
-    color: '#4caf50',
+    color: '#10B981',
   },
   healthBtnTextWarningActive: {
-    color: '#ff9800',
+    color: '#F59E0B',
   },
   healthBtnTextCriticalActive: {
-    color: '#f44336',
+    color: '#EF4444',
   },
 });

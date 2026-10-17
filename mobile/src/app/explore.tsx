@@ -32,6 +32,9 @@ export default function ExploreScreen() {
   return (
     <View style={styles.background}>
       <StatusBar barStyle="light-content" backgroundColor="#0B0D11" />
+      <View style={styles.topGlow} pointerEvents="none" />
+      <View style={styles.bottomGlow} pointerEvents="none" />
+
       <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
         <View style={[styles.header, isRTL && styles.headerRtl]}>
           <Text style={[styles.headerTitle, isRTL && styles.textRtl]}>
@@ -132,11 +135,11 @@ export default function ExploreScreen() {
                       const score = v.completenessScore != null ? v.completenessScore : 85;
                       return (
                         <View key={v.id} style={[styles.vehicleItem, isRTL && styles.rowRtl]}>
-                          <View style={{ flex: 1 }}>
-                            <Text style={[styles.vehicleName, isRTL && styles.textRtl]}>
+                          <View style={{ flex: 1, minWidth: 0 }}>
+                            <Text style={[styles.vehicleName, isRTL && styles.textRtl]} numberOfLines={1}>
                               {v.year} {v.brandName} {v.modelName}
                             </Text>
-                            <Text style={[styles.vehicleSub, isRTL && styles.textRtl]}>
+                            <Text style={[styles.vehicleSub, isRTL && styles.textRtl]} numberOfLines={1}>
                               {v.currentMileage ? `${v.currentMileage.toLocaleString()} ${v.mileageUnit || 'KM'}` : '0 KM'}
                               {v.nickname ? ` • "${v.nickname}"` : ''}
                             </Text>
@@ -164,9 +167,34 @@ const styles = StyleSheet.create({
   background: {
     flex: 1,
     backgroundColor: '#0B0D11',
+    position: 'relative',
+    overflow: 'hidden',
+  },
+  topGlow: {
+    position: 'absolute',
+    top: -80,
+    right: -80,
+    width: 260,
+    height: 260,
+    borderRadius: 130,
+    backgroundColor: '#3B82F6',
+    opacity: 0.08,
+  },
+  bottomGlow: {
+    position: 'absolute',
+    bottom: -60,
+    left: -60,
+    width: 220,
+    height: 220,
+    borderRadius: 110,
+    backgroundColor: '#1D4ED8',
+    opacity: 0.06,
   },
   safeArea: {
     flex: 1,
+    width: '100%',
+    maxWidth: 850,
+    alignSelf: 'center',
     paddingHorizontal: 16,
   },
   header: {
@@ -195,7 +223,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row-reverse',
   },
   content: {
-    paddingBottom: 40,
+    paddingBottom: 32,
     gap: 12,
   },
   loadingContainer: {
@@ -210,11 +238,16 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   card: {
-    backgroundColor: '#131722',
-    borderRadius: 16,
+    backgroundColor: '#141824',
+    borderRadius: 18,
     padding: 16,
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.08)',
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.35,
+    shadowRadius: 10,
+    elevation: 3,
   },
   cardHeader: {
     flexDirection: 'row',

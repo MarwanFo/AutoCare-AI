@@ -582,6 +582,9 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     height: '92%',
+    maxWidth: 750,
+    width: '100%',
+    alignSelf: 'center',
     paddingTop: 16,
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.08)',
@@ -691,6 +694,7 @@ const styles = StyleSheet.create({
   scrollContainer: {
     flex: 1,
     paddingHorizontal: 16,
+    paddingBottom: 36,
   },
   tabContentContainer: {
     paddingVertical: 14,
@@ -703,12 +707,17 @@ const styles = StyleSheet.create({
     letterSpacing: -0.2,
   },
   componentCard: {
-    backgroundColor: '#131722',
-    borderRadius: 14,
-    padding: 14,
+    backgroundColor: '#141824',
+    borderRadius: 16,
+    padding: 16,
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.08)',
     marginBottom: 10,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 6,
+    elevation: 2,
   },
   componentHeader: {
     flexDirection: 'row',

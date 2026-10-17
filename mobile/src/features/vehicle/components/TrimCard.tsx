@@ -46,10 +46,10 @@ export function TrimCard({ name, isSelected, onPress }: TrimCardProps) {
       </Text>
       {isSelected && (
         <View style={styles.checkIcon}>
-          <Svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+          <Svg width="16" height="16" viewBox="0 0 24 24" fill="none">
             <Path
               d="M9 16.17L4.83 12L3.41 13.41L9 19L21 7L19.59 5.59L9 16.17Z"
-              fill="#abc7ff"
+              fill="#3B82F6"
             />
           </Svg>
         </View>
@@ -63,33 +63,34 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: '#1c1c1c',
-    borderRadius: 16,
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    borderWidth: 1,
-    borderColor: '#2f3131',
+    backgroundColor: '#181D2A',
+    borderRadius: 14,
+    paddingHorizontal: 18,
+    paddingVertical: 14,
+    borderWidth: 1.5,
+    borderColor: 'rgba(255, 255, 255, 0.08)',
     marginBottom: 10,
     alignSelf: 'stretch',
   },
   cardSelected: {
-    borderColor: '#abc7ff',
-    backgroundColor: '#1b2333',
+    borderColor: '#3B82F6',
+    backgroundColor: 'rgba(59, 130, 246, 0.12)',
   },
   trimName: {
     fontFamily: 'Inter',
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '600',
-    color: '#e5e2e1',
+    color: '#F8FAFC',
   },
   trimNameSelected: {
-    color: '#ffffff',
+    color: '#3B82F6',
+    fontWeight: '700',
   },
   checkIcon: {
     width: 24,
     height: 24,
     borderRadius: 12,
-    backgroundColor: '#131e33',
+    backgroundColor: 'rgba(59, 130, 246, 0.2)',
     alignItems: 'center',
     justifyContent: 'center',
   },

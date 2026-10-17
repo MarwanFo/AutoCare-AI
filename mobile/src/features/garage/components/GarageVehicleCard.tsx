@@ -143,9 +143,9 @@ export function GarageVehicleCard({ vehicle, onPress }: GarageVehicleCardProps) 
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: '#131722',
+    backgroundColor: '#141824',
     borderRadius: 18,
-    padding: 18,
+    padding: 16,
     marginBottom: 14,
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.08)',
@@ -160,11 +160,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    marginBottom: 16,
+    marginBottom: 14,
   },
   brandTitleContainer: {
     flex: 1,
     marginRight: 10,
+    minWidth: 0,
   },
   titleText: {
     fontSize: 17,
@@ -212,15 +213,16 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#181D2A',
-    borderRadius: 12,
+    borderRadius: 14,
     paddingVertical: 12,
-    paddingHorizontal: 14,
+    paddingHorizontal: 12,
     marginBottom: 14,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.04)',
+    borderColor: 'rgba(255, 255, 255, 0.05)',
   },
   metricItem: {
     flex: 1,
+    minWidth: 0,
     alignItems: 'flex-start',
   },
   metricHeader: {
@@ -230,9 +232,11 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   metricLabel: {
-    fontSize: 11,
-    color: '#64748B',
-    fontWeight: '500',
+    fontSize: 10,
+    color: '#94A3B8',
+    fontWeight: '600',
+    textTransform: 'uppercase',
+    letterSpacing: 0.3,
   },
   metricValue: {
     fontSize: 13,
@@ -251,6 +255,7 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.1)',
+    maxWidth: '100%',
   },
   plateText: {
     fontSize: 11,

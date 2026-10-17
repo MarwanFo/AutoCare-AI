@@ -41,7 +41,7 @@ export function ProfileHeaderCard({
 
   return (
     <View style={styles.card}>
-      <View style={styles.glowBg} />
+      <View style={styles.topGlow} pointerEvents="none" />
 
       <View style={[styles.contentRow, isRTL && styles.rowReverse]}>
         {/* Avatar with Camera badge */}
@@ -130,7 +130,7 @@ export function ProfileHeaderCard({
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: '#131722',
+    backgroundColor: '#141824',
     borderRadius: 18,
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.08)',
@@ -138,9 +138,21 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     position: 'relative',
     overflow: 'hidden',
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.35,
+    shadowRadius: 10,
+    elevation: 3,
   },
-  glowBg: {
-    display: 'none',
+  topGlow: {
+    position: 'absolute',
+    top: -40,
+    right: -40,
+    width: 140,
+    height: 140,
+    borderRadius: 70,
+    backgroundColor: '#3B82F6',
+    opacity: 0.1,
   },
   contentRow: {
     flexDirection: 'row',

@@ -85,11 +85,11 @@ export function NotificationModal({ visible, onClose, onSelectNotification }: No
   const getSeverityBadgeColor = (severity: string) => {
     switch (severity) {
       case 'DANGER':
-        return { bg: 'rgba(255, 180, 171, 0.15)', border: 'rgba(255, 180, 171, 0.4)', text: '#ffb4ab' };
+        return { bg: 'rgba(239, 68, 68, 0.12)', border: 'rgba(239, 68, 68, 0.3)', text: '#EF4444' };
       case 'WARNING':
-        return { bg: 'rgba(255, 223, 150, 0.15)', border: 'rgba(255, 223, 150, 0.4)', text: '#ffdf96' };
+        return { bg: 'rgba(245, 158, 11, 0.12)', border: 'rgba(245, 158, 11, 0.3)', text: '#F59E0B' };
       default:
-        return { bg: 'rgba(171, 199, 255, 0.15)', border: 'rgba(171, 199, 255, 0.4)', text: '#abc7ff' };
+        return { bg: 'rgba(59, 130, 246, 0.12)', border: 'rgba(59, 130, 246, 0.3)', text: '#3B82F6' };
     }
   };
 
@@ -103,7 +103,7 @@ export function NotificationModal({ visible, onClose, onSelectNotification }: No
               <Svg width="22" height="22" viewBox="0 0 24 24" fill="none">
                 <Path
                   d="M12 22C13.1 22 14 21.1 14 20H10C10 21.1 10.9 22 12 22ZM18 16V11C18 7.93 16.37 5.36 13.5 4.68V4C13.5 3.17 12.83 2.5 12 2.5C11.17 2.5 10.5 3.17 10.5 4V4.68C7.64 5.36 6 7.92 6 11V16L4 18V19H20V18L18 16Z"
-                  fill="#abc7ff"
+                  fill="#3B82F6"
                 />
               </Svg>
               <Text style={styles.headerTitle}>{t('notifications:title')}</Text>
@@ -122,7 +122,7 @@ export function NotificationModal({ visible, onClose, onSelectNotification }: No
                 <Svg width="20" height="20" viewBox="0 0 24 24" fill="none">
                   <Path
                     d="M19 6.41L17.59 5L12 10.59L6.41 5L5 6.41L10.59 12L5 17.59L6.41 19L12 13.41L17.59 19L19 17.59L13.41 12L19 6.41Z"
-                    fill="#c4c6d0"
+                    fill="#94A3B8"
                   />
                 </Svg>
               </TouchableOpacity>
@@ -132,14 +132,14 @@ export function NotificationModal({ visible, onClose, onSelectNotification }: No
           {/* Body */}
           {isLoading ? (
             <View style={styles.loadingContainer}>
-              <ActivityIndicator size="large" color="#abc7ff" />
+              <ActivityIndicator size="large" color="#3B82F6" />
             </View>
           ) : notifications.length === 0 ? (
             <View style={styles.emptyContainer}>
               <Svg width="48" height="48" viewBox="0 0 24 24" fill="none">
                 <Path
                   d="M12 22C13.1 22 14 21.1 14 20H10C10 21.1 10.9 22 12 22ZM18 16V11C18 7.93 16.37 5.36 13.5 4.68V4C13.5 3.17 12.83 2.5 12 2.5C11.17 2.5 10.5 3.17 10.5 4V4.68C7.64 5.36 6 7.92 6 11V16L4 18V19H20V18L18 16Z"
-                  fill="rgba(196, 198, 208, 0.3)"
+                  fill="rgba(148, 163, 184, 0.2)"
                 />
               </Svg>
               <Text style={styles.emptyTitle}>{t('notifications:empty_title')}</Text>
@@ -212,42 +212,48 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   modalContent: {
-    backgroundColor: '#1b1b1f',
+    backgroundColor: '#0B0D11',
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     height: '80%',
+    maxWidth: 600,
+    width: '100%',
+    alignSelf: 'center',
     paddingBottom: Platform.OS === 'ios' ? 34 : 16,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
+    borderColor: 'rgba(255, 255, 255, 0.08)',
   },
   header: {
     paddingHorizontal: 20,
     paddingVertical: 16,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255, 255, 255, 0.08)',
+    borderBottomColor: 'rgba(255, 255, 255, 0.06)',
     justifyContent: 'space-between',
     alignItems: 'center',
   },
   headerTitle: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#e2e2e6',
+    color: '#F8FAFC',
+    letterSpacing: -0.2,
   },
   markAllButton: {
-    paddingHorizontal: 10,
+    paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 8,
-    backgroundColor: 'rgba(171, 199, 255, 0.12)',
+    backgroundColor: 'rgba(59, 130, 246, 0.12)',
+    borderWidth: 1,
+    borderColor: 'rgba(59, 130, 246, 0.25)',
   },
   markAllText: {
     fontSize: 12,
-    fontWeight: '600',
-    color: '#abc7ff',
+    fontWeight: '700',
+    color: '#3B82F6',
   },
   closeButton: {
-    padding: 6,
-    borderRadius: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    padding: 8,
+    borderRadius: 10,
+    backgroundColor: '#181D2A',
   },
   loadingContainer: {
     flex: 1,
@@ -263,12 +269,12 @@ const styles = StyleSheet.create({
   },
   emptyTitle: {
     fontSize: 18,
-    fontWeight: '600',
-    color: '#e2e2e6',
+    fontWeight: '700',
+    color: '#F8FAFC',
   },
   emptySubtitle: {
-    fontSize: 14,
-    color: '#8e9099',
+    fontSize: 13,
+    color: '#94A3B8',
     textAlign: 'center',
   },
   listContent: {
@@ -276,14 +282,16 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   notificationCard: {
-    backgroundColor: '#252529',
+    backgroundColor: '#141824',
     borderRadius: 16,
     padding: 16,
     borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.08)',
     gap: 8,
   },
   unreadCard: {
-    backgroundColor: '#2d2d33',
+    backgroundColor: '#181D2A',
+    borderColor: 'rgba(59, 130, 246, 0.25)',
   },
   cardHeader: {
     justifyContent: 'space-between',
@@ -291,7 +299,7 @@ const styles = StyleSheet.create({
   },
   badge: {
     paddingHorizontal: 8,
-    paddingVertical: 2,
+    paddingVertical: 3,
     borderRadius: 6,
     borderWidth: 1,
   },
@@ -300,17 +308,18 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   dateText: {
-    fontSize: 12,
-    color: '#8e9099',
+    fontSize: 11,
+    color: '#64748B',
+    fontWeight: '500',
   },
   cardTitle: {
     fontSize: 15,
     fontWeight: '700',
-    color: '#e2e2e6',
+    color: '#F8FAFC',
   },
   cardMessage: {
     fontSize: 13,
-    color: '#c4c6d0',
+    color: '#94A3B8',
     lineHeight: 18,
   },
   actionHintRow: {
@@ -321,6 +330,6 @@ const styles = StyleSheet.create({
   actionHintText: {
     fontSize: 12,
     fontWeight: '600',
-    color: '#abc7ff',
+    color: '#3B82F6',
   },
 });

@@ -44,6 +44,9 @@ export default function GarageHomeScreen() {
   return (
     <View style={styles.background}>
       <StatusBar barStyle="light-content" backgroundColor="#0B0D11" />
+      <View style={styles.topGlow} pointerEvents="none" />
+      <View style={styles.bottomGlow} pointerEvents="none" />
+
       <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
         {/* Screen Header */}
         <View style={styles.header}>
@@ -56,9 +59,11 @@ export default function GarageHomeScreen() {
                 />
               </Svg>
             </View>
-            <View>
-              <Text style={styles.headerTitle}>{t('garage:dashboard.title')}</Text>
-              <Text style={styles.headerSubtitle}>
+            <View style={styles.titleTextContainer}>
+              <Text style={styles.headerTitle} numberOfLines={1}>
+                {t('garage:dashboard.title')}
+              </Text>
+              <Text style={styles.headerSubtitle} numberOfLines={1}>
                 {totalVehicles > 0
                   ? t('garage:dashboard.subtitle_active', {
                       count: totalVehicles,
@@ -130,6 +135,28 @@ const styles = StyleSheet.create({
   background: {
     flex: 1,
     backgroundColor: '#0B0D11',
+    position: 'relative',
+    overflow: 'hidden',
+  },
+  topGlow: {
+    position: 'absolute',
+    top: -80,
+    right: -80,
+    width: 260,
+    height: 260,
+    borderRadius: 130,
+    backgroundColor: '#3B82F6',
+    opacity: 0.08,
+  },
+  bottomGlow: {
+    position: 'absolute',
+    bottom: -60,
+    left: -60,
+    width: 220,
+    height: 220,
+    borderRadius: 110,
+    backgroundColor: '#1D4ED8',
+    opacity: 0.06,
   },
   safeArea: {
     flex: 1,
@@ -146,9 +173,16 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   headerTitleRow: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
+    marginRight: 10,
+    minWidth: 0,
+  },
+  titleTextContainer: {
+    flex: 1,
+    minWidth: 0,
   },
   brandBadgeIcon: {
     width: 38,
@@ -178,8 +212,8 @@ const styles = StyleSheet.create({
     gap: 6,
     backgroundColor: '#2563EB',
     paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 10,
+    paddingVertical: 9,
+    borderRadius: 12,
     shadowColor: '#2563EB',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
@@ -193,7 +227,7 @@ const styles = StyleSheet.create({
     letterSpacing: 0.2,
   },
   listContent: {
-    paddingBottom: 40,
+    paddingBottom: 32,
     paddingTop: 4,
   },
 });

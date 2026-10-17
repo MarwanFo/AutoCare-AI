@@ -42,10 +42,10 @@ export function ModelCard({ name, isSelected, onPress }: ModelCardProps) {
       accessibilityState={{ selected: isSelected }}
     >
       <View style={[styles.iconContainer, isSelected && styles.iconContainerSelected]}>
-        <Svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+        <Svg width="22" height="22" viewBox="0 0 24 24" fill="none">
           <Path
             d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5H6.5C5.84 5 5.28 5.42 5.08 6.01L3 12V20C3 20.55 3.45 21 4 21H5C5.55 21 6 20.55 6 20V19H18V20C18 20.55 18.45 21 19 21H20C20.55 21 21 20.55 21 20V12L18.92 6.01ZM6.85 7H17.14L18.22 10.14H5.78L6.85 7ZM19 17H5V13H19V17Z"
-            fill={isSelected ? '#abc7ff' : '#c4c7c8'}
+            fill={isSelected ? '#3B82F6' : '#94A3B8'}
           />
         </Svg>
       </View>
@@ -60,39 +60,40 @@ const styles = StyleSheet.create({
   card: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#1c1c1c',
-    borderRadius: 16,
+    backgroundColor: '#181D2A',
+    borderRadius: 14,
     paddingHorizontal: 16,
     paddingVertical: 14,
-    borderWidth: 1,
-    borderColor: '#2f3131',
+    borderWidth: 1.5,
+    borderColor: 'rgba(255, 255, 255, 0.08)',
     marginBottom: 10,
     alignSelf: 'stretch',
   },
   cardSelected: {
-    borderColor: '#abc7ff',
-    backgroundColor: '#1b2333',
+    borderColor: '#3B82F6',
+    backgroundColor: 'rgba(59, 130, 246, 0.12)',
   },
   iconContainer: {
     width: 40,
     height: 40,
-    borderRadius: 8,
-    backgroundColor: '#2e3132',
+    borderRadius: 10,
+    backgroundColor: '#141824',
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: 16,
+    marginRight: 14,
   },
   iconContainerSelected: {
-    backgroundColor: '#354366',
+    backgroundColor: 'rgba(59, 130, 246, 0.2)',
   },
   modelName: {
     fontFamily: 'Inter',
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '600',
-    color: '#e5e2e1',
+    color: '#F8FAFC',
     flex: 1,
   },
   modelNameSelected: {
-    color: '#ffffff',
+    color: '#3B82F6',
+    fontWeight: '700',
   },
 });

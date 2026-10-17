@@ -77,7 +77,7 @@ export function ForgotPasswordScreen({
       <View style={styles.bottomGlow} pointerEvents="none" />
 
       <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         style={styles.keyboardView}
       >
         <ScrollView
@@ -86,16 +86,15 @@ export function ForgotPasswordScreen({
           showsVerticalScrollIndicator={false}
         >
           {/* Brand header */}
-          <BrandHeader />
+          <BrandHeader subtitle={t('auth:forgot_password_subtitle')} />
 
           {/* Error Banner */}
           <ErrorBanner message={errorMessage} />
 
           {/* Premium Animated Layout Card */}
-          <Animated.View entering={FadeIn.duration(500)} style={styles.animationWrapper}>
+          <Animated.View entering={FadeIn.duration(400)} style={styles.animationWrapper}>
             <AuthCard>
               <View style={styles.cardContent}>
-                
                 {/* Title */}
                 <Text style={styles.cardTitle}>{t('auth:forgot_password_title')}</Text>
 
@@ -117,14 +116,13 @@ export function ForgotPasswordScreen({
                       error={errors.email?.message as string}
                       editable={!isLoading}
                       keyboardType="email-address"
-                      prefixIcon={<MailIcon color={errors.email ? '#ffb4ab' : '#c4c7c8'} />}
+                      prefixIcon={<MailIcon color={errors.email ? '#EF4444' : '#94A3B8'} />}
                     />
                   )}
                 />
 
                 {/* Actions container */}
                 <View style={styles.buttonsContainer}>
-                  {/* Primary Button */}
                   <PrimaryButton
                     title={t('auth:send_reset_link')}
                     isLoading={isLoading}
@@ -156,7 +154,7 @@ export function ForgotPasswordScreen({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#131313',
+    backgroundColor: '#0B0D11',
     position: 'relative',
     overflow: 'hidden',
   },
@@ -168,29 +166,27 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     justifyContent: 'center',
     paddingHorizontal: 20,
-    paddingVertical: 32,
+    paddingVertical: 20,
   },
   topGlow: {
     position: 'absolute',
-    top: '-15%',
-    right: '-15%',
-    width: '75%',
-    aspectRatio: 1,
-    borderRadius: 9999,
-    backgroundColor: '#abc7ff',
-    opacity: 0.05,
-    zIndex: 1,
+    top: -80,
+    right: -80,
+    width: 260,
+    height: 260,
+    borderRadius: 130,
+    backgroundColor: '#3B82F6',
+    opacity: 0.08,
   },
   bottomGlow: {
     position: 'absolute',
-    bottom: '-15%',
-    left: '-15%',
-    width: '60%',
-    aspectRatio: 1,
-    borderRadius: 9999,
-    backgroundColor: '#ffffff',
-    opacity: 0.05,
-    zIndex: 1,
+    bottom: -60,
+    left: -60,
+    width: 220,
+    height: 220,
+    borderRadius: 110,
+    backgroundColor: '#1D4ED8',
+    opacity: 0.06,
   },
   animationWrapper: {
     width: '100%',
@@ -198,42 +194,41 @@ const styles = StyleSheet.create({
   cardContent: {
     alignItems: 'stretch',
     justifyContent: 'center',
-    paddingVertical: 8,
+    paddingVertical: 4,
   },
   cardTitle: {
-    fontSize: 24,
+    fontSize: 22,
     fontFamily: 'Inter',
     fontWeight: '700',
-    color: '#ffffff',
-    marginBottom: 12,
+    color: '#F8FAFC',
+    marginBottom: 8,
     textAlign: 'center',
   },
   cardBody: {
-    fontSize: 14,
+    fontSize: 13,
     fontFamily: 'Inter',
-    color: '#c4c7c8',
-    lineHeight: 22,
+    color: '#94A3B8',
+    lineHeight: 20,
     textAlign: 'center',
-    marginBottom: 24,
+    marginBottom: 20,
   },
   buttonsContainer: {
     width: '100%',
-    marginTop: 16,
+    marginTop: 8,
     alignItems: 'center',
   },
   footer: {
-    marginTop: 32,
+    marginTop: 20,
     flexDirection: 'row',
     justifyContent: 'center',
   },
   footerLinkContainer: {
-    paddingVertical: 8,
+    paddingVertical: 6,
   },
   footerLinkText: {
     fontFamily: 'Inter',
     fontSize: 14,
-    fontWeight: '600',
-    color: '#ffffff',
-    textDecorationLine: 'underline',
+    fontWeight: '700',
+    color: '#3B82F6',
   },
 });

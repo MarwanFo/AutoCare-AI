@@ -25,12 +25,10 @@ export interface EmailActionScreenProps {
   onPrimaryPress: () => void;
   isPrimaryLoading?: boolean;
   
-  // Optional secondary action button (like Resend)
   secondaryButtonTitle?: string;
   onSecondaryPress?: () => void;
   isSecondaryDisabled?: boolean;
 
-  // Optional success banner
   showSuccessConfirmation?: boolean;
   successTitle?: string;
   successText?: string;
@@ -42,36 +40,32 @@ export interface EmailActionScreenProps {
   errorMessage?: string | null;
 }
 
-// Premium envelope with check icon illustration matching Stitch style
+// Premium envelope with check icon illustration matching modern styling
 export function EmailCheckIcon() {
   return (
     <Svg width="64" height="64" viewBox="0 0 64 64" fill="none">
-      {/* Background soft circle */}
-      <Circle cx="32" cy="32" r="32" fill="#202020" />
-      <Circle cx="32" cy="32" r="31" stroke="#2c2c2c" strokeWidth="2" />
+      <Circle cx="32" cy="32" r="32" fill="#141824" />
+      <Circle cx="32" cy="32" r="31" stroke="rgba(59, 130, 246, 0.3)" strokeWidth="2" />
       
-      {/* Envelope path */}
       <Path
         d="M18 22h28c1.65 0 3 1.35 3 3v16c0 1.65-1.35 3-3 3H18c-1.65 0-3-1.35-3-3V25c0-1.65 1.35-3 3-3z"
-        stroke="#e5e2e1"
+        stroke="#F8FAFC"
         strokeWidth="2"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
-      {/* Envelope flap line */}
       <Path
         d="M15 25l17 11 17-11"
-        stroke="#e5e2e1"
+        stroke="#F8FAFC"
         strokeWidth="2"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
 
-      {/* Blue checklist checkmark circle badge at bottom-right */}
-      <Circle cx="44" cy="44" r="12" fill="#abc7ff" />
+      <Circle cx="44" cy="44" r="12" fill="#3B82F6" />
       <Path
         d="M39 44l3 3 6-6"
-        stroke="#131313"
+        stroke="#FFFFFF"
         strokeWidth="2.5"
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -80,14 +74,13 @@ export function EmailCheckIcon() {
   );
 }
 
-// Custom simple Check SVG for success confirmation card
 function InfoCheckIcon() {
   return (
     <Svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-      <Circle cx="12" cy="12" r="10" fill="#abc7ff" />
+      <Circle cx="12" cy="12" r="10" fill="#3B82F6" />
       <Path
         d="M8.5 12.5l2.5 2.5 5-5"
-        stroke="#131313"
+        stroke="#FFFFFF"
         strokeWidth="2"
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -121,7 +114,7 @@ export function EmailActionScreen({
       <View style={styles.bottomGlow} pointerEvents="none" />
 
       <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         style={styles.keyboardView}
       >
         <ScrollView
@@ -136,7 +129,7 @@ export function EmailActionScreen({
           <ErrorBanner message={errorMessage ?? null} />
 
           {/* Premium Animated Layout Card */}
-          <Animated.View entering={FadeIn.duration(500)} style={styles.animationWrapper}>
+          <Animated.View entering={FadeIn.duration(400)} style={styles.animationWrapper}>
             <AuthCard>
               <View style={styles.cardContent}>
                 
@@ -179,40 +172,36 @@ export function EmailActionScreen({
                   </Animated.View>
                 )}
 
-                {/* Actions container */}
-                {!showSuccessConfirmation && (
-                  <View style={styles.buttonsContainer}>
-                    {/* Primary Button */}
-                    <PrimaryButton
-                      title={primaryButtonTitle}
-                      isLoading={isPrimaryLoading}
-                      onPress={onPrimaryPress}
-                    />
+                {/* Main Action Buttons */}
+                <View style={styles.buttonsContainer}>
+                  <PrimaryButton
+                    title={primaryButtonTitle}
+                    isLoading={isPrimaryLoading}
+                    onPress={onPrimaryPress}
+                  />
 
-                    {/* Secondary Text Link */}
-                    {secondaryButtonTitle && onSecondaryPress ? (
-                      <TouchableOpacity
-                        style={[
-                          styles.secondaryButton,
-                          isSecondaryDisabled && styles.disabledSecondaryBtn,
-                        ]}
-                        onPress={onSecondaryPress}
-                        disabled={isSecondaryDisabled}
-                        accessibilityRole="button"
-                        accessibilityLabel={secondaryButtonTitle}
-                      >
-                        <Text style={styles.secondaryButtonText}>
-                          {secondaryButtonTitle}
-                        </Text>
-                      </TouchableOpacity>
-                    ) : null}
-                  </View>
-                )}
+                  {secondaryButtonTitle && onSecondaryPress ? (
+                    <TouchableOpacity
+                      onPress={onSecondaryPress}
+                      disabled={isSecondaryDisabled}
+                      style={[
+                        styles.secondaryButton,
+                        isSecondaryDisabled && styles.disabledSecondaryBtn,
+                      ]}
+                      accessibilityRole="button"
+                      accessibilityLabel={secondaryButtonTitle}
+                    >
+                      <Text style={styles.secondaryButtonText}>
+                        {secondaryButtonTitle}
+                      </Text>
+                    </TouchableOpacity>
+                  ) : null}
+                </View>
               </View>
             </AuthCard>
           </Animated.View>
 
-          {/* Bottom link */}
+          {/* Footer Back Link */}
           <View style={styles.footer}>
             <TouchableOpacity
               accessibilityRole="link"
@@ -232,7 +221,7 @@ export function EmailActionScreen({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#131313', // bg-surface-dim = #131313
+    backgroundColor: '#0B0D11',
     position: 'relative',
     overflow: 'hidden',
   },
@@ -243,30 +232,28 @@ const styles = StyleSheet.create({
   scrollContent: {
     flexGrow: 1,
     justifyContent: 'center',
-    paddingHorizontal: 20, // p-container-padding-mobile
-    paddingVertical: 32,
+    paddingHorizontal: 20,
+    paddingVertical: 20,
   },
   topGlow: {
     position: 'absolute',
-    top: '-15%',
-    right: '-15%',
-    width: '75%',
-    aspectRatio: 1,
-    borderRadius: 9999,
-    backgroundColor: '#abc7ff', // bg-secondary = #abc7ff
-    opacity: 0.05,
-    zIndex: 1,
+    top: -80,
+    right: -80,
+    width: 260,
+    height: 260,
+    borderRadius: 130,
+    backgroundColor: '#3B82F6',
+    opacity: 0.08,
   },
   bottomGlow: {
     position: 'absolute',
-    bottom: '-15%',
-    left: '-15%',
-    width: '60%',
-    aspectRatio: 1,
-    borderRadius: 9999,
-    backgroundColor: '#ffffff', // bg-primary = #ffffff
-    opacity: 0.05,
-    zIndex: 1,
+    bottom: -60,
+    left: -60,
+    width: 220,
+    height: 220,
+    borderRadius: 110,
+    backgroundColor: '#1D4ED8',
+    opacity: 0.06,
   },
   animationWrapper: {
     width: '100%',
@@ -277,115 +264,118 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   iconWrapper: {
-    marginBottom: 24,
+    marginBottom: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   cardTitle: {
-    fontSize: 24,
+    fontSize: 22,
     fontFamily: 'Inter',
     fontWeight: '700',
-    color: '#ffffff',
-    marginBottom: 12,
+    color: '#F8FAFC',
+    marginBottom: 8,
     textAlign: 'center',
   },
   cardBody: {
-    fontSize: 14,
+    fontSize: 13,
     fontFamily: 'Inter',
-    color: '#c4c7c8', // text-on-surface-variant = #c4c7c8
-    lineHeight: 22,
+    color: '#94A3B8',
+    lineHeight: 20,
     textAlign: 'center',
-    marginBottom: 20,
+    marginBottom: 16,
+    paddingHorizontal: 12,
   },
   emailBadge: {
-    backgroundColor: '#202020',
+    backgroundColor: '#181D2A',
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#2c2c2c',
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    marginBottom: 28,
+    borderColor: 'rgba(255, 255, 255, 0.08)',
+    paddingVertical: 6,
+    paddingHorizontal: 14,
+    marginBottom: 20,
   },
   emailText: {
-    fontSize: 14,
+    fontSize: 13,
     fontFamily: 'Inter',
-    fontWeight: '500',
-    color: '#abc7ff', // text-secondary = #abc7ff
+    fontWeight: '600',
+    color: '#3B82F6',
   },
   buttonsContainer: {
     width: '100%',
-    gap: 16,
+    gap: 12,
     alignItems: 'center',
   },
   secondaryButton: {
-    paddingVertical: 12,
+    paddingVertical: 10,
     paddingHorizontal: 16,
     justifyContent: 'center',
     alignItems: 'center',
   },
   disabledSecondaryBtn: {
-    opacity: 0.6,
+    opacity: 0.5,
   },
   secondaryButtonText: {
     fontSize: 14,
     fontFamily: 'Inter',
-    fontWeight: '600', // font-button = 600
-    color: '#abc7ff', // text-secondary = #abc7ff
+    fontWeight: '600',
+    color: '#3B82F6',
   },
   successBanner: {
-    backgroundColor: '#1b231f', // Soft dark green glassmorphic hue
+    backgroundColor: 'rgba(16, 185, 129, 0.12)',
     borderWidth: 1,
-    borderColor: '#435147',
-    borderRadius: 16,
-    padding: 16,
+    borderColor: 'rgba(16, 185, 129, 0.3)',
+    borderRadius: 14,
+    padding: 14,
     width: '100%',
     alignItems: 'center',
+    marginBottom: 16,
   },
   successHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-    marginBottom: 8,
+    marginBottom: 6,
   },
   successTitle: {
-    fontSize: 15,
+    fontSize: 14,
     fontFamily: 'Inter',
     fontWeight: '700',
-    color: '#abc7ff',
+    color: '#34D399',
   },
   successText: {
-    fontSize: 13,
-    fontFamily: 'Inter',
-    color: '#c4c7c8',
-    lineHeight: 18,
-    textAlign: 'center',
-    marginBottom: 12,
-  },
-  dismissBtn: {
-    backgroundColor: '#2c2c2c',
-    borderRadius: 9999,
-    paddingVertical: 6,
-    paddingHorizontal: 16,
-    borderWidth: 1,
-    borderColor: '#444748',
-  },
-  dismissBtnText: {
     fontSize: 12,
     fontFamily: 'Inter',
+    color: '#E2E8F0',
+    lineHeight: 18,
+    textAlign: 'center',
+    marginBottom: 10,
+  },
+  dismissBtn: {
+    backgroundColor: '#1E2436',
+    borderRadius: 9999,
+    paddingVertical: 5,
+    paddingHorizontal: 14,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  dismissBtnText: {
+    fontSize: 11,
+    fontFamily: 'Inter',
     fontWeight: '600',
-    color: '#e5e2e1',
+    color: '#F8FAFC',
   },
   footer: {
-    marginTop: 32,
+    marginTop: 20,
     flexDirection: 'row',
     justifyContent: 'center',
   },
   footerLinkContainer: {
-    paddingVertical: 8,
+    paddingVertical: 6,
   },
   footerLinkText: {
     fontFamily: 'Inter',
     fontSize: 14,
-    fontWeight: '600', // font-medium
-    color: '#ffffff', // text-primary = #ffffff
-    textDecorationLine: 'underline',
+    fontWeight: '700',
+    color: '#3B82F6',
   },
 });

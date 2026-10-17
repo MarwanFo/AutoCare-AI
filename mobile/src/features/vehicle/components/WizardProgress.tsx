@@ -64,11 +64,11 @@ export function WizardProgress({ currentStep }: WizardProgressProps) {
 
 function AnimatedSegment({ isActive, isCompleted }: { isActive: boolean; isCompleted: boolean }) {
   const animatedStyle = useAnimatedStyle(() => {
-    let backgroundColor = '#444748'; // incomplete/inactive
+    let backgroundColor = 'rgba(255, 255, 255, 0.12)';
     if (isActive) {
-      backgroundColor = '#abc7ff'; // active secondary accent
+      backgroundColor = '#3B82F6';
     } else if (isCompleted) {
-      backgroundColor = '#ffffff'; // completed
+      backgroundColor = '#60A5FA';
     }
     
     return {
@@ -82,26 +82,26 @@ function AnimatedSegment({ isActive, isCompleted }: { isActive: boolean; isCompl
 const styles = StyleSheet.create({
   container: {
     alignSelf: 'stretch',
-    marginBottom: 24,
+    marginBottom: 20,
   },
   textContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'baseline',
-    marginBottom: 12,
+    marginBottom: 10,
   },
   stepText: {
     fontFamily: 'Inter',
     fontSize: 11,
     fontWeight: '700',
-    color: '#abc7ff',
-    letterSpacing: 1.5,
+    color: '#3B82F6',
+    letterSpacing: 1.2,
   },
   titleText: {
     fontFamily: 'Inter',
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#ffffff',
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#F8FAFC',
   },
   barContainer: {
     flexDirection: 'row',

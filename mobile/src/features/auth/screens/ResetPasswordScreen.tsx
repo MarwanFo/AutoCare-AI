@@ -97,7 +97,7 @@ export function ResetPasswordScreen({
       <View style={styles.bottomGlow} pointerEvents="none" />
 
       <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         style={styles.keyboardView}
       >
         <ScrollView
@@ -106,7 +106,7 @@ export function ResetPasswordScreen({
           showsVerticalScrollIndicator={false}
         >
           {/* Header branding */}
-          <BrandHeader />
+          <BrandHeader subtitle={t('auth:reset_password_subtitle')} />
 
           {/* Validation/Network Error Alert Banner */}
           <ErrorBanner message={errorMessage} />
@@ -186,7 +186,7 @@ export function ResetPasswordScreen({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#131313',
+    backgroundColor: '#0B0D11',
     position: 'relative',
     overflow: 'hidden',
   },
@@ -198,67 +198,64 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     justifyContent: 'center',
     paddingHorizontal: 20,
-    paddingVertical: 32,
+    paddingVertical: 20,
   },
   topGlow: {
     position: 'absolute',
-    top: '-15%',
-    right: '-15%',
-    width: '75%',
-    aspectRatio: 1,
-    borderRadius: 9999,
-    backgroundColor: '#abc7ff',
-    opacity: 0.05,
-    zIndex: 1,
+    top: -80,
+    right: -80,
+    width: 260,
+    height: 260,
+    borderRadius: 130,
+    backgroundColor: '#3B82F6',
+    opacity: 0.08,
   },
   bottomGlow: {
     position: 'absolute',
-    bottom: '-15%',
-    left: '-15%',
-    width: '60%',
-    aspectRatio: 1,
-    borderRadius: 9999,
-    backgroundColor: '#ffffff',
-    opacity: 0.05,
-    zIndex: 1,
+    bottom: -60,
+    left: -60,
+    width: 220,
+    height: 220,
+    borderRadius: 110,
+    backgroundColor: '#1D4ED8',
+    opacity: 0.06,
   },
   formContainer: {
     alignSelf: 'stretch',
   },
   cardTitle: {
-    fontSize: 24,
+    fontSize: 22,
     fontFamily: 'Inter',
     fontWeight: '700',
-    color: '#ffffff',
-    marginBottom: 8,
+    color: '#F8FAFC',
+    marginBottom: 6,
     textAlign: 'center',
   },
   cardSubtitle: {
-    fontSize: 14,
+    fontSize: 13,
     fontFamily: 'Inter',
-    color: '#c4c7c8',
-    lineHeight: 20,
+    color: '#94A3B8',
+    lineHeight: 18,
     textAlign: 'center',
-    marginBottom: 24,
+    marginBottom: 20,
   },
   actionContainer: {
     alignSelf: 'stretch',
-    marginTop: 8,
+    marginTop: 6,
   },
   screenFooter: {
-    marginTop: 32,
+    marginTop: 20,
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
   },
   footerLinkContainer: {
-    paddingVertical: 8,
+    paddingVertical: 6,
   },
   footerLinkText: {
     fontFamily: 'Inter',
     fontSize: 14,
-    fontWeight: '600',
-    color: '#ffffff',
-    textDecorationLine: 'underline',
+    fontWeight: '700',
+    color: '#3B82F6',
   },
 });
