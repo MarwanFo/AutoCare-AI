@@ -8,6 +8,7 @@ import { PasswordStrengthBar } from './PasswordStrengthBar';
 import { PhoneInput } from './PhoneInput';
 import { PrimaryButton } from './PrimaryButton';
 import { useAppTranslation } from '@/i18n/hooks/useAppTranslation';
+import { useAppTheme } from '@/theme/ThemeProvider';
 
 export interface RegisterFormData {
   fullName: string;
@@ -48,6 +49,8 @@ export function RegisterForm({
   watchedPassword = '',
 }: RegisterFormProps) {
   const { t } = useAppTranslation('auth');
+  const { isDark } = useAppTheme();
+  const iconColor = isDark ? '#94A3B8' : '#64748B';
 
   return (
     <View style={styles.container}>
@@ -64,7 +67,7 @@ export function RegisterForm({
             error={errors.fullName?.message as string}
             editable={!isLoading}
             autoCapitalize="words"
-            prefixIcon={<PersonIcon color={errors.fullName ? '#EF4444' : '#94A3B8'} />}
+            prefixIcon={<PersonIcon color={errors.fullName ? '#EF4444' : iconColor} />}
           />
         )}
       />
@@ -82,7 +85,7 @@ export function RegisterForm({
             error={errors.email?.message as string}
             editable={!isLoading}
             keyboardType="email-address"
-            prefixIcon={<MailIcon color={errors.email ? '#EF4444' : '#94A3B8'} />}
+            prefixIcon={<MailIcon color={errors.email ? '#EF4444' : iconColor} />}
           />
         )}
       />

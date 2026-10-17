@@ -13,6 +13,7 @@ import Animated, {
   withSpring,
 } from 'react-native-reanimated';
 import Svg, { Path } from 'react-native-svg';
+import { useAppTheme } from '@/theme/ThemeProvider';
 
 interface GoogleButtonProps {
   title?: string;
@@ -54,6 +55,7 @@ export function GoogleButton({
   disabled = false,
   style,
 }: GoogleButtonProps) {
+  const { isDark } = useAppTheme();
   const scale = useSharedValue(1);
 
   const animatedStyle = useAnimatedStyle(() => {
@@ -77,14 +79,15 @@ export function GoogleButton({
   return (
     <View style={styles.wrapper}>
       <View style={styles.dividerRow}>
-        <View style={styles.dividerLine} />
-        <Text style={styles.dividerText}>or</Text>
-        <View style={styles.dividerLine} />
+        <View style={[styles.dividerLine, !isDark && styles.dividerLineLight]} />
+        <Text style={[styles.dividerText, !isDark && styles.dividerTextLight]}>or</Text>
+        <View style={[styles.dividerLine, !isDark && styles.dividerLineLight]} />
       </View>
 
       <AnimatedPressable
         style={[
           styles.button,
+          !isDark && styles.buttonLight,
           {
             opacity: isBtnDisabled ? 0.7 : 1,
           },
@@ -99,11 +102,11 @@ export function GoogleButton({
         accessibilityState={{ disabled: isBtnDisabled }}
       >
         {isLoading ? (
-          <ActivityIndicator color="#F8FAFC" />
+          <ActivityIndicator color={isDark ? '#F8FAFC' : '#0F172A'} />
         ) : (
           <Animated.View style={styles.contentContainer}>
             <GoogleIcon />
-            <Text style={styles.buttonText}>{title}</Text>
+            <Text style={[styles.buttonText, !isDark && styles.buttonTextLight]}>{title}</Text>
           </Animated.View>
         )}
       </AnimatedPressable>
@@ -125,6 +128,9 @@ const styles = StyleSheet.create({
     height: 1,
     backgroundColor: 'rgba(255, 255, 255, 0.08)',
   },
+  dividerLineLight: {
+    backgroundColor: 'rgba(15, 23, 42, 0.10)',
+  },
   dividerText: {
     marginHorizontal: 10,
     fontSize: 11,
@@ -132,6 +138,9 @@ const styles = StyleSheet.create({
     color: '#64748B',
     textTransform: 'uppercase',
     letterSpacing: 1,
+  },
+  dividerTextLight: {
+    color: '#94A3B8',
   },
   button: {
     height: 52,
@@ -148,6 +157,13 @@ const styles = StyleSheet.create({
     shadowRadius: 6,
     elevation: 2,
   },
+  buttonLight: {
+    backgroundColor: '#F8FAFC',
+    borderColor: 'rgba(15, 23, 42, 0.12)',
+    shadowOpacity: 0.04,
+    shadowRadius: 4,
+    elevation: 1,
+  },
   contentContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -160,5 +176,8 @@ const styles = StyleSheet.create({
     letterSpacing: 0.2,
     color: '#F8FAFC',
     marginLeft: 10,
+  },
+  buttonTextLight: {
+    color: '#0F172A',
   },
 });

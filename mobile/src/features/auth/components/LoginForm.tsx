@@ -6,6 +6,7 @@ import Svg, { Path } from 'react-native-svg';
 import { FloatingInput, MailIcon, PasswordInput } from './PasswordInput';
 import { PrimaryButton } from './PrimaryButton';
 import { useAppTranslation } from '@/i18n/hooks/useAppTranslation';
+import { useAppTheme } from '@/theme/ThemeProvider';
 
 export interface LoginFormData {
   email: string;
@@ -44,6 +45,7 @@ export function LoginForm({
   onForgotPassword,
 }: LoginFormProps) {
   const { t } = useAppTranslation(['auth', 'common']);
+  const { isDark } = useAppTheme();
 
   return (
     <View style={styles.container}>
@@ -60,7 +62,7 @@ export function LoginForm({
             error={errors.email?.message as string}
             editable={!isLoading}
             keyboardType="email-address"
-            prefixIcon={<MailIcon color={errors.email ? '#EF4444' : '#94A3B8'} />}
+            prefixIcon={<MailIcon color={errors.email ? '#EF4444' : isDark ? '#94A3B8' : '#64748B'} />}
           />
         )}
       />
@@ -98,12 +100,15 @@ export function LoginForm({
               <View
                 style={[
                   styles.checkbox,
+                  !isDark && styles.checkboxLight,
                   value && { backgroundColor: '#3B82F6', borderColor: '#3B82F6' },
                 ]}
               >
                 <CheckboxIcon checked={!!value} />
               </View>
-              <Text style={styles.rememberText}>{t('auth:remember_me')}</Text>
+              <Text style={[styles.rememberText, !isDark && styles.rememberTextLight]}>
+                {t('auth:remember_me')}
+              </Text>
             </Pressable>
           )}
         />
@@ -114,7 +119,9 @@ export function LoginForm({
           disabled={isLoading}
           onPress={onForgotPassword}
         >
-          <Text style={styles.forgotText}>{t('auth:forgot_password_link')}</Text>
+          <Text style={[styles.forgotText, !isDark && styles.forgotTextLight]}>
+            {t('auth:forgot_password_link')}
+          </Text>
         </Pressable>
       </View>
 
@@ -157,6 +164,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  checkboxLight: {
+    borderColor: 'rgba(15, 23, 42, 0.2)',
+    backgroundColor: '#F1F5F9',
+  },
   rememberText: {
     fontSize: 13,
     fontFamily: 'Inter',
@@ -164,11 +175,17 @@ const styles = StyleSheet.create({
     marginLeft: 10,
     fontWeight: '500',
   },
+  rememberTextLight: {
+    color: '#475569',
+  },
   forgotText: {
     fontSize: 13,
     fontFamily: 'Inter',
     fontWeight: '600',
     color: '#3B82F6',
+  },
+  forgotTextLight: {
+    color: '#2563EB',
   },
   actionContainer: {
     alignSelf: 'stretch',

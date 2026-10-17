@@ -1,14 +1,17 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
+import { useAppTheme } from '@/theme/ThemeProvider';
 
 interface PasswordStrengthBarProps {
   password?: string;
 }
 
 export function PasswordStrengthBar({ password = '' }: PasswordStrengthBarProps) {
+  const { isDark } = useAppTheme();
+
   // Score password complexity from 0 to 4
   const getPasswordStrength = () => {
-    if (!password) return { score: 0, text: '', color: '#444748' };
+    if (!password) return { score: 0, text: '', color: isDark ? '#444748' : '#94A3B8' };
 
     let score = 0;
     if (password.length >= 8) score++;
@@ -26,7 +29,7 @@ export function PasswordStrengthBar({ password = '' }: PasswordStrengthBarProps)
       case 4:
         return { score, text: 'Strong', color: '#10B981' };
       default:
-        return { score: 0, text: '', color: 'rgba(255, 255, 255, 0.1)' };
+        return { score: 0, text: '', color: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(15, 23, 42, 0.1)' };
     }
   };
 
@@ -44,7 +47,11 @@ export function PasswordStrengthBar({ password = '' }: PasswordStrengthBarProps)
               style={[
                 styles.barSegment,
                 {
-                  backgroundColor: isActive ? color : 'rgba(255, 255, 255, 0.08)',
+                  backgroundColor: isActive
+                    ? color
+                    : isDark
+                    ? 'rgba(255, 255, 255, 0.08)'
+                    : 'rgba(15, 23, 42, 0.08)',
                 },
               ]}
             />

@@ -17,6 +17,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import Svg, { Path } from 'react-native-svg';
+import { useAppTheme } from '@/theme/ThemeProvider';
 
 // Custom Phone Icon
 function PhoneIcon({ color }: { color: string }) {
@@ -73,6 +74,7 @@ export function PhoneInput({
   style,
   ...props
 }: PhoneInputProps) {
+  const { isDark } = useAppTheme();
   const [isFocused, setIsFocused] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const inputRef = useRef<TextInput>(null);
@@ -114,7 +116,7 @@ export function PhoneInput({
     const color = interpolateColor(
       floatProgress.value,
       [0, 1],
-      ['#64748B', isFocused ? '#3B82F6' : '#94A3B8']
+      ['#64748B', isFocused ? '#3B82F6' : (isDark ? '#94A3B8' : '#64748B')]
     );
 
     return {
@@ -178,15 +180,19 @@ export function PhoneInput({
               ? '#EF4444'
               : isFocused
               ? '#3B82F6'
-              : 'rgba(255, 255, 255, 0.08)',
-            backgroundColor: isFocused ? '#181D2A' : '#11141B',
+              : isDark
+              ? 'rgba(255, 255, 255, 0.08)'
+              : 'rgba(15, 23, 42, 0.12)',
+            backgroundColor: isDark
+              ? (isFocused ? '#181D2A' : '#11141B')
+              : (isFocused ? '#FFFFFF' : '#F8FAFC'),
           },
           isFocused && styles.containerFocused,
         ]}
       >
         {/* Left Phone Icon */}
         <View style={styles.prefixContainer} pointerEvents="none">
-          <PhoneIcon color={error ? '#EF4444' : isFocused ? '#3B82F6' : '#94A3B8'} />
+          <PhoneIcon color={error ? '#EF4444' : isFocused ? '#3B82F6' : (isDark ? '#94A3B8' : '#64748B')} />
         </View>
 
         {/* Country Code Trigger */}
@@ -198,14 +204,14 @@ export function PhoneInput({
           accessibilityRole="button"
           accessibilityLabel="Select country code"
         >
-          <Text style={styles.countryText}>
+          <Text style={[styles.countryText, !isDark && styles.countryTextLight]}>
             {selectedCountry.flag} {selectedCountry.code}
           </Text>
-          <ChevronDownIcon color="#94A3B8" />
+          <ChevronDownIcon color={isDark ? '#94A3B8' : '#64748B'} />
         </TouchableOpacity>
 
         {/* Divider */}
-        <View style={styles.divider} />
+        <View style={[styles.divider, !isDark && styles.dividerLight]} />
 
         {/* Input & Floating Label Area */}
         <View style={styles.inputArea}>
@@ -217,7 +223,7 @@ export function PhoneInput({
           </Animated.Text>
           <TextInput
             ref={inputRef}
-            style={styles.textInput}
+            style={[styles.textInput, !isDark && styles.textInputLight, style]}
             value={localNumber}
             onChangeText={handleTextChange}
             editable={editable}
@@ -251,18 +257,18 @@ export function PhoneInput({
           activeOpacity={1}
           onPress={() => setModalVisible(false)}
         >
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Select Country Code</Text>
+          <View style={[styles.modalContent, !isDark && styles.modalContentLight]}>
+            <Text style={[styles.modalTitle, !isDark && styles.modalTitleLight]}>Select Country Code</Text>
             <FlatList
               data={COUNTRIES}
               keyExtractor={(item) => item.code}
               renderItem={({ item }) => (
                 <TouchableOpacity
-                  style={styles.countryRow}
+                  style={[styles.countryRow, !isDark && styles.countryRowLight]}
                   activeOpacity={0.7}
                   onPress={() => handleCountrySelect(item)}
                 >
-                  <Text style={styles.countryRowText}>
+                  <Text style={[styles.countryRowText, !isDark && styles.countryRowTextLight]}>
                     {item.flag} {item.name} ({item.code})
                   </Text>
                 </TouchableOpacity>
@@ -315,11 +321,17 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter',
     fontWeight: '600',
   },
+  countryTextLight: {
+    color: '#0F172A',
+  },
   divider: {
     width: 1,
     height: 22,
     backgroundColor: 'rgba(255, 255, 255, 0.12)',
     marginRight: 10,
+  },
+  dividerLight: {
+    backgroundColor: 'rgba(15, 23, 42, 0.12)',
   },
   inputArea: {
     flex: 1,
@@ -343,16 +355,15 @@ const styles = StyleSheet.create({
     color: '#F8FAFC',
     fontFamily: 'Inter',
   },
+  textInputLight: {
+    color: '#0F172A',
+  },
   errorText: {
     color: '#EF4444',
-    fontSize: 12,
-    marginTop: 4,
-    marginLeft: 4,
-    fontFamily: 'Inter',
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
     justifyContent: 'center',
     alignItems: 'center',
     padding: 24,
@@ -366,6 +377,15 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.1)',
   },
+  modalContentLight: {
+    backgroundColor: '#FFFFFF',
+    borderColor: 'rgba(15, 23, 42, 0.12)',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.15,
+    shadowRadius: 24,
+    elevation: 8,
+  },
   modalTitle: {
     fontSize: 18,
     fontWeight: '700',
@@ -373,14 +393,23 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     fontFamily: 'Inter',
   },
+  modalTitleLight: {
+    color: '#0F172A',
+  },
   countryRow: {
     paddingVertical: 14,
     borderBottomWidth: 1,
     borderBottomColor: 'rgba(255, 255, 255, 0.08)',
   },
+  countryRowLight: {
+    borderBottomColor: 'rgba(15, 23, 42, 0.08)',
+  },
   countryRowText: {
     fontSize: 15,
     color: '#F8FAFC',
     fontFamily: 'Inter',
+  },
+  countryRowTextLight: {
+    color: '#0F172A',
   },
 });

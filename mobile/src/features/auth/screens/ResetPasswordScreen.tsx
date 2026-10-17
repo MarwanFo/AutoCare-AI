@@ -3,6 +3,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  StatusBar,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -15,6 +16,8 @@ import * as z from 'zod';
 
 import { apiClient } from '@/api/client';
 import { useAppTranslation } from '@/i18n/hooks/useAppTranslation';
+import { useAppTheme } from '@/theme/ThemeProvider';
+import { ThemeToggle } from '@/components/ThemeToggle';
 import { BrandHeader } from '../components/BrandHeader';
 import { AuthCard } from '../components/AuthCard';
 import { PasswordInput } from '../components/PasswordInput';
@@ -47,6 +50,7 @@ export function ResetPasswordScreen({
   onResetSuccess,
 }: ResetPasswordScreenProps) {
   const { t } = useAppTranslation(['auth', 'common', 'errors', 'validation']);
+  const { isDark } = useAppTheme();
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -91,10 +95,19 @@ export function ResetPasswordScreen({
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, !isDark && styles.containerLight]}>
+      <StatusBar
+        barStyle={isDark ? 'light-content' : 'dark-content'}
+        backgroundColor={isDark ? '#0B0D11' : '#F8FAFC'}
+      />
       {/* Abstract Background Glows */}
-      <View style={styles.topGlow} pointerEvents="none" />
-      <View style={styles.bottomGlow} pointerEvents="none" />
+      <View style={[styles.topGlow, !isDark && styles.topGlowLight]} pointerEvents="none" />
+      <View style={[styles.bottomGlow, !isDark && styles.bottomGlowLight]} pointerEvents="none" />
+
+      {/* Top Bar with Quick Theme Toggle */}
+      <View style={styles.topBar}>
+        <ThemeToggle />
+      </View>
 
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
@@ -114,8 +127,10 @@ export function ResetPasswordScreen({
           {/* Form Card wrapper */}
           <AuthCard>
             <View style={styles.formContainer}>
-              <Text style={styles.cardTitle}>{t('auth:reset_password_title')}</Text>
-              <Text style={styles.cardSubtitle}>
+              <Text style={[styles.cardTitle, !isDark && styles.cardTitleLight]}>
+                {t('auth:reset_password_title')}
+              </Text>
+              <Text style={[styles.cardSubtitle, !isDark && styles.cardSubtitleLight]}>
                 {t('auth:reset_password_subtitle')}
               </Text>
 
@@ -190,6 +205,16 @@ const styles = StyleSheet.create({
     position: 'relative',
     overflow: 'hidden',
   },
+  containerLight: {
+    backgroundColor: '#F8FAFC',
+  },
+  topBar: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    paddingHorizontal: 20,
+    paddingTop: 8,
+    zIndex: 20,
+  },
   keyboardView: {
     flex: 1,
     zIndex: 10,
@@ -198,7 +223,7 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     justifyContent: 'center',
     paddingHorizontal: 20,
-    paddingVertical: 20,
+    paddingBottom: 24,
   },
   topGlow: {
     position: 'absolute',
@@ -210,6 +235,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#3B82F6',
     opacity: 0.08,
   },
+  topGlowLight: {
+    opacity: 0.04,
+  },
   bottomGlow: {
     position: 'absolute',
     bottom: -60,
@@ -219,6 +247,9 @@ const styles = StyleSheet.create({
     borderRadius: 110,
     backgroundColor: '#1D4ED8',
     opacity: 0.06,
+  },
+  bottomGlowLight: {
+    opacity: 0.03,
   },
   formContainer: {
     alignSelf: 'stretch',
@@ -231,6 +262,9 @@ const styles = StyleSheet.create({
     marginBottom: 6,
     textAlign: 'center',
   },
+  cardTitleLight: {
+    color: '#0F172A',
+  },
   cardSubtitle: {
     fontSize: 13,
     fontFamily: 'Inter',
@@ -238,6 +272,9 @@ const styles = StyleSheet.create({
     lineHeight: 18,
     textAlign: 'center',
     marginBottom: 20,
+  },
+  cardSubtitleLight: {
+    color: '#64748B',
   },
   actionContainer: {
     alignSelf: 'stretch',
