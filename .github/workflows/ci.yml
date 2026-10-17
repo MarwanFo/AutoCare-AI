@@ -35,20 +35,6 @@ jobs:
     name: Backend CI (Spring Boot 3 / Java 21)
     runs-on: ubuntu-latest
     needs: [secret-guard]
-    services:
-      postgres:
-        image: postgres:16-alpine
-        env:
-          POSTGRES_DB: autocare
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
     defaults:
       run:
         working-directory: backend
@@ -66,15 +52,34 @@ jobs:
       - name: Validate Maven Wrapper
         run: mvn -version
 
+      - name: Start and Configure PostgreSQL
+        run: |
+          sudo systemctl start postgresql.service
+          until pg_isready -h 127.0.0.1 -p 5432; do sleep 1; done
+          sudo -u postgres psql -c "ALTER USER postgres PASSWORD 'postgres';"
+          sudo -u postgres psql -c "DROP DATABASE IF EXISTS autocare;"
+          sudo -u postgres psql -c "CREATE DATABASE autocare;"
+
       - name: Run Unit & Integration Tests (JUnit 5)
-        run: mvn test -B
+        run: mvn test -B -D_JAVA_OPTIONS="-Djava.net.preferIPv4Stack=true"
         env:
           SPRING_PROFILES_ACTIVE: dev
-          DB_URL: jdbc:postgresql://localhost:5432/autocare
+          DB_URL: jdbc:postgresql://127.0.0.1:5432/autocare
           DB_USERNAME: postgres
           DB_PASSWORD: postgres
           JWT_SECRET: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
           JWT_EXPIRATION_MS: 900000
+
+      - name: Print Surefire Reports on Failure
+        if: failure()
+        run: |
+          echo "==================== SUREFIRE TEST REPORTS ===================="
+          for f in target/surefire-reports/*.txt target/surefire-reports/*dump*; do
+            if [ -f "$f" ]; then
+              echo "-------------------- $f --------------------"
+              cat "$f"
+            fi
+          done
 
       - name: Build Production JAR Package
         run: mvn package -DskipTests -B
