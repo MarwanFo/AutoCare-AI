@@ -60,6 +60,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/v1/auth/reset-password").permitAll()
                         // Public Brand & Model Catalog
                         .requestMatchers(HttpMethod.GET, "/api/v1/brands/**").permitAll()
+                        // Public Pricing Packs
+                        .requestMatchers(HttpMethod.GET, "/api/v1/packs/**").permitAll()
                         // OpenAPI / Swagger UI
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                         // Public File Upload Static Serving

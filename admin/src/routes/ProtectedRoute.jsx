@@ -34,12 +34,18 @@ const ProtectedRoute = ({ requiredRoles = ['ROLE_ADMIN'] }) => {
   }
 
   // Authenticated but missing required role — redirect to unauthorized
-  const userRoles = user?.roles ?? new Set();
-  const hasRequiredRole = requiredRoles.some((role) =>
-    userRoles instanceof Set ? userRoles.has(role) : userRoles.includes(role)
-  );
+  const userRoles = user?.roles;
+  const hasRequiredRole = requiredRoles.some((role) => {
+    if (!userRoles) return false;
+    if (Array.isArray(userRoles)) return userRoles.includes(role);
+    if (userRoles instanceof Set) return userRoles.has(role);
+    return false;
+  });
 
   if (!hasRequiredRole) {
+    if (location.pathname === '/unauthorized') {
+      return <Outlet />;
+    }
     return <Navigate to="/unauthorized" replace />;
   }
 

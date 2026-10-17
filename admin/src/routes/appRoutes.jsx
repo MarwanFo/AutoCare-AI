@@ -18,6 +18,7 @@ import { UsersPage } from '../features/users/UsersPage';
 import { VehiclesPage } from '../features/vehicles/VehiclesPage';
 import { JobsPage } from '../features/jobs/JobsPage';
 import { ProfilePage } from '../features/profile/ProfilePage';
+import { PacksPage } from '../features/packs/PacksPage';
 
 export const appRoutes = createBrowserRouter([
   // Guest-Only Authentication Pages
@@ -49,12 +50,18 @@ export const appRoutes = createBrowserRouter([
           { path: '/users', element: <UsersPage /> },
           { path: '/vehicles', element: <VehiclesPage /> },
           { path: '/jobs', element: <JobsPage /> },
+          { path: '/packs', element: <PacksPage /> },
           { path: '/sessions', element: <Sessions /> },
           { path: '/profile', element: <ProfilePage /> },
-          { path: '/unauthorized', element: <Unauthorized /> },
         ],
       },
     ],
+  },
+  
+  // Standalone Error / Access Pages
+  {
+    path: '/unauthorized',
+    element: <Unauthorized />,
   },
   
   // Global 404 handler

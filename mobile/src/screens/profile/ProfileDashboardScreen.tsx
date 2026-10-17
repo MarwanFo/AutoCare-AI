@@ -30,6 +30,7 @@ import { useVehicles } from '@/hooks/vehicle/useVehicles';
 
 import { ProfileHeaderCard } from '@/features/profile/components/ProfileHeaderCard';
 import { ActiveSessionsCard } from '@/features/profile/components/ActiveSessionsCard';
+import { PacksMembershipCard } from '@/features/profile/components/PacksMembershipCard';
 
 import { ErrorBanner } from '@/features/auth/components/ErrorBanner';
 import { useLanguage } from '@/i18n/hooks/useLanguage';
@@ -66,7 +67,7 @@ export default function ProfileDashboardScreen() {
   const { currentLanguage, supportedLanguages, setLanguage, isRTL } = useLanguage();
 
   // Navigation tab state
-  const [activeTab, setActiveTab] = useState<'personal' | 'preferences' | 'security' | 'storage'>('personal');
+  const [activeTab, setActiveTab] = useState<'personal' | 'packs' | 'preferences' | 'security' | 'storage'>('personal');
 
   // Form states
   const [fullName, setFullName] = useState('');
@@ -322,6 +323,7 @@ export default function ProfileDashboardScreen() {
           <View style={[styles.tabContainer, !isDark && styles.tabContainerLight]}>
             {[
               { id: 'personal', label: t('profile:tab_personal', { defaultValue: 'Personal' }) },
+              { id: 'packs', label: 'Forfaits & Plans 💎' },
               { id: 'preferences', label: t('profile:tab_preferences', { defaultValue: 'Preferences' }) },
               { id: 'security', label: t('profile:tab_security', { defaultValue: 'Security & Sessions' }) },
               { id: 'storage', label: t('profile:tab_storage', { defaultValue: 'Storage & App' }) },
@@ -394,6 +396,11 @@ export default function ProfileDashboardScreen() {
               )}
             </TouchableOpacity>
           </View>
+        )}
+
+        {/* TAB: FORFAITS & PLANS */}
+        {activeTab === 'packs' && (
+          <PacksMembershipCard />
         )}
 
         {/* TAB 2: PREFERENCES */}

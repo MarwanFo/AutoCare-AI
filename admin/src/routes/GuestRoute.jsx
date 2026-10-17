@@ -3,7 +3,7 @@ import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../features/auth/stores/authStore';
 
 const GuestRoute = () => {
-  const { isAuthenticated, isLoading } = useAuthStore();
+  const { isAuthenticated, isLoading, user } = useAuthStore();
   const location = useLocation();
 
   if (isLoading) {
@@ -18,9 +18,18 @@ const GuestRoute = () => {
   }
 
   if (isAuthenticated) {
-    // Redirect to where they came from or default to dashboard
-    const from = location.state?.from?.pathname || '/';
-    return <Navigate to={from} replace />;
+    const userRoles = user?.roles;
+    const isAdmin = Array.isArray(userRoles)
+      ? userRoles.includes('ROLE_ADMIN')
+      : userRoles instanceof Set
+        ? userRoles.has('ROLE_ADMIN')
+        : false;
+
+    // If already authenticated as an Admin, redirect to intended page or dashboard
+    if (isAdmin) {
+      const from = location.state?.from?.pathname || '/';
+      return <Navigate to={from} replace />;
+    }
   }
 
   return <Outlet />;

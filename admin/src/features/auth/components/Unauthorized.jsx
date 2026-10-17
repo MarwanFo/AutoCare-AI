@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Lock, LayoutDashboard, LifeBuoy } from 'lucide-react';
+import { useAuthStore } from '../stores/authStore';
 
 export const Unauthorized = () => {
   const navigate = useNavigate();
+  const logout = useAuthStore((state) => state.logout);
   const [mockSessionId, setMockSessionId] = useState('ACAI-882-990-X');
   const [mockIp, setMockIp] = useState('192.168.1.104');
 
@@ -65,18 +67,20 @@ export const Unauthorized = () => {
           {/* Actions */}
           <div className="pt-4 flex flex-col sm:flex-row gap-4 items-center justify-center">
             <button
+              onClick={() => {
+                logout();
+                navigate('/login');
+              }}
+              className="inline-flex items-center justify-center px-8 h-14 bg-red-600 hover:bg-red-500 text-white font-sans text-[14px] leading-[20px] font-semibold rounded-full shadow-lg shadow-red-600/30 hover:scale-[1.02] active:scale-95 transition-all duration-200 w-full sm:w-auto min-w-[220px] cursor-pointer"
+            >
+              Sign In as Admin
+            </button>
+            <button
               onClick={() => navigate('/')}
-              className="inline-flex items-center justify-center px-8 h-14 bg-white text-[#2f3131] font-sans text-[14px] leading-[20px] font-semibold rounded-full shadow-[0_0_20px_rgba(255,255,255,0.1)] hover:scale-[1.02] active:scale-95 transition-all duration-200 w-full sm:w-auto min-w-[220px] cursor-pointer"
+              className="inline-flex items-center justify-center px-8 h-14 bg-zinc-800 hover:bg-zinc-700 text-white font-sans text-[14px] leading-[20px] font-semibold rounded-full hover:scale-[1.02] active:scale-95 transition-all duration-200 w-full sm:w-auto min-w-[220px] cursor-pointer"
             >
               <LayoutDashboard className="h-4 w-4 mr-2" />
               Return to Dashboard
-            </button>
-            <button
-              onClick={() => window.open('mailto:support@autocare.ai')}
-              className="inline-flex items-center justify-center px-8 h-14 border border-[#444748] text-white font-sans text-[14px] leading-[20px] font-semibold rounded-full hover:bg-[#3a3939] transition-all duration-200 w-full sm:w-auto min-w-[220px] group cursor-pointer"
-            >
-              <LifeBuoy className="h-4 w-4 mr-2 group-hover:text-[#abc7ff] transition-colors" />
-              Contact System Admin
             </button>
           </div>
 
