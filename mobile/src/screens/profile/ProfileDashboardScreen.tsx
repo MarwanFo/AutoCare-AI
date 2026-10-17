@@ -31,6 +31,7 @@ import { useVehicles } from '@/hooks/vehicle/useVehicles';
 import { ProfileHeaderCard } from '@/features/profile/components/ProfileHeaderCard';
 import { ActiveSessionsCard } from '@/features/profile/components/ActiveSessionsCard';
 import { PacksMembershipCard } from '@/features/profile/components/PacksMembershipCard';
+import { useUserMembershipStatus } from '@/hooks/pack/usePacks';
 
 import { ErrorBanner } from '@/features/auth/components/ErrorBanner';
 import { useLanguage } from '@/i18n/hooks/useLanguage';
@@ -55,6 +56,7 @@ export default function ProfileDashboardScreen() {
   const { data: profile, isLoading, isError, refetch } = useUserProfile();
   const { data: vehiclesData } = useVehicles({ page: 0, size: 1 });
   const vehiclesCount = vehiclesData?.totalElements || 0;
+  const { data: membershipStatus } = useUserMembershipStatus();
 
   const updateProfile = useUpdateProfile();
   const updatePreferences = useUpdatePreferences();
@@ -316,6 +318,9 @@ export default function ProfileDashboardScreen() {
           avatarUrl={profile?.avatarUrl}
           onEditAvatarPress={() => setIsAvatarModalVisible(true)}
           vehiclesCount={vehiclesCount}
+          planName={membershipStatus?.currentPack?.name || 'Starter Free'}
+          aiCredits={membershipStatus?.aiCredits ?? 10}
+          onPlanPress={() => setActiveTab('packs')}
         />
 
         {/* Navigation Tabs Bar */}

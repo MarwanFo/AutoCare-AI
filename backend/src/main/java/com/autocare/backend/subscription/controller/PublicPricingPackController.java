@@ -36,4 +36,26 @@ public class PublicPricingPackController {
     public ResponseEntity<PricingPackResponse> getPackById(@PathVariable UUID id) {
         return ResponseEntity.ok(pricingPackService.getPackById(id));
     }
+
+    @GetMapping("/my-status")
+    @Operation(summary = "Get current authenticated user's membership and credits status")
+    public ResponseEntity<com.autocare.backend.subscription.dto.UserMembershipStatusResponse> getMyMembershipStatus() {
+        var auth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !(auth.getPrincipal() instanceof com.autocare.backend.security.CustomUserDetails userDetails)) {
+            return ResponseEntity.status(org.springframework.http.HttpStatus.UNAUTHORIZED).build();
+        }
+        return ResponseEntity.ok(pricingPackService.getUserMembershipStatus(userDetails.getId()));
+    }
+
+    @PostMapping("/activate/{id}")
+    @Operation(summary = "Activate subscription plan or purchase AI credit pack")
+    public ResponseEntity<com.autocare.backend.subscription.dto.UserMembershipStatusResponse> activatePack(
+            @PathVariable UUID id
+    ) {
+        var auth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !(auth.getPrincipal() instanceof com.autocare.backend.security.CustomUserDetails userDetails)) {
+            return ResponseEntity.status(org.springframework.http.HttpStatus.UNAUTHORIZED).build();
+        }
+        return ResponseEntity.ok(pricingPackService.activatePackForUser(userDetails.getId(), id));
+    }
 }

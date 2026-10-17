@@ -29,6 +29,8 @@ public class PricingPackServiceImpl implements PricingPackService {
     private final PricingPackRepository pricingPackRepository;
     private final UserRepository userRepository;
     private final UserAiCreditsRepository userAiCreditsRepository;
+    private final com.autocare.backend.subscription.repository.UserSubscriptionRepository userSubscriptionRepository;
+    private final com.autocare.backend.vehicle.repository.UserVehicleRepository userVehicleRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -185,5 +187,110 @@ public class PricingPackServiceImpl implements PricingPackService {
                 user.getEmail(), creditsAmount, newTotal, reason);
 
         return newTotal;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public com.autocare.backend.subscription.dto.UserMembershipStatusResponse getUserMembershipStatus(UUID userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with ID: " + userId));
+
+        int aiCredits = userAiCreditsRepository.findById(userId)
+                .map(UserAiCredits::getCredits)
+                .orElse(10); // default starting credits
+
+        long vehiclesCount = userVehicleRepository.countByUserId(userId);
+
+        var activeSubOpt = userSubscriptionRepository.findFirstByUserIdAndStatusOrderByCreatedAtDesc(userId, "ACTIVE");
+
+        if (activeSubOpt.isPresent()) {
+            var sub = activeSubOpt.get();
+            PricingPack pack = sub.getPack();
+            return com.autocare.backend.subscription.dto.UserMembershipStatusResponse.builder()
+                    .currentPack(PricingPackResponse.fromEntity(pack))
+                    .aiCredits(aiCredits)
+                    .vehiclesCount(vehiclesCount)
+                    .vehicleLimit(pack.getVehicleLimit())
+                    .status("ACTIVE")
+                    .startedAt(sub.getStartedAt())
+                    .expiresAt(sub.getExpiresAt())
+                    .autoRenew(Boolean.TRUE.equals(sub.getAutoRenew()))
+                    .build();
+        }
+
+        // Default to STARTER_FREE pack if no active paid subscription
+        PricingPack freePack = pricingPackRepository.findByCode("STARTER_FREE")
+                .orElseGet(() -> PricingPack.builder()
+                        .code("STARTER_FREE")
+                        .name("Starter Driver")
+                        .price(java.math.BigDecimal.ZERO)
+                        .currency("MAD")
+                        .vehicleLimit(1)
+                        .aiCredits(10)
+                        .badge("Free Forever")
+                        .build());
+
+        return com.autocare.backend.subscription.dto.UserMembershipStatusResponse.builder()
+                .currentPack(PricingPackResponse.fromEntity(freePack))
+                .aiCredits(aiCredits)
+                .vehiclesCount(vehiclesCount)
+                .vehicleLimit(freePack.getVehicleLimit())
+                .status("ACTIVE")
+                .startedAt(user.getCreatedAt())
+                .expiresAt(null)
+                .autoRenew(false)
+                .build();
+    }
+
+    @Override
+    @Transactional
+    public com.autocare.backend.subscription.dto.UserMembershipStatusResponse activatePackForUser(UUID userId, UUID packId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with ID: " + userId));
+
+        PricingPack pack = pricingPackRepository.findById(packId)
+                .orElseThrow(() -> new ResourceNotFoundException("Pricing pack not found with ID: " + packId));
+
+        if (!Boolean.TRUE.equals(pack.getIsActive())) {
+            throw new IllegalArgumentException("This pricing pack is currently inactive and cannot be purchased.");
+        }
+
+        // Add credits to user
+        int creditsToAdd = pack.getAiCredits() != null ? pack.getAiCredits() : 0;
+        UserAiCredits credits = userAiCreditsRepository.findById(userId)
+                .orElseGet(() -> {
+                    UserAiCredits newCredits = new UserAiCredits();
+                    newCredits.setUser(user);
+                    newCredits.setCredits(0);
+                    return newCredits;
+                });
+
+        credits.setCredits(credits.getCredits() + creditsToAdd);
+        userAiCreditsRepository.save(credits);
+
+        if (pack.getPackType() == PackType.SUBSCRIPTION) {
+            // Expire previous active subscription if exists
+            userSubscriptionRepository.findFirstByUserIdAndStatusOrderByCreatedAtDesc(userId, "ACTIVE")
+                    .ifPresent(prev -> {
+                        prev.setStatus("UPGRADED");
+                        userSubscriptionRepository.save(prev);
+                    });
+
+            com.autocare.backend.subscription.entity.UserSubscription newSub = com.autocare.backend.subscription.entity.UserSubscription.builder()
+                    .user(user)
+                    .pack(pack)
+                    .status("ACTIVE")
+                    .startedAt(java.time.Instant.now())
+                    .expiresAt(java.time.Instant.now().plus(30, java.time.temporal.ChronoUnit.DAYS))
+                    .autoRenew(true)
+                    .build();
+
+            userSubscriptionRepository.save(newSub);
+            log.info("Activated subscription pack '{}' for user '{}'", pack.getName(), user.getEmail());
+        } else {
+            log.info("Granted credit top-up pack '{}' ({} credits) to user '{}'", pack.getName(), creditsToAdd, user.getEmail());
+        }
+
+        return getUserMembershipStatus(userId);
     }
 }

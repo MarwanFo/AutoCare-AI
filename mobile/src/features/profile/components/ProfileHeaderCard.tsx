@@ -18,6 +18,9 @@ interface ProfileHeaderCardProps {
   avatarUrl?: string | null;
   onEditAvatarPress: () => void;
   vehiclesCount?: number;
+  planName?: string;
+  aiCredits?: number;
+  onPlanPress?: () => void;
 }
 
 export function ProfileHeaderCard({
@@ -27,6 +30,9 @@ export function ProfileHeaderCard({
   avatarUrl,
   onEditAvatarPress,
   vehiclesCount = 0,
+  planName = 'Starter Free',
+  aiCredits = 10,
+  onPlanPress,
 }: ProfileHeaderCardProps) {
   const { t } = useAppTranslation(['profile', 'common']);
   const { isRTL } = useLanguage();
@@ -98,9 +104,17 @@ export function ProfileHeaderCard({
             <View style={styles.verifiedBadge}>
               <View style={styles.greenDot} />
               <Text style={styles.verifiedText}>
-                {t('profile:security_status', { defaultValue: 'Account Secured' })}
+                {t('profile:security_status', { defaultValue: 'Compte Vérifié' })}
               </Text>
             </View>
+
+            <TouchableOpacity
+              style={[styles.planHeaderBadge, onPlanPress && { cursor: 'pointer' } as any]}
+              onPress={onPlanPress}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.planHeaderBadgeText}>💎 {planName}</Text>
+            </TouchableOpacity>
           </View>
         </View>
       </View>
@@ -109,22 +123,22 @@ export function ProfileHeaderCard({
       <View style={[styles.statsBar, !isDark && styles.statsBarLight]}>
         <View style={styles.statBox}>
           <Text style={styles.statVal}>{vehiclesCount}</Text>
-          <Text style={[styles.statLbl, !isDark && styles.statLblLight]}>Vehicles</Text>
+          <Text style={[styles.statLbl, !isDark && styles.statLblLight]}>Véhicules</Text>
         </View>
 
         <View style={[styles.statDivider, !isDark && styles.statDividerLight]} />
 
-        <View style={styles.statBox}>
-          <Text style={styles.statVal}>100%</Text>
-          <Text style={[styles.statLbl, !isDark && styles.statLblLight]}>Digital Twin</Text>
-        </View>
+        <TouchableOpacity style={styles.statBox} onPress={onPlanPress} activeOpacity={0.8}>
+          <Text style={[styles.statVal, { color: '#F59E0B' }]}>{aiCredits}</Text>
+          <Text style={[styles.statLbl, !isDark && styles.statLblLight]}>Crédits IA</Text>
+        </TouchableOpacity>
 
         <View style={[styles.statDivider, !isDark && styles.statDividerLight]} />
 
-        <View style={styles.statBox}>
-          <Text style={[styles.statVal, { color: '#10B981' }]}>ACTIVE</Text>
-          <Text style={[styles.statLbl, !isDark && styles.statLblLight]}>Status</Text>
-        </View>
+        <TouchableOpacity style={styles.statBox} onPress={onPlanPress} activeOpacity={0.8}>
+          <Text style={[styles.statVal, { color: '#10B981' }]}>ACTIF</Text>
+          <Text style={[styles.statLbl, !isDark && styles.statLblLight]}>Abonnement</Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -323,5 +337,18 @@ const styles = StyleSheet.create({
   },
   statDividerLight: {
     backgroundColor: 'rgba(15, 23, 42, 0.08)',
+  },
+  planHeaderBadge: {
+    backgroundColor: 'rgba(239, 68, 68, 0.12)',
+    borderColor: 'rgba(239, 68, 68, 0.3)',
+    borderWidth: 1,
+    borderRadius: 8,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+  },
+  planHeaderBadgeText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#EF4444',
   },
 });

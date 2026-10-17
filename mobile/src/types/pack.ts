@@ -19,3 +19,14 @@ export interface PricingPack {
   createdAt?: string;
   lastModifiedAt?: string;
 }
+
+export interface UserMembershipStatus {
+  currentPack: PricingPack;
+  aiCredits: number;
+  vehiclesCount: number;
+  vehicleLimit: number;
+  status: string;
+  startedAt?: string;
+  expiresAt?: string | null;
+  autoRenew: boolean;
+}
