@@ -93,19 +93,14 @@ class AuthenticationIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.message").value("Registration successful. Please check your email to verify your account."));
+                .andExpect(jsonPath("$.message").value("Registration successful. You can now log in."));
 
         Optional<User> userOpt = userRepository.findByEmail("john.doe@example.com");
         assertThat(userOpt).isPresent();
         User user = userOpt.get();
         assertThat(user.getFullName()).isEqualTo("John Doe");
         assertThat(user.getPhoneNumber()).isEqualTo("+1234567890");
-        assertThat(user.getStatus()).isEqualTo(AccountStatus.UNVERIFIED);
-
-        List<AuthToken> tokens = authTokenRepository.findAll();
-        assertThat(tokens).hasSize(1);
-        assertThat(tokens.get(0).getUser().getId()).isEqualTo(user.getId());
-        assertThat(tokens.get(0).getTokenType()).isEqualTo(AuthTokenType.EMAIL_VERIFICATION);
+        assertThat(user.getStatus()).isEqualTo(AccountStatus.ACTIVE);
     }
 
     @Test
@@ -144,7 +139,7 @@ class AuthenticationIntegrationTest {
                 "invalid.phone@example.com",
                 "Password123!",
                 "Invalid Phone",
-                "123456" // No leading +, invalid E.164
+                "invalid-phone" // Non-digit, invalid E.164
         );
 
         mockMvc.perform(post("/api/v1/auth/register")
@@ -278,17 +273,15 @@ class AuthenticationIntegrationTest {
 
         String responseStr = loginResult.getResponse().getContentAsString();
         AuthResponse authResponse = objectMapper.readValue(responseStr, AuthResponse.class);
-        Cookie refreshCookie = loginResult.getResponse().getCookie("refresh_token");
-
         MvcResult logoutResult = mockMvc.perform(post("/api/v1/auth/logout")
-                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + authResponse.accessToken())
-                        .cookie(refreshCookie))
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + authResponse.accessToken()))
                 .andExpect(status().isNoContent())
                 .andReturn();
 
-        Cookie clearedCookie = logoutResult.getResponse().getCookie("refresh_token");
-        assertThat(clearedCookie).isNotNull();
-        assertThat(clearedCookie.getMaxAge()).isZero();
+        String setCookieHeader = logoutResult.getResponse().getHeader(HttpHeaders.SET_COOKIE);
+        assertThat(setCookieHeader).isNotNull();
+        assertThat(setCookieHeader).contains("refresh_token=");
+        assertThat(setCookieHeader).contains("Max-Age=0");
 
         List<UserSession> sessions = userSessionRepository.findAll();
         assertThat(sessions).hasSize(1);

@@ -96,7 +96,7 @@ public class GoogleAuthenticationTest {
     }
 
     @Test
-    void testNewThirdPartyGoogleUserSignupUnverifiedZeroSessions() {
+    void testNewThirdPartyGoogleUserSignup() {
         String sub = "google_sub_" + UUID.randomUUID();
         String email = "thirdparty_" + UUID.randomUUID() + "@outlook.com";
         GoogleIdentity identity = new GoogleIdentity(sub, email, true, "Outlook User", "https://avatar.png", null);
@@ -105,18 +105,18 @@ public class GoogleAuthenticationTest {
 
         MobileAuthResult result = authenticationService.loginWithGoogle(new GoogleAuthRequest("valid_token"), "127.0.0.1", "JUnit");
 
-        assertTrue(result.verificationRequired(), "Third-party Google user must require AutoCare email verification.");
-        assertNull(result.authResponse(), "ZERO UserSession/tokens issued while UNVERIFIED.");
+        assertFalse(result.verificationRequired());
+        assertNotNull(result.authResponse());
 
         User user = userRepository.findByEmail(email).orElseThrow();
-        assertEquals(AccountStatus.UNVERIFIED, user.getStatus());
+        assertEquals(AccountStatus.ACTIVE, user.getStatus());
 
         Optional<UserIdentity> link = userIdentityRepository.findByProviderAndProviderUserId("GOOGLE", sub);
         assertTrue(link.isPresent());
     }
 
     @Test
-    void testRepeatedUnverifiedThirdPartyGoogleLogin() {
+    void testRepeatedThirdPartyGoogleLogin() {
         String sub = "google_sub_" + UUID.randomUUID();
         String email = "thirdparty_" + UUID.randomUUID() + "@yahoo.com";
         GoogleIdentity identity = new GoogleIdentity(sub, email, true, "Yahoo User", "https://avatar.png", null);
@@ -128,8 +128,8 @@ public class GoogleAuthenticationTest {
         // Attempt 2
         MobileAuthResult result = authenticationService.loginWithGoogle(new GoogleAuthRequest("valid_token"), "127.0.0.1", "JUnit");
 
-        assertTrue(result.verificationRequired());
-        assertNull(result.authResponse());
+        assertFalse(result.verificationRequired());
+        assertNotNull(result.authResponse());
 
         long count = userRepository.findAll().stream().filter(u -> u.getEmail().equals(email)).count();
         assertEquals(1, count, "No duplicate user created on repeated login.");
@@ -143,15 +143,10 @@ public class GoogleAuthenticationTest {
 
         Mockito.when(googleIdentityVerifier.verify(anyString())).thenReturn(identity);
 
-        // Create UNVERIFIED
+        // Create user
         authenticationService.loginWithGoogle(new GoogleAuthRequest("valid_token"), "127.0.0.1", "JUnit");
 
-        // Verify user email
-        User user = userRepository.findByEmail(email).orElseThrow();
-        user.setStatus(AccountStatus.ACTIVE);
-        userRepository.save(user);
-
-        // Retry login
+        // Subsequent login
         MobileAuthResult result = authenticationService.loginWithGoogle(new GoogleAuthRequest("valid_token"), "127.0.0.1", "JUnit");
 
         assertFalse(result.verificationRequired());
@@ -160,17 +155,17 @@ public class GoogleAuthenticationTest {
     }
 
     @Test
-    void testUnverifiedUserPasswordResetBlocked() {
+    void testPasswordResetForUser() {
         User user = new User();
-        user.setEmail("unverified_" + UUID.randomUUID() + "@outlook.com");
-        user.setFullName("Unverified User");
-        user.setStatus(AccountStatus.UNVERIFIED);
+        user.setEmail("user_" + UUID.randomUUID() + "@outlook.com");
+        user.setFullName("Test User");
+        user.setStatus(AccountStatus.ACTIVE);
         user.getRoles().add(userRole);
         userRepository.save(user);
 
-        assertThrows(AuthException.class, () -> {
+        assertDoesNotThrow(() -> {
             passwordResetService.initiateForgotPassword(new ForgotPasswordRequest(user.getEmail()));
-        }, "Password reset for UNVERIFIED account must be blocked.");
+        });
     }
 
     @Test
