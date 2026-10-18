@@ -44,7 +44,7 @@ public class User extends BaseEntity {
     private String preferredLanguage = "en";
 
     @Column(name = "preferred_currency", nullable = false, length = 10)
-    private String preferredCurrency = "USD";
+    private String preferredCurrency = "MAD";
 
     @Column(name = "preferred_distance_unit", nullable = false, length = 10)
     private String preferredDistanceUnit = "KM";

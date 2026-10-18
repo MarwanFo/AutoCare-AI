@@ -8,6 +8,7 @@ import com.autocare.backend.job.service.JobService;
 import com.autocare.backend.security.CustomUserDetails;
 import com.autocare.backend.vehicle.dto.CreateVehicleRequest;
 import com.autocare.backend.vehicle.dto.UpdateVehicleRequest;
+import com.autocare.backend.vehicle.dto.UpdateMileageRequest;
 import com.autocare.backend.vehicle.dto.VehicleResponse;
 import com.autocare.backend.vehicle.dto.VehicleSummaryResponse;
 import com.autocare.backend.vehicle.dto.CreateComponentRequest;
@@ -54,6 +55,7 @@ public class VehicleController {
     private final JobService jobService;
     private final JobMapper jobMapper;
     private final ObjectMapper objectMapper;
+    private final com.autocare.backend.subscription.service.PricingPackService pricingPackService;
 
     @PostMapping
     @Operation(summary = "Onboard a new vehicle (Asynchronous)", description = "Enqueues a background job to build the vehicle's digital twin representation.")
@@ -67,6 +69,8 @@ public class VehicleController {
     ) {
         log.info("Onboarding vehicle via background job for user: {}", userDetails.getUser().getId());
         vehicleService.checkDuplicates(request.getVin(), request.getLicensePlate());
+        // Verify active vehicle quota allowed by user's subscription pack
+        pricingPackService.validateVehicleLimit(userDetails.getUser().getId());
         Map<String, Object> payload = objectMapper.convertValue(request, new TypeReference<Map<String, Object>>() {});
         Job job = jobService.createJob(
                 userDetails.getUser().getId(),
@@ -141,6 +145,23 @@ public class VehicleController {
     ) {
         log.info("Updating vehicle ID: {} for user: {}", id, userDetails.getUser().getId());
         UserVehicle vehicle = vehicleService.updateVehicle(userDetails.getUser().getId(), id, request);
+        return ResponseEntity.ok(vehicleMapper.toResponse(vehicle));
+    }
+
+    @PatchMapping("/{id}/mileage")
+    @Operation(summary = "Update vehicle mileage", description = "Updates current mileage (odometer) of the vehicle and triggers immediate telemetry and health degradation recalculations.")
+    @ApiResponse(responseCode = "200", description = "Vehicle mileage updated successfully")
+    @ApiResponse(responseCode = "400", description = "Invalid mileage value")
+    @ApiResponse(responseCode = "401", description = "Unauthorized - Valid JWT token required")
+    @ApiResponse(responseCode = "403", description = "Forbidden - User does not own this vehicle")
+    @ApiResponse(responseCode = "404", description = "Not Found - Vehicle does not exist")
+    public ResponseEntity<VehicleResponse> updateMileage(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PathVariable UUID id,
+            @Valid @RequestBody UpdateMileageRequest request
+    ) {
+        log.info("Updating mileage for vehicle ID: {} to {} km for user: {}", id, request.getCurrentMileage(), userDetails.getUser().getId());
+        UserVehicle vehicle = vehicleService.updateMileage(userDetails.getUser().getId(), id, request.getCurrentMileage());
         return ResponseEntity.ok(vehicleMapper.toResponse(vehicle));
     }
 
@@ -332,7 +353,7 @@ public class VehicleController {
     public ResponseEntity<com.autocare.backend.vehicle.dto.VehicleBudgetForecastResponse> getVehicleBudgetForecast(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable UUID vehicleId,
-            @RequestParam(required = false, defaultValue = "EUR") String currency
+            @RequestParam(required = false, defaultValue = "MAD") String currency
     ) {
         log.info("Generating AI budget forecast for vehicle ID: {} with currency: {} for user: {}", vehicleId, currency, userDetails.getUser().getId());
         com.autocare.backend.vehicle.dto.VehicleBudgetForecastResponse forecast = vehicleService.getVehicleBudgetForecast(userDetails.getUser().getId(), vehicleId, currency);

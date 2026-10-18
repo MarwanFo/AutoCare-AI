@@ -12,4 +12,5 @@ public interface AdminUserService {
     AdminUserSummaryResponse getUserById(UUID userId);
     AdminUserSummaryResponse updateUserStatus(UUID userId, AccountStatus status);
     AdminUserSummaryResponse updateUserRole(UUID userId, String roleName);
+    AdminUserSummaryResponse createUser(com.autocare.backend.admin.dto.AdminCreateUserRequest request);
 }

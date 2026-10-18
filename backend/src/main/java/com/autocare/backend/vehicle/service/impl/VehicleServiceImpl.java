@@ -49,11 +49,15 @@ public class VehicleServiceImpl implements VehicleService {
     private final com.autocare.backend.vehicle.service.ComponentDegradationService componentDegradationService;
     private final com.autocare.backend.notification.service.NotificationService notificationService;
     private final com.autocare.backend.vehicle.service.GeminiClient geminiClient;
+    private final com.autocare.backend.subscription.service.PricingPackService pricingPackService;
 
     @Override
     @Transactional
     public UserVehicle createVehicle(UUID userId, CreateVehicleRequest request) {
         log.info("Onboarding request received for user: {}, vehicle model ID: {}", userId, request.getModelId());
+
+        // 0. Quota Validation: Verify active vehicle limit allowed by user's subscription pack
+        pricingPackService.validateVehicleLimit(userId);
 
         // 1. Validation: Verify user exists
         User user = userRepository.findById(userId)
@@ -170,33 +174,39 @@ public class VehicleServiceImpl implements VehicleService {
         }
 
         // 1. Validate VIN duplicates if modified
-        if (request.getVin() != null && !request.getVin().trim().isEmpty()) {
-            String sanitizedVin = request.getVin().trim().toUpperCase();
-            if (!sanitizedVin.equals(vehicle.getVin())) {
-                if (userVehicleRepository.existsByVinAndStatus(sanitizedVin, VehicleStatus.ACTIVE)) {
-                    throw new DuplicateResourceException("A vehicle with the VIN '" + sanitizedVin + "' is already registered and active.");
+        if (request.getVin() != null) {
+            if (!request.getVin().trim().isEmpty()) {
+                String sanitizedVin = request.getVin().trim().toUpperCase();
+                if (!sanitizedVin.equals(vehicle.getVin())) {
+                    if (userVehicleRepository.existsByVinAndStatus(sanitizedVin, VehicleStatus.ACTIVE)) {
+                        throw new DuplicateResourceException("A vehicle with the VIN '" + sanitizedVin + "' is already registered and active.");
+                    }
                 }
+                vehicle.setVin(sanitizedVin);
+            } else {
+                vehicle.setVin(null);
             }
-            vehicle.setVin(sanitizedVin);
-        } else {
-            vehicle.setVin(null);
         }
 
         // 2. Validate License Plate duplicates if modified
-        if (request.getLicensePlate() != null && !request.getLicensePlate().trim().isEmpty()) {
-            String sanitizedPlate = request.getLicensePlate().trim().toUpperCase();
-            if (!sanitizedPlate.equals(vehicle.getLicensePlate())) {
-                if (userVehicleRepository.existsByLicensePlateIgnoreCaseAndStatus(sanitizedPlate, VehicleStatus.ACTIVE)) {
-                    throw new DuplicateResourceException("A vehicle with the license plate '" + sanitizedPlate + "' is already registered and active.");
+        if (request.getLicensePlate() != null) {
+            if (!request.getLicensePlate().trim().isEmpty()) {
+                String sanitizedPlate = request.getLicensePlate().trim().toUpperCase();
+                if (!sanitizedPlate.equals(vehicle.getLicensePlate())) {
+                    if (userVehicleRepository.existsByLicensePlateIgnoreCaseAndStatus(sanitizedPlate, VehicleStatus.ACTIVE)) {
+                        throw new DuplicateResourceException("A vehicle with the license plate '" + sanitizedPlate + "' is already registered and active.");
+                    }
                 }
+                vehicle.setLicensePlate(sanitizedPlate);
+            } else {
+                vehicle.setLicensePlate(null);
             }
-            vehicle.setLicensePlate(sanitizedPlate);
-        } else {
-            vehicle.setLicensePlate(null);
         }
 
         // 3. Update fields
-        vehicle.setColor(request.getColor());
+        if (request.getColor() != null) {
+            vehicle.setColor(request.getColor());
+        }
         if (request.getCurrentMileage() != null) {
             vehicle.setCurrentMileage(request.getCurrentMileage());
         }
@@ -209,8 +219,12 @@ public class VehicleServiceImpl implements VehicleService {
         if (request.getTransmission() != null) {
             vehicle.setTransmission(request.getTransmission());
         }
-        vehicle.setLastServiceDate(request.getLastServiceDate());
-        vehicle.setLastServiceMileage(request.getLastServiceMileage());
+        if (request.getLastServiceDate() != null) {
+            vehicle.setLastServiceDate(request.getLastServiceDate());
+        }
+        if (request.getLastServiceMileage() != null) {
+            vehicle.setLastServiceMileage(request.getLastServiceMileage());
+        }
         
         if (request.getStatus() != null) {
             if (request.getStatus() == VehicleStatus.ARCHIVED || request.getStatus() == VehicleStatus.SOLD) {
@@ -223,6 +237,26 @@ public class VehicleServiceImpl implements VehicleService {
         // Automatically recalculate degradation scores and alerts when vehicle details or mileage change
         componentDegradationService.updateVehicleComponentDegradation(savedVehicle);
         return savedVehicle;
+    }
+
+    @Override
+    @Transactional
+    public UserVehicle updateMileage(UUID userId, UUID id, Integer currentMileage) {
+        UserVehicle vehicle = userVehicleRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Vehicle not found with ID: " + id));
+
+        if (!vehicle.getUser().getId().equals(userId)) {
+            throw new AccessDeniedException("Access denied: You do not own this vehicle.");
+        }
+
+        if (currentMileage != null && currentMileage >= 0) {
+            vehicle.setCurrentMileage(currentMileage);
+            UserVehicle savedVehicle = userVehicleRepository.save(vehicle);
+            // Automatically recalculate degradation scores and alerts when vehicle mileage changes
+            componentDegradationService.updateVehicleComponentDegradation(savedVehicle);
+            return savedVehicle;
+        }
+        return vehicle;
     }
 
     @Override
@@ -556,12 +590,15 @@ public class VehicleServiceImpl implements VehicleService {
     }
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public com.autocare.backend.vehicle.dto.AiAdvisorResponse consultAiAdvisor(
             UUID userId, 
             UUID vehicleId, 
             com.autocare.backend.vehicle.dto.AiAdvisorRequest request
     ) {
+        // Deduct 1 AI credit for consultation
+        pricingPackService.consumeAiCredit(userId, 1, "AI Mechanic Consultation");
+
         UserVehicle vehicle = userVehicleRepository.findById(vehicleId)
                 .orElseThrow(() -> new ResourceNotFoundException("Vehicle not found with ID: " + vehicleId));
 
@@ -700,15 +737,15 @@ public class VehicleServiceImpl implements VehicleService {
         String modelName = vehicle.getTemplate().getModel().getName().trim();
         int year = vehicle.getTemplate().getYear();
         String fuelType = vehicle.getFuelType() != null ? vehicle.getFuelType().name() : "GASOLINE";
-        String currency = (requestedCurrency != null && !requestedCurrency.trim().isEmpty()) ? requestedCurrency.toUpperCase() : "EUR";
+        String currency = (requestedCurrency != null && !requestedCurrency.trim().isEmpty()) ? requestedCurrency.toUpperCase() : "MAD";
 
-        // 1. Determine Brand Tier & Rates
+        // 1. Determine Brand Tier & Moroccan Market Benchmark Rates
         String brandTier = determineBrandTier(brandName);
         double tierMultiplier = getTierMultiplier(brandTier);
-        int baseLaborRate = getBaseLaborRate(brandTier);
+        int baseLaborRateMAD = getBaseLaborRate(brandTier);
         double currencyRate = getCurrencyExchangeRate(currency);
 
-        int laborRatePerHour = (int) Math.round(baseLaborRate * currencyRate);
+        int laborRatePerHour = (int) Math.round(baseLaborRateMAD * currencyRate);
 
         // 2. Build items and calculate timeframe budgets
         java.util.List<com.autocare.backend.vehicle.dto.VehicleBudgetForecastResponse.BudgetItem> budgetItems = new java.util.ArrayList<>();
@@ -716,6 +753,7 @@ public class VehicleServiceImpl implements VehicleService {
         int budget3To6 = 0;
         int budget6To12 = 0;
         double totalLaborHours = 0.0;
+        boolean hasAnnualOilServiceScheduled = false;
 
         if (vehicle.getComponents() != null && !vehicle.getComponents().isEmpty()) {
             for (com.autocare.backend.vehicle.entity.UserComponent c : vehicle.getComponents()) {
@@ -730,33 +768,52 @@ public class VehicleServiceImpl implements VehicleService {
                 int health = c.getHealthScore() != null ? c.getHealthScore() : 100;
                 Integer remainingDays = c.getRemainingDays();
 
-                // Determine base part cost & labor hours
+                // Determine base part cost & labor hours calibrated in MAD
                 ComponentCostEstimate estimate = getComponentBaseEstimate(nameLower);
                 int partCost = (int) Math.round(estimate.basePartCost * tierMultiplier * currencyRate);
                 int laborCost = (int) Math.round(estimate.laborHours * laborRatePerHour);
-                int itemTotal = partCost + laborCost;
-                totalLaborHours += estimate.laborHours;
+                int itemFullCost = partCost + laborCost;
 
-                // Determine timeframe & urgency based on health and remaining lifespan
+                // Moroccan Automotive Wear & Predictive Logic:
+                // Healthy components (>= 75% health & > 365 days remaining) do NOT need replacement in 12 months.
+                // Their timeframe is "> 12M" and they do NOT add to the 12-month projected spend.
+                boolean isOilOrFilter = nameLower.contains("oil") || nameLower.contains("vidange") || nameLower.contains("filter");
                 String timeframe;
                 String urgency;
                 String recommendation;
+                int costIn12MBudget = 0;
 
                 if (health < 40 || (remainingDays != null && remainingDays <= 90)) {
                     timeframe = "0-3M";
                     urgency = "URGENT";
-                    budget0To3 += itemTotal;
-                    recommendation = "High wear detected (" + health + "% health). Schedule replacement soon to avoid breakdown.";
-                } else if (health < 70 || (remainingDays != null && remainingDays <= 180)) {
+                    costIn12MBudget = itemFullCost;
+                    budget0To3 += itemFullCost;
+                    totalLaborHours += estimate.laborHours;
+                    recommendation = String.format("Usure critique (%d%% santé). Remplacement immédiat recommandé pour la sécurité sur les routes marocaines.", health);
+                } else if (health < 65 || (remainingDays != null && remainingDays <= 180)) {
                     timeframe = "3-6M";
                     urgency = "UPCOMING";
-                    budget3To6 += itemTotal;
-                    recommendation = "Moderate wear. Monitor condition during upcoming routine inspections.";
-                } else {
+                    costIn12MBudget = itemFullCost;
+                    budget3To6 += itemFullCost;
+                    totalLaborHours += estimate.laborHours;
+                    recommendation = String.format("Usure modérée (%d%% santé). À planifier lors du prochain passage au garage.", health);
+                } else if (health < 80 || (remainingDays != null && remainingDays <= 365) || (isOilOrFilter && !hasAnnualOilServiceScheduled)) {
                     timeframe = "6-12M";
                     urgency = "SCHEDULED";
-                    budget6To12 += itemTotal;
-                    recommendation = "Good condition. Standard preventive factory maintenance scheduled.";
+                    costIn12MBudget = itemFullCost;
+                    budget6To12 += itemFullCost;
+                    totalLaborHours += estimate.laborHours;
+                    if (isOilOrFilter) {
+                        hasAnnualOilServiceScheduled = true;
+                        recommendation = "Vidange & révision périodique annuelle (10 000 - 15 000 km, adaptée aux poussières et à la chaleur au Maroc).";
+                    } else {
+                        recommendation = String.format("Entretien préventif programmé (%d%% santé restante).", health);
+                    }
+                } else {
+                    timeframe = "> 12M";
+                    urgency = "OPTIMAL";
+                    costIn12MBudget = 0;
+                    recommendation = String.format("État optimal (%d%% santé). Aucun remplacement nécessaire dans les 12 prochains mois.", health);
                 }
 
                 budgetItems.add(com.autocare.backend.vehicle.dto.VehicleBudgetForecastResponse.BudgetItem.builder()
@@ -766,27 +823,40 @@ public class VehicleServiceImpl implements VehicleService {
                         .urgency(urgency)
                         .estimatedPartCost(partCost)
                         .estimatedLaborCost(laborCost)
-                        .totalCost(itemTotal)
+                        .totalCost(costIn12MBudget > 0 ? costIn12MBudget : itemFullCost)
                         .timeframe(timeframe)
                         .aiRecommendation(recommendation)
                         .build());
             }
         }
 
-        int totalBudget = budget0To3 + budget3To6 + budget6To12;
+        // 3. Guarantee baseline Moroccan annual warranty/preventive service if all parts are 100% brand new
+        if (budget0To3 == 0 && budget3To6 == 0 && budget6To12 == 0) {
+            int baseAnnualParts = (int) Math.round(550 * tierMultiplier * currencyRate);
+            double annualLaborH = 1.2;
+            int baseAnnualLabor = (int) Math.round(annualLaborH * laborRatePerHour);
+            budget6To12 = baseAnnualParts + baseAnnualLabor;
+            totalLaborHours = annualLaborH;
+        }
 
-        // 3. Generate rich AI summary
+        int totalBudget = budget0To3 + budget3To6 + budget6To12;
+        int partsBudget = (int) Math.round(totalBudget * 0.65);
+        int laborBudget = totalBudget - partsBudget;
+
+        // 4. Generate Moroccan Market AI Summary
+        String symbol = currencySymbol(currency);
         String aiSummary = String.format(
-                "AI Maintenance Forecast for %d %s %s (%s Tier, %s):\n" +
-                "Estimated 12-month investment is %s %s (%s %s parts + %s %s labor across %.1f workshop hours). " +
+                "Prévision IA d'entretien pour %d %s %s (%s, %s) - Calibrage Maroc :\n" +
+                "Budget prévisionnel 12 mois : %s %s (%s %s pièces + %s %s main d'œuvre pour environ %.1f h d'atelier à %s %s/h).\n" +
                 (budget0To3 > 0
-                        ? "Priority attention required for 0-3 month items due to critical component wear."
-                        : "No immediate critical repairs needed; major maintenance is deferred to scheduled 6-12 month intervals."),
+                        ? "🚨 Priorité : Remplacement urgent recommandé sous 0 à 3 mois sur les organes présentant une usure avancée."
+                        : "✅ État excellent : Les organes majeurs (distribution, boîte, freins) sont en condition optimale et ne nécessitent aucun frais à court terme. Le budget annuel correspond à l'entretien périodique recommandé (vidange synthèse, filtres poussière/climat marocain)."),
                 year, brandName, modelName, brandTier, fuelType,
-                currencySymbol(currency), totalBudget,
-                currencySymbol(currency), (int)(totalBudget * 0.6),
-                currencySymbol(currency), (int)(totalBudget * 0.4),
-                totalLaborHours
+                totalBudget, symbol,
+                partsBudget, symbol,
+                laborBudget, symbol,
+                totalLaborHours,
+                laborRatePerHour, symbol
         );
 
         String vehicleTitle = String.format("%d %s %s", year, brandName, modelName);
@@ -816,15 +886,16 @@ public class VehicleServiceImpl implements VehicleService {
             return "EXOTIC";
         }
         if (b.contains("porsche") || b.contains("audi") || b.contains("bmw") || b.contains("mercedes") ||
-            b.contains("land rover") || b.contains("jaguar") || b.contains("lexus") || b.contains("genesis") || b.contains("alfa")) {
+            b.contains("land rover") || b.contains("jaguar") || b.contains("lexus") || b.contains("genesis")) {
             return "LUXURY";
         }
         if (b.contains("tesla") || b.contains("volvo") || b.contains("mini") || b.contains("infiniti") ||
-            b.contains("acura") || b.contains("cupra") || b.contains("jeep") || b.contains("ds")) {
+            b.contains("acura") || b.contains("cupra") || b.contains("jeep") || b.contains("ds") || b.contains("alfa")) {
             return "PREMIUM";
         }
         if (b.contains("dacia") || b.contains("renault") || b.contains("fiat") || b.contains("citroen") ||
-            b.contains("suzuki") || b.contains("lada") || b.contains("mg") || b.contains("mitsubishi") || b.contains("byd") || b.contains("geely")) {
+            b.contains("suzuki") || b.contains("peugeot") && (b.contains("208") || b.contains("301")) ||
+            b.contains("lada") || b.contains("mg") || b.contains("byd") || b.contains("geely")) {
             return "ECONOMY";
         }
         return "STANDARD";
@@ -832,9 +903,9 @@ public class VehicleServiceImpl implements VehicleService {
 
     private double getTierMultiplier(String tier) {
         switch (tier) {
-            case "EXOTIC": return 3.5;
+            case "EXOTIC": return 3.2;
             case "LUXURY": return 2.1;
-            case "PREMIUM": return 1.45;
+            case "PREMIUM": return 1.4;
             case "ECONOMY": return 0.75;
             case "STANDARD":
             default: return 1.0;
@@ -842,33 +913,34 @@ public class VehicleServiceImpl implements VehicleService {
     }
 
     private int getBaseLaborRate(String tier) {
+        // Moroccan workshop labor rates in MAD/hour (Ateliers & Concessionnaires agréés au Maroc)
         switch (tier) {
-            case "EXOTIC": return 180;
-            case "LUXURY": return 125;
-            case "PREMIUM": return 95;
-            case "ECONOMY": return 55;
+            case "EXOTIC": return 650;  // Ateliers spécialisés & concessionnaires de prestige
+            case "LUXURY": return 420;  // CAC (Audi/VW), SMEIA (BMW), Auto-Nejma (Mercedes)
+            case "PREMIUM": return 300; // Volvo, Jeep, DS, Mini
+            case "ECONOMY": return 150; // Dacia, Renault, Fiat, garagistes indépendants
             case "STANDARD":
-            default: return 75;
+            default: return 220;        // Peugeot, Toyota, Hyundai, Kia, Nissan
         }
     }
 
     private double getCurrencyExchangeRate(String currency) {
         switch (currency) {
-            case "USD": return 1.08;
-            case "MAD": return 10.8;
-            case "GBP": return 0.85;
-            case "EUR":
+            case "EUR": return 0.093; // 1 MAD ~ 0.093 EUR
+            case "USD": return 0.10;  // 1 MAD ~ 0.10 USD
+            case "GBP": return 0.078;
+            case "MAD":
             default: return 1.0;
         }
     }
 
     private String currencySymbol(String currency) {
         switch (currency) {
+            case "EUR": return "€";
             case "USD": return "$";
-            case "MAD": return "DH";
             case "GBP": return "£";
-            case "EUR":
-            default: return "€";
+            case "MAD":
+            default: return "DH";
         }
     }
 
@@ -883,40 +955,41 @@ public class VehicleServiceImpl implements VehicleService {
     }
 
     private ComponentCostEstimate getComponentBaseEstimate(String nameLower) {
-        if (nameLower.contains("oil filter") || nameLower.contains("cabin") || nameLower.contains("air filter")) {
-            return new ComponentCostEstimate(25, 0.3);
+        // Base part costs in MAD (Standard tier benchmark in Moroccan automotive market)
+        if (nameLower.contains("oil filter") || nameLower.contains("cabin") || nameLower.contains("air filter") || nameLower.contains("filtre")) {
+            return new ComponentCostEstimate(150, 0.3);
         }
-        if (nameLower.contains("engine oil") || nameLower.contains("oil change")) {
-            return new ComponentCostEstimate(65, 0.5);
+        if (nameLower.contains("engine oil") || nameLower.contains("oil change") || nameLower.contains("vidange")) {
+            return new ComponentCostEstimate(550, 0.5); // Huile moteur synthèse 5L
         }
-        if (nameLower.contains("brake rotor") || nameLower.contains("rotor")) {
-            return new ComponentCostEstimate(120, 1.5);
+        if (nameLower.contains("brake rotor") || nameLower.contains("rotor") || nameLower.contains("disque")) {
+            return new ComponentCostEstimate(850, 1.2);
         }
-        if (nameLower.contains("brake pad") || nameLower.contains("brake")) {
-            return new ComponentCostEstimate(80, 1.0);
+        if (nameLower.contains("brake pad") || nameLower.contains("brake") || nameLower.contains("frein") || nameLower.contains("plaquette")) {
+            return new ComponentCostEstimate(450, 0.8);
         }
-        if (nameLower.contains("tire") || nameLower.contains("tyre")) {
-            return new ComponentCostEstimate(340, 0.8);
+        if (nameLower.contains("tire") || nameLower.contains("tyre") || nameLower.contains("pneu")) {
+            return new ComponentCostEstimate(850, 0.6);
         }
-        if (nameLower.contains("battery")) {
-            return new ComponentCostEstimate(130, 0.4);
+        if (nameLower.contains("battery") || nameLower.contains("batterie")) {
+            return new ComponentCostEstimate(1100, 0.4); // Batterie 12V Start/Stop
         }
-        if (nameLower.contains("spark plug") || nameLower.contains("spark")) {
-            return new ComponentCostEstimate(60, 1.0);
+        if (nameLower.contains("spark plug") || nameLower.contains("spark") || nameLower.contains("bougie")) {
+            return new ComponentCostEstimate(350, 0.8);
         }
-        if (nameLower.contains("timing") || nameLower.contains("belt") || nameLower.contains("chain")) {
-            return new ComponentCostEstimate(220, 3.5);
+        if (nameLower.contains("timing") || nameLower.contains("belt") || nameLower.contains("chain") || nameLower.contains("distribution")) {
+            return new ComponentCostEstimate(2200, 3.0); // Kit distribution
         }
-        if (nameLower.contains("transmission") || nameLower.contains("clutch") || nameLower.contains("gearbox")) {
-            return new ComponentCostEstimate(150, 2.0);
+        if (nameLower.contains("transmission") || nameLower.contains("clutch") || nameLower.contains("gearbox") || nameLower.contains("embrayage")) {
+            return new ComponentCostEstimate(1800, 2.5); // Kit embrayage / Vidange BVA
         }
-        if (nameLower.contains("coolant") || nameLower.contains("radiator")) {
-            return new ComponentCostEstimate(50, 0.8);
+        if (nameLower.contains("coolant") || nameLower.contains("radiator") || nameLower.contains("refroidissement")) {
+            return new ComponentCostEstimate(250, 0.6);
         }
-        if (nameLower.contains("wiper")) {
-            return new ComponentCostEstimate(30, 0.2);
+        if (nameLower.contains("wiper") || nameLower.contains("essuie")) {
+            return new ComponentCostEstimate(180, 0.2);
         }
-        return new ComponentCostEstimate(70, 0.8);
+        return new ComponentCostEstimate(400, 0.7);
     }
 }
 

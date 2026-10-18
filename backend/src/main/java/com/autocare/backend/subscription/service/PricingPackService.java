@@ -28,4 +28,8 @@ public interface PricingPackService {
     com.autocare.backend.subscription.dto.UserMembershipStatusResponse getUserMembershipStatus(UUID userId);
 
     com.autocare.backend.subscription.dto.UserMembershipStatusResponse activatePackForUser(UUID userId, UUID packId);
+
+    void validateVehicleLimit(UUID userId);
+
+    void consumeAiCredit(UUID userId, int amount, String purpose);
 }

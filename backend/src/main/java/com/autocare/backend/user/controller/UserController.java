@@ -39,13 +39,22 @@ import java.util.UUID;
 @Slf4j
 @RestController
 @RequestMapping("/api/v1/users")
-@RequiredArgsConstructor
 @Tag(name = "User Profile", description = "Endpoints for managing authenticated user profiles, preferences, and avatars.")
 public class UserController {
 
     private final UserService userService;
     private final PasswordResetService passwordResetService;
     private final JwtService jwtService;
+
+    public UserController(
+            UserService userService,
+            PasswordResetService passwordResetService,
+            JwtService jwtService
+    ) {
+        this.userService = userService;
+        this.passwordResetService = passwordResetService;
+        this.jwtService = jwtService;
+    }
 
     @GetMapping("/me")
     @Operation(summary = "Get current authenticated user profile", description = "Retrieves profile details, localization preferences, roles, and status for the authenticated user.")

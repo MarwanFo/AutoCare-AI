@@ -38,6 +38,15 @@ public class AdminUserController {
         return ResponseEntity.ok(users);
     }
 
+    @PostMapping
+    public ResponseEntity<AdminUserSummaryResponse> createUser(
+            @Valid @RequestBody com.autocare.backend.admin.dto.AdminCreateUserRequest request
+    ) {
+        log.info("Admin creating user with email: {}", request.getEmail());
+        return ResponseEntity.status(org.springframework.http.HttpStatus.CREATED)
+                .body(adminUserService.createUser(request));
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<AdminUserSummaryResponse> getUserById(@PathVariable UUID id) {
         log.info("Admin request to get user details by ID: {}", id);

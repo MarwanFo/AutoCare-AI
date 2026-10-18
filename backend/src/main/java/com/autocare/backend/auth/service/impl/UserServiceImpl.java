@@ -28,7 +28,6 @@ import java.util.UUID;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class UserServiceImpl implements UserService {
 
@@ -37,6 +36,20 @@ public class UserServiceImpl implements UserService {
     private final UserMapper userMapper;
     private final StorageService storageService;
     private final PasswordEncoder passwordEncoder;
+
+    public UserServiceImpl(
+            UserRepository userRepository,
+            UserSessionRepository userSessionRepository,
+            UserMapper userMapper,
+            StorageService storageService,
+            PasswordEncoder passwordEncoder
+    ) {
+        this.userRepository = userRepository;
+        this.userSessionRepository = userSessionRepository;
+        this.userMapper = userMapper;
+        this.storageService = storageService;
+        this.passwordEncoder = passwordEncoder;
+    }
 
     @Override
     public UserProfileResponse getUserProfile(UUID userId) {

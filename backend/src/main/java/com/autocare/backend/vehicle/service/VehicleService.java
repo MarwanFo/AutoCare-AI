@@ -27,6 +27,8 @@ public interface VehicleService {
 
     UserVehicle updateVehicle(UUID userId, UUID id, UpdateVehicleRequest request);
 
+    UserVehicle updateMileage(UUID userId, UUID id, Integer currentMileage);
+
     void archiveVehicle(UUID userId, UUID id);
 
     UserVehicle setPrimaryVehicle(UUID userId, UUID id);

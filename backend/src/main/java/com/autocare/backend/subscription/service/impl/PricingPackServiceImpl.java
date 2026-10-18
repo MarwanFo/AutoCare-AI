@@ -199,7 +199,7 @@ public class PricingPackServiceImpl implements PricingPackService {
                 .map(UserAiCredits::getCredits)
                 .orElse(10); // default starting credits
 
-        long vehiclesCount = userVehicleRepository.countByUserId(userId);
+        long vehiclesCount = userVehicleRepository.countByUserIdAndStatus(userId, com.autocare.backend.vehicle.entity.enums.VehicleStatus.ACTIVE);
 
         var activeSubOpt = userSubscriptionRepository.findFirstByUserIdAndStatusOrderByCreatedAtDesc(userId, "ACTIVE");
 
@@ -292,5 +292,53 @@ public class PricingPackServiceImpl implements PricingPackService {
         }
 
         return getUserMembershipStatus(userId);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public void validateVehicleLimit(UUID userId) {
+        var status = getUserMembershipStatus(userId);
+        int limit = status.vehicleLimit();
+        if (limit == -1) {
+            return; // Unlimited vehicles allowed
+        }
+
+        long activeCount = userVehicleRepository.countByUserIdAndStatus(
+                userId, 
+                com.autocare.backend.vehicle.entity.enums.VehicleStatus.ACTIVE
+        );
+
+        if (activeCount >= limit) {
+            String planName = status.currentPack() != null ? status.currentPack().name() : "Current Plan";
+            log.warn("User {} reached vehicle limit: {}/{} on plan '{}'", userId, activeCount, limit, planName);
+            throw new com.autocare.backend.auth.exception.BusinessException(String.format(
+                    "Vehicle limit reached (%d/%d active vehicles allowed on %s). Please upgrade your subscription plan to add more vehicles.",
+                    activeCount, limit, planName
+            ));
+        }
+    }
+
+    @Override
+    @Transactional
+    public void consumeAiCredit(UUID userId, int amount, String purpose) {
+        UserAiCredits credits = userAiCreditsRepository.findById(userId)
+                .orElseThrow(() -> new com.autocare.backend.auth.exception.BusinessException(
+                        "No AI credits found. Please purchase an AI credit top-up pack."
+                ));
+
+        if (credits.getCredits() < amount) {
+            log.warn("User {} has insufficient AI credits: {} available, {} required for {}", 
+                    userId, credits.getCredits(), amount, purpose);
+            throw new com.autocare.backend.auth.exception.BusinessException(String.format(
+                    "Insufficient AI credits (%d available, %d required for %s). Please top up your credits or upgrade your plan.",
+                    credits.getCredits(), amount, purpose
+            ));
+        }
+
+        int newTotal = credits.getCredits() - amount;
+        credits.setCredits(newTotal);
+        userAiCreditsRepository.save(credits);
+        log.info("Deducted {} AI credit(s) from user {} for {}. Remaining balance: {}", 
+                amount, userId, purpose, newTotal);
     }
 }

@@ -31,6 +31,8 @@ public class SessionServiceImpl implements SessionService {
     public UserSession createSession(User user, UUID deviceId, String ipAddress, String userAgent, String refreshToken, boolean rememberMe) {
         String tokenHash = refreshTokenService.hashToken(refreshToken);
         Instant expiresAt = Instant.now().plus(rememberMe ? Duration.ofDays(30) : Duration.ofDays(7));
+        String safeIp = (ipAddress != null && !ipAddress.isBlank()) ? ipAddress : "127.0.0.1";
+        String safeUserAgent = (userAgent != null && !userAgent.isBlank()) ? (userAgent.length() > 512 ? userAgent.substring(0, 512) : userAgent) : "Unknown-Client";
 
         Optional<UserSession> existingOpt = userSessionRepository.findByUserAndDeviceId(user, deviceId);
         UserSession session;
@@ -38,8 +40,8 @@ public class SessionServiceImpl implements SessionService {
         if (existingOpt.isPresent()) {
             session = existingOpt.get();
             session.setTokenHash(tokenHash);
-            session.setIpAddress(ipAddress);
-            session.setUserAgent(userAgent);
+            session.setIpAddress(safeIp);
+            session.setUserAgent(safeUserAgent);
             session.setExpiresAt(expiresAt);
             session.setLastAccessedAt(Instant.now());
             session.setRevokedAt(null);
@@ -48,8 +50,8 @@ public class SessionServiceImpl implements SessionService {
             session.setUser(user);
             session.setDeviceId(deviceId);
             session.setTokenHash(tokenHash);
-            session.setIpAddress(ipAddress);
-            session.setUserAgent(userAgent);
+            session.setIpAddress(safeIp);
+            session.setUserAgent(safeUserAgent);
             session.setExpiresAt(expiresAt);
             session.setLastAccessedAt(Instant.now());
             session = userSessionRepository.save(session);

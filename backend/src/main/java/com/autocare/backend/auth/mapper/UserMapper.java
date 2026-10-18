@@ -48,7 +48,7 @@ public class UserMapper {
                 user.getPhoneNumber(),
                 user.getAvatarUrl(),
                 user.getPreferredLanguage() != null ? user.getPreferredLanguage() : "FR",
-                user.getPreferredCurrency() != null ? user.getPreferredCurrency() : "EUR",
+                user.getPreferredCurrency() != null ? user.getPreferredCurrency() : "MAD",
                 user.getPreferredDistanceUnit() != null ? user.getPreferredDistanceUnit() : "KM",
                 user.isPushNotificationsEnabled(),
                 user.isEmailNotificationsEnabled(),

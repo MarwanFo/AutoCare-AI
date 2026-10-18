@@ -25,7 +25,6 @@ import java.util.UUID;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
 @Transactional
 public class AuthenticationServiceImpl implements AuthenticationService {
 
@@ -41,6 +40,34 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final PasswordEncoder passwordEncoder;
     private final com.autocare.backend.auth.repository.UserIdentityRepository userIdentityRepository;
     private final com.autocare.backend.auth.service.GoogleIdentityVerifier googleIdentityVerifier;
+
+    public AuthenticationServiceImpl(
+            UserRepository userRepository,
+            RoleRepository roleRepository,
+            PasswordHistoryRepository passwordHistoryRepository,
+            UserSessionRepository userSessionRepository,
+            SessionService sessionService,
+            EmailVerificationService emailVerificationService,
+            JwtService jwtService,
+            RefreshTokenService refreshTokenService,
+            UserMapper userMapper,
+            PasswordEncoder passwordEncoder,
+            com.autocare.backend.auth.repository.UserIdentityRepository userIdentityRepository,
+            com.autocare.backend.auth.service.GoogleIdentityVerifier googleIdentityVerifier
+    ) {
+        this.userRepository = userRepository;
+        this.roleRepository = roleRepository;
+        this.passwordHistoryRepository = passwordHistoryRepository;
+        this.userSessionRepository = userSessionRepository;
+        this.sessionService = sessionService;
+        this.emailVerificationService = emailVerificationService;
+        this.jwtService = jwtService;
+        this.refreshTokenService = refreshTokenService;
+        this.userMapper = userMapper;
+        this.passwordEncoder = passwordEncoder;
+        this.userIdentityRepository = userIdentityRepository;
+        this.googleIdentityVerifier = googleIdentityVerifier;
+    }
 
     @Override
     public User register(RegisterRequest request) {
@@ -150,8 +177,12 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         String newHash = refreshTokenService.hashToken(newRefreshToken);
 
         session.setTokenHash(newHash);
-        session.setIpAddress(ipAddress);
-        session.setUserAgent(userAgent);
+        if (ipAddress != null && !ipAddress.isBlank()) {
+            session.setIpAddress(ipAddress);
+        }
+        if (userAgent != null && !userAgent.isBlank()) {
+            session.setUserAgent(userAgent.length() > 512 ? userAgent.substring(0, 512) : userAgent);
+        }
         session.setLastAccessedAt(Instant.now());
         userSessionRepository.save(session);
 

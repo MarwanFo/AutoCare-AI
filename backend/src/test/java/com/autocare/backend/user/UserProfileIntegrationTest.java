@@ -70,7 +70,7 @@ class UserProfileIntegrationTest {
         testUser.setEmail(userEmail);
         testUser.setPasswordHash(passwordEncoder.encode("Password123!"));
         testUser.setFullName("Profile Test User");
-        testUser.setPhoneNumber("+1202555" + (1000 + (int)(Math.random() * 8999)));
+        testUser.setPhoneNumber("+1" + ((System.currentTimeMillis() + (long)(Math.random() * 100000)) % 9000000000L + 1000000000L));
         testUser.setStatus(AccountStatus.ACTIVE);
         testUser.setRoles(Set.of(userRole));
         testUser = userRepository.save(testUser);
@@ -101,7 +101,7 @@ class UserProfileIntegrationTest {
                 .andExpect(jsonPath("$.email").value(userEmail))
                 .andExpect(jsonPath("$.fullName").value("Profile Test User"))
                 .andExpect(jsonPath("$.preferredLanguage").value("en"))
-                .andExpect(jsonPath("$.preferredCurrency").value("USD"))
+                .andExpect(jsonPath("$.preferredCurrency").value("MAD"))
                 .andExpect(jsonPath("$.preferredDistanceUnit").value("KM"))
                 .andExpect(jsonPath("$.pushNotificationsEnabled").value(true))
                 .andExpect(jsonPath("$.emailNotificationsEnabled").value(true));
@@ -110,7 +110,7 @@ class UserProfileIntegrationTest {
     @Test
     @DisplayName("PUT /api/v1/users/me — Successfully updates fullName and phoneNumber")
     void testUpdateProfile_Success() throws Exception {
-        String newPhone = "+1202555" + (1000 + (int)(Math.random() * 8999));
+        String newPhone = "+1" + ((System.currentTimeMillis() + 999999L) % 9000000000L + 1000000000L);
         UpdateProfileRequest request = new UpdateProfileRequest("Updated Name", newPhone);
 
         mockMvc.perform(put("/api/v1/users/me")

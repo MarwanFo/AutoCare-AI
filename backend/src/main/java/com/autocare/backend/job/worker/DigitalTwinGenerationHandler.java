@@ -43,6 +43,7 @@ public class DigitalTwinGenerationHandler implements JobHandler {
     private final GeminiVehicleProfileService geminiVehicleProfileService;
     private final VehicleTemplateCloneService vehicleTemplateCloneService;
     private final JobService jobService;
+    private final com.autocare.backend.subscription.service.PricingPackService pricingPackService;
 
     @Autowired
     public DigitalTwinGenerationHandler(
@@ -54,7 +55,8 @@ public class DigitalTwinGenerationHandler implements JobHandler {
             VehicleTemplateRepository vehicleTemplateRepository,
             GeminiVehicleProfileService geminiVehicleProfileService,
             VehicleTemplateCloneService vehicleTemplateCloneService,
-            @Lazy JobService jobService) {
+            @Lazy JobService jobService,
+            com.autocare.backend.subscription.service.PricingPackService pricingPackService) {
         this.objectMapper = objectMapper;
         this.userRepository = userRepository;
         this.brandRepository = brandRepository;
@@ -64,6 +66,7 @@ public class DigitalTwinGenerationHandler implements JobHandler {
         this.geminiVehicleProfileService = geminiVehicleProfileService;
         this.vehicleTemplateCloneService = vehicleTemplateCloneService;
         this.jobService = jobService;
+        this.pricingPackService = pricingPackService;
     }
 
     @Override
@@ -78,6 +81,8 @@ public class DigitalTwinGenerationHandler implements JobHandler {
 
         // 1. Validating Request Stage
         jobService.updateStage(job.getId(), JobStage.VALIDATING_REQUEST);
+        // Verify active vehicle quota allowed by user's subscription pack
+        pricingPackService.validateVehicleLimit(userId);
         CreateVehicleRequest request = objectMapper.convertValue(job.getPayload(), CreateVehicleRequest.class);
 
         User user = userRepository.findById(userId)

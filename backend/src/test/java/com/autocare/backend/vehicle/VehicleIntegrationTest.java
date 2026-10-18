@@ -77,6 +77,12 @@ class VehicleIntegrationTest {
     @Autowired
     private VehicleTemplateRepository vehicleTemplateRepository;
 
+    @Autowired
+    private com.autocare.backend.subscription.repository.PricingPackRepository pricingPackRepository;
+
+    @Autowired
+    private com.autocare.backend.subscription.repository.UserSubscriptionRepository userSubscriptionRepository;
+
     @MockitoBean
     private GeminiClient geminiClient;
 
@@ -88,6 +94,7 @@ class VehicleIntegrationTest {
 
     @BeforeEach
     void setUp() throws Exception {
+        userSubscriptionRepository.deleteAll();
         userVehicleRepository.deleteAll();
         vehicleTemplateRepository.deleteAll();
         userSessionRepository.deleteAll();
@@ -154,7 +161,32 @@ class VehicleIntegrationTest {
         user.setFullName(name);
         user.setRoles(Collections.singleton(userRole));
         user.setStatus(AccountStatus.ACTIVE);
-        return userRepository.save(user);
+        User savedUser = userRepository.save(user);
+
+        com.autocare.backend.subscription.entity.PricingPack proPack = pricingPackRepository.findByCode("PRO_TEST")
+                .orElseGet(() -> pricingPackRepository.save(com.autocare.backend.subscription.entity.PricingPack.builder()
+                        .code("PRO_TEST")
+                        .name("Pro Test Plan")
+                        .price(java.math.BigDecimal.TEN)
+                        .currency("MAD")
+                        .packType(com.autocare.backend.subscription.entity.PackType.SUBSCRIPTION)
+                        .billingPeriod(com.autocare.backend.subscription.entity.BillingPeriod.MONTHLY)
+                        .vehicleLimit(10)
+                        .aiCredits(50)
+                        .badge("Pro")
+                        .isActive(true)
+                        .build()));
+
+        userSubscriptionRepository.save(com.autocare.backend.subscription.entity.UserSubscription.builder()
+                .user(savedUser)
+                .pack(proPack)
+                .status("ACTIVE")
+                .startedAt(java.time.Instant.now())
+                .expiresAt(java.time.Instant.now().plus(30, java.time.temporal.ChronoUnit.DAYS))
+                .autoRenew(true)
+                .build());
+
+        return savedUser;
     }
 
     private String obtainMobileToken(String email) throws Exception {
