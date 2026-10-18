@@ -34,3 +34,11 @@ out/
 *.log
 backend/run.log
 backend/uploads/
+
+# User-specific documentation, scratch and asset exclusions
+docs/
+scratch/
+autocare-logo-square.png
+autocare-logo-transparent.png
+autocare_vehicle_api.postman_collection.json
+Spring Boot Production Architecture Design(1).md
